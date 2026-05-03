@@ -107,7 +107,7 @@ def inp(arg: int):
     """get a char from console"""
     if arg < 0:
         return
-    DATA_MEMORY[arg] = getch()
+    DATA_MEMORY[arg] = ord(getch())  # type: ignore
 
 
 def jmpm(arg: int):
@@ -176,7 +176,7 @@ def main():
     data: str
     with open(args.file, "r") as file:
         data = file.read().strip()
-    length: int = len(data)
+    length: int = len(data) - 1
     char: str
     last: int = -1
     while pointer < length:
@@ -207,3 +207,6 @@ def main():
             print(" |", " | ".join(str(i) for i in DATA_MEMORY), "|")
             print("-" * 50)
             print("CALLING: ", CALLING)
+
+
+main()
