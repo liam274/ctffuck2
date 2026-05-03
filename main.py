@@ -188,10 +188,10 @@ def main():
         else:
             ACTION_MEMORY[int(char)](last - int(char))
         last = int(char)
-        if name != CALLING[0]:
+        if CALLING and name != CALLING[0]:
             CALLING.append(name)
             if len(CALLING) > 2:
-                STACK[CALLING[-1]].clear()
+                STACK[CALLING[0]].clear()
                 CALLING.pop()
         if len(STACK["push"]) and name != "push":
             STACK[name.lstrip("_")].append(STACK["push"].pop())
