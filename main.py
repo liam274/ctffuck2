@@ -157,12 +157,13 @@ def run(data: str, debug: bool = False, FS: list[TextIO] = [sys.stdout, sys.stde
         char = data[pointer]
         if char > "9" or char < "0":
             continue
-        name: str = ACTION_MEMORY[int(char)].__name__
+        char_int: int = int(char)
+        name: str = ACTION_MEMORY[char_int].__name__
         if last == -1:
-            ACTION_MEMORY[int(char)](int(char))
+            ACTION_MEMORY[char_int](char_int)
         else:
-            ACTION_MEMORY[int(char)](last - int(char))
-        last = int(char)
+            ACTION_MEMORY[char_int](last - char_int)
+        last = char_int
         if not CALLING or name != CALLING[0]:
             CALLING.append(name)
             if len(CALLING) > 2:
