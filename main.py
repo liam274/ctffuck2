@@ -97,6 +97,7 @@ def run(
 
     def grow(arg: int):
         """edit the code"""
+        nonlocal action_names, ACTION_MEMORY
         if len(STACK["grow"]) > 1:
             method: int = STACK["grow"][-1]
             spindle: int = STACK["grow"][-2]
@@ -109,6 +110,14 @@ def run(
                 transposus.append(spindle % (arg or 1))
             elif method == 4:
                 transposus.append((spindle * arg) % 10)
+            elif method == 5:
+                ACTION_MEMORY[spindle], ACTION_MEMORY[arg] = (
+                    ACTION_MEMORY[spindle],
+                    ACTION_MEMORY[arg],
+                )
+            elif method == 8:
+                random.shuffle(ACTION_MEMORY)
+                action_names = [f.__name__.lstrip("_") for f in ACTION_MEMORY]
             STACK["grow"].clear()
         else:
             STACK["grow"].append(arg)
@@ -147,6 +156,8 @@ def run(
             elif l == 5:
                 if zf or not sf:  # >=
                     pointer = flag_setter(pointer + arg)
+            elif l == 6:  # jmp
+                pointer = flag_setter(pointer + arg)
             STACK["jmpm"].clear()
         else:
             if arg < 0:
@@ -182,7 +193,7 @@ def run(
     length: int = len(data) - 1
     char: str
     last: int = -1
-    ACTION_NAMES: list[str] = [f.__name__.lstrip("_") for f in ACTION_MEMORY]
+    action_names: list[str] = [f.__name__.lstrip("_") for f in ACTION_MEMORY]
     while pointer < length or transposus:
         if transposus:
             char_int: int = transposus.pop()
@@ -192,7 +203,7 @@ def run(
             if char > "9" or char < "0":
                 continue
             char_int: int = ord(char) - 48
-        name: str = ACTION_NAMES[char_int]
+        name: str = action_names[char_int]
         if last == -1:
             ACTION_MEMORY[char_int](char_int)
         else:
