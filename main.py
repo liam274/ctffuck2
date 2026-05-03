@@ -2,7 +2,7 @@
 import argparse
 import os
 import sys
-from getch import getch  # type: ignore
+from getch import getche  # type: ignore
 from typing import Callable, TextIO
 from pprint import pprint
 
@@ -92,7 +92,7 @@ def run(data: str, debug: bool = False, FS: list[TextIO] = [sys.stdout, sys.stde
         """get a char from console"""
         if arg < 0:
             return
-        DATA_MEMORY[arg] = ord(getch())  # type: ignore
+        DATA_MEMORY[arg] = ord(getche())  # type: ignore
 
     def jmpm(arg: int):
         """jmp to an offset in file, according to the mode given"""
