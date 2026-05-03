@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 from getch import getch  # type: ignore
-from typing import Callable, TextIO, Generator
+from typing import Callable, TextIO
 
 parser = argparse.ArgumentParser(description="ctffuck2 is a very brainy language")
 parser.add_argument("--file", "-f", help="program file", type=str)
@@ -145,14 +145,29 @@ ACTION_MEMORY: list[Callable[[int], None]] = [
 DATA_MEMORY: list[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 FLAGS: dict[str, bool] = {"ZF": False, "SF": False}
 FS: list[TextIO] = [sys.stdout, sys.stderr]
-pointer: int = 0
-CALLING: set[str] = set()
+pointer: int = -1
+CALLING: list[str] = []
 
 
 def main():
-    iterator: Generator[str, None, None]
+    global pointer
+    data: str
     with open(args.file, "r") as file:
-        iterator = (i for i in file.read().strip())
-    for char in iterator:
+        data = file.read().strip()
+    length: int = len(data)
+    char: str
+    last: int = -1
+    while pointer < length:
+        pointer += 1
+        char = data[pointer]
         if char > "9" or char < "0":
             pass
+        if last == -1:
+            ACTION_MEMORY[int(char)](int(char))
+        else:
+            ACTION_MEMORY[int(char)](last - int(char))
+        last = int(char)
+        CALLING.append(ACTION_MEMORY[last].__name__)
+        if len(CALLING) > 2:
+            STACK[CALLING[-1]].clear()
+            CALLING.pop()
