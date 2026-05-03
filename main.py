@@ -5,6 +5,9 @@ import sys
 from getch import getche  # type: ignore
 from typing import Callable, TextIO
 from pprint import pprint
+from contextlib import redirect_stdout, redirect_stderr
+import lib.cuz_rand as cuz_rand
+import io
 
 
 def run(
@@ -194,6 +197,7 @@ def run(
 
 
 def main():
+    """main proc"""
     parser = argparse.ArgumentParser(description="ctffuck2 is a very brainy language")
     parser.add_argument("--file", "-f", help="program file", type=str)
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
@@ -215,12 +219,38 @@ def fun_ctffuck2(
     debug: bool = False,
     FS: list[TextIO] = [sys.stdout, sys.stderr],
     is_file: bool = False,
-):
+    capture_output: bool = True,
+) -> tuple[list[int], str]:
     """Though fun is a typo, but it's really fun!"""
     if is_file:
         with open(data, "r") as file:
             data = file.read().strip()
-    return run(data, _input, debug, FS)
+    if capture_output:
+        stdout: TextIO = io.StringIO()
+        stderr: TextIO = io.StringIO()
+        with redirect_stderr(stderr), redirect_stdout(stdout):
+            return run(data, _input, debug, FS), stdout.getvalue()
+    return run(data, _input, debug, FS), ""
+
+
+def encrypt(path: str, code: str, secureLvl: int = 1):
+    """encrypt the code into a binary file"""
+    random_frag: list[str] = cuz_rand.random_split(code)
+    with open(path, "a+b") as file:
+        for i in random_frag:
+            file.write(i.encode())
+            file.write(cuz_rand.random_text(40 * secureLvl, 20 * secureLvl).encode())
+
+
+def decrypt(path: str) -> str:
+    """decrypt the code from a binary file"""
+    result: str = ""
+    with open(path, "rb") as file:
+        for char in file.read().decode():
+            if char > "9" or char < "0":
+                continue
+            result += char
+    return result
 
 
 if __name__ == "__main__":
