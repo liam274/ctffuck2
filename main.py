@@ -6,7 +6,6 @@ from getch import getche  # type: ignore
 from typing import Callable, TextIO
 from pprint import pprint
 from contextlib import redirect_stdout, redirect_stderr
-import lib.cuz_rand as cuz_rand
 import io
 
 
@@ -102,9 +101,9 @@ def run(
         if arg < 0:
             return
         if input:
-            DATA_MEMORY[arg] = ord(getche())  # type: ignore
-        else:
             DATA_MEMORY[arg] = ord(input.pop())
+        else:
+            DATA_MEMORY[arg] = ord(getche())  # type: ignore
 
     def jmpm(arg: int):
         """jmp to an offset in file, according to the mode given"""
@@ -231,26 +230,6 @@ def fun_ctffuck2(
         with redirect_stderr(stderr), redirect_stdout(stdout):
             return run(data, _input, debug, FS), stdout.getvalue()
     return run(data, _input, debug, FS), ""
-
-
-def encrypt(path: str, code: str, secureLvl: int = 1):
-    """encrypt the code into a binary file"""
-    random_frag: list[str] = cuz_rand.random_split(code)
-    with open(path, "a+b") as file:
-        for i in random_frag:
-            file.write(i.encode())
-            file.write(cuz_rand.random_text(40 * secureLvl, 20 * secureLvl).encode())
-
-
-def decrypt(path: str) -> str:
-    """decrypt the code from a binary file"""
-    result: str = ""
-    with open(path, "rb") as file:
-        for char in file.read().decode():
-            if char > "9" or char < "0":
-                continue
-            result += char
-    return result
 
 
 if __name__ == "__main__":
