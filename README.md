@@ -78,14 +78,15 @@ The interpreter reads the source file character by character:
 
 ### Jump Modes (jmpm)
 
-| Mode | Condition | Description       |
-| ---- | --------- | ----------------- |
-| 0    | ZF        | Jump if equal     |
-| 1    | !ZF       | Jump if not equal |
-| 2    | SF        | Jump if smaller   |
-| 3    | !SF       | Jump if bigger    |
-| 4    | ZF ∨ SF   | Jump if ≤         |
-| 5    | ZF ∨ !SF  | Jump if ≥         |
+| Mode | Condition | Description         |
+| ---- | --------- | ------------------- |
+| 0    | ZF        | Jump if equal       |
+| 1    | !ZF       | Jump if not equal   |
+| 2    | SF        | Jump if smaller     |
+| 3    | !SF       | Jump if bigger      |
+| 4    | ZF ∨ SF   | Jump if ≤           |
+| 5    | ZF ∨ !SF  | Jump if ≥           |
+| 6    | True      | Jump no matter what |
 
 ## Development
 
