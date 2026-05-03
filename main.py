@@ -36,6 +36,8 @@ def flag_setter(data: int) -> int:
 
 def read(arg: int):
     """read a memory"""
+    if arg < 0:
+        return
     if len(STACK["read"]):
         DATA_MEMORY[STACK["read"][-1]] = flag_setter(DATA_MEMORY[arg])
         STACK["read"].clear()
@@ -46,11 +48,11 @@ def read(arg: int):
 def add(arg: int):
     """increase a box"""
     if len(STACK["add"]):
-        DATA_MEMORY[STACK["add"][-1]] = flag_setter(
-            DATA_MEMORY[STACK["add"][-1]] + DATA_MEMORY[arg]
-        )
+        DATA_MEMORY[STACK["add"][-1]] = flag_setter(DATA_MEMORY[STACK["add"][-1]] + arg)
         STACK["add"].clear()
     else:
+        if arg < 0:
+            return
         STACK["add"].append(arg)
 
 
@@ -66,6 +68,8 @@ def push(arg: int):
 
 def _print(arg: int):
     """print the char out to the console, at destination given"""
+    if arg < 0:
+        return
     if len(STACK["print"]):
         FS[arg].write(chr(DATA_MEMORY[STACK["print"][-1]]))
         STACK["print"].clear()
@@ -75,6 +79,8 @@ def _print(arg: int):
 
 def swap(arg: int):
     """swap two box's func"""
+    if arg < 0:
+        return
     if len(STACK["swap"]):
         DATA_MEMORY[STACK["swap"][-1]], DATA_MEMORY[arg] = DATA_MEMORY[
             arg
@@ -91,6 +97,8 @@ def halt(arg: int):
 
 def inp(arg: int):
     """get a char from console"""
+    if arg < 0:
+        return
     DATA_MEMORY[arg] = getch()
 
 
@@ -119,11 +127,15 @@ def jmpm(arg: int):
                 pointer += arg
         STACK["jmpm"].clear()
     else:
+        if arg < 0:
+            return
         STACK["jmpm"].append(arg)
 
 
 def revf(arg: int):
     """reverse a flag"""
+    if arg < 0:
+        return
     if arg == 0:
         FLAGS["ZF"] = not FLAGS["ZF"]
     elif arg == 1:
@@ -161,7 +173,7 @@ def main():
         pointer += 1
         char = data[pointer]
         if char > "9" or char < "0":
-            pass
+            continue
         if last == -1:
             ACTION_MEMORY[int(char)](int(char))
         else:
