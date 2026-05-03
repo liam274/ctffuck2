@@ -193,7 +193,7 @@ def main():
         if not CALLING or name != CALLING[0]:
             CALLING.append(name)
             if len(CALLING) > 2:
-                STACK[CALLING[0]].clear()
+                STACK[CALLING[0].lstrip("_")].clear()
                 CALLING.pop()
         if len(STACK["push"]) and name != "push":
             STACK[name.lstrip("_")].append(STACK["push"].pop())
