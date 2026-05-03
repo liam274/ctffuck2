@@ -4,9 +4,11 @@ import os
 import sys
 from getch import getch  # type: ignore
 from typing import Callable, TextIO
+from pprint import pprint
 
 parser = argparse.ArgumentParser(description="ctffuck2 is a very brainy language")
 parser.add_argument("--file", "-f", help="program file", type=str)
+parser.add_argument("--debug", action="store_true", help="Enable debug mode")
 args = parser.parse_args()
 if not os.path.exists(args.file):
     print(
@@ -195,3 +197,13 @@ def main():
                 CALLING.pop()
         if len(STACK["push"]) and name != "push":
             STACK[name.lstrip("_")].append(STACK["push"].pop())
+        if args.debug:
+            print("-" * 50)
+            print("STACK\n")
+            pprint(STACK)
+            print("-" * 50)
+            print(f"action name: {name}")
+            print("-" * 50)
+            print(" |", " | ".join(str(i) for i in DATA_MEMORY), "|")
+            print("-" * 50)
+            print("CALLING: ", CALLING)
