@@ -5,7 +5,7 @@ import sys
 import io
 import random
 from getch import getche  # type: ignore
-from typing import Callable, TextIO
+from typing import Callable, TextIO, Generator
 from pprint import pprint
 from contextlib import redirect_stdout, redirect_stderr
 from typing import Any
@@ -17,7 +17,7 @@ def run(
     debug: bool = False,
     FS: list[TextIO] = [sys.stdout, sys.stderr],
     seed: int | None = None,
-) -> tuple[list[int], tuple[Any, ...]]:
+) -> Generator[tuple[dict[str, list[int]], list[int], list[str]], Any, Any]:
     """Run this to execute ctffuck v2.0"""
     random.seed(seed)
     input: list[str] = list(_input)
@@ -224,6 +224,7 @@ def run(
                     CALLING.pop()
             if len(STACK["push"]) and name != "push":
                 STACK[name].append(STACK["push"].pop())
+            yield STACK, DATA_MEMORY, CALLING
             if debug:
                 print("-" * 50)
                 print("STACK\n")
@@ -236,7 +237,6 @@ def run(
                 print("CALLING: ", CALLING)
     except KeyboardInterrupt:
         print("Interrupted by user...")
-    return DATA_MEMORY, random.getstate()
 
 
 def main():
@@ -253,7 +253,7 @@ def main():
     data: str
     with open(args.file, "r") as file:
         data = file.read().strip()
-    run(data, debug=args.debug)
+    fun_ctffuck2(data, debug=args.debug)
 
 
 def fun_ctffuck2(
@@ -263,7 +263,8 @@ def fun_ctffuck2(
     FS: list[TextIO] = [sys.stdout, sys.stderr],
     is_file: bool = False,
     capture_output: bool = True,
-) -> tuple[tuple[list[int], tuple[Any, ...]], str]:
+    as_generator: bool = False,
+):
     """Though fun is a typo, but it's really fun!"""
     if is_file:
         with open(data, "r") as file:
@@ -272,8 +273,16 @@ def fun_ctffuck2(
         stdout: TextIO = io.StringIO()
         stderr: TextIO = io.StringIO()
         with redirect_stderr(stderr), redirect_stdout(stdout):
-            return run(data, _input, debug, FS), stdout.getvalue()
-    return run(data, _input, debug, FS), ""
+            return (
+                run(data, _input, debug, FS)
+                if as_generator
+                else list(i[1] for i in run(data, _input, debug, FS))
+            ), stdout.getvalue()
+    return (
+        run(data, _input, debug, FS)
+        if as_generator
+        else list(i[1] for i in run(data, _input, debug, FS))
+    ), ""
 
 
 if __name__ == "__main__":
