@@ -7,6 +7,7 @@ from typing import Callable, TextIO
 from pprint import pprint
 from contextlib import redirect_stdout, redirect_stderr
 import io
+import random
 
 
 def run(
@@ -23,13 +24,14 @@ def run(
         "push": [],
         "print": [],
         "swap": [],
-        "halt": [],
+        "grow": [],
         "inp": [],
         "set": [],
         "jmpm": [],
         "revf": [],
     }
     pointer: int = -1
+    transposus: list[int] = []
 
     def flag_setter(data: int) -> int:
         FLAGS["ZF"] = data == 0
@@ -92,9 +94,23 @@ def run(
         else:
             STACK["swap"].append(arg)
 
-    def halt(arg: int):
-        """stop the program"""
-        sys.exit(arg)
+    def grow(arg: int):
+        """edit the code"""
+        if len(STACK["grow"]) > 1:
+            method: int = STACK["grow"][-1]
+            spindle: int = STACK["grow"][-2]
+            arg += random.randint(3, 3)
+            if method == 1:
+                transposus.append((spindle + arg) % 10)
+            elif method == 2:
+                transposus.append(abs(spindle - arg) % 10)
+            elif method == 3:
+                transposus.append(spindle % arg)
+            elif method == 4:
+                transposus.append((spindle * arg) % 10)
+            STACK["grow"].clear()
+        else:
+            STACK["grow"].append(arg)
 
     def inp(arg: int):
         """get a char from console"""
@@ -152,7 +168,7 @@ def run(
         push,
         _print,
         swap,
-        halt,
+        grow,
         inp,
         jmpm,
         revf,
@@ -163,12 +179,15 @@ def run(
     length: int = len(data) - 1
     char: str
     last: int = -1
-    while pointer < length:
-        pointer += 1
-        char = data[pointer]
-        if char > "9" or char < "0":
-            continue
-        char_int: int = int(char)
+    while pointer < length and not transposus:
+        if transposus:
+            char_int: int = transposus.pop()
+        else:
+            pointer += 1
+            char = data[pointer]
+            if char > "9" or char < "0":
+                continue
+            char_int: int = int(char)
         name: str = ACTION_MEMORY[char_int].__name__
         if last == -1:
             ACTION_MEMORY[char_int](char_int)
