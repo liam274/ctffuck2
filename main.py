@@ -6,16 +6,6 @@ from getch import getch  # type: ignore
 from typing import Callable, TextIO
 from pprint import pprint
 
-parser = argparse.ArgumentParser(description="ctffuck2 is a very brainy language")
-parser.add_argument("--file", "-f", help="program file", type=str)
-parser.add_argument("--debug", action="store_true", help="Enable debug mode")
-args = parser.parse_args()
-if not os.path.exists(args.file):
-    print(
-        f'Error occurred when trying to open file "{args.file}", which does not exists.'
-    )
-    sys.exit(1)
-
 STACK: dict[str, list[int]] = {
     "read": [],
     "add": [],
@@ -172,10 +162,24 @@ CALLING: list[str] = []
 
 
 def main():
-    global pointer
+    parser = argparse.ArgumentParser(description="ctffuck2 is a very brainy language")
+    parser.add_argument("--file", "-f", help="program file", type=str)
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
+    args = parser.parse_args()
+    if not os.path.exists(args.file):
+        print(
+            f'Error occurred when trying to open file "{args.file}", which does not exists.'
+        )
+        sys.exit(1)
     data: str
     with open(args.file, "r") as file:
         data = file.read().strip()
+    run(data, args.debug)
+
+
+def run(data: str, debug: bool = False):
+    """Run this to execute ctffuck v2.0"""
+    global pointer
     length: int = len(data) - 1
     char: str
     last: int = -1
@@ -197,7 +201,7 @@ def main():
                 CALLING.pop()
         if len(STACK["push"]) and name != "push":
             STACK[name.lstrip("_")].append(STACK["push"].pop())
-        if args.debug:
+        if debug:
             print("-" * 50)
             print("STACK\n")
             pprint(STACK)
@@ -209,4 +213,5 @@ def main():
             print("CALLING: ", CALLING)
 
 
-main()
+if __name__ == "__main__":
+    main()
