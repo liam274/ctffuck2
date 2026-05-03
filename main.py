@@ -39,7 +39,7 @@ def read(arg: int):
     if arg < 0:
         return
     if len(STACK["read"]):
-        DATA_MEMORY[STACK["read"][-1]] = flag_setter(DATA_MEMORY[arg])
+        DATA_MEMORY[STACK["read"][-1] % 10] = flag_setter(DATA_MEMORY[arg % 10])
         STACK["read"].clear()
     else:
         STACK["read"].append(arg)
@@ -48,7 +48,9 @@ def read(arg: int):
 def add(arg: int):
     """increase a box"""
     if len(STACK["add"]):
-        DATA_MEMORY[STACK["add"][-1]] = flag_setter(DATA_MEMORY[STACK["add"][-1]] + arg)
+        DATA_MEMORY[STACK["add"][-1] % 10] = flag_setter(
+            DATA_MEMORY[STACK["add"][-1] % 10] + arg
+        )
         STACK["add"].clear()
     else:
         if arg < 0:
@@ -58,11 +60,15 @@ def add(arg: int):
 
 def _set(arg: int):
     """set a box to zero"""
-    DATA_MEMORY[arg] = flag_setter(0)
+    if arg < 0:
+        return
+    DATA_MEMORY[arg % 10] = flag_setter(0)
 
 
 def push(arg: int):
     """push a int to the next called"""
+    if arg < 0:
+        return
     STACK["push"] = [arg]
 
 
@@ -71,7 +77,7 @@ def _print(arg: int):
     if arg < 0:
         return
     if len(STACK["print"]):
-        FS[arg].write(chr(DATA_MEMORY[STACK["print"][-1]]))
+        FS[arg].write(chr(DATA_MEMORY[STACK["print"][-1] % 10]))
         STACK["print"].clear()
     else:
         STACK["print"].append(arg)
@@ -82,9 +88,9 @@ def swap(arg: int):
     if arg < 0:
         return
     if len(STACK["swap"]):
-        DATA_MEMORY[STACK["swap"][-1]], DATA_MEMORY[arg] = DATA_MEMORY[
-            arg
-        ], flag_setter(DATA_MEMORY[STACK["swap"][-1]])
+        DATA_MEMORY[STACK["swap"][-1] % 10], DATA_MEMORY[arg % 10] = DATA_MEMORY[
+            arg % 10
+        ], flag_setter(DATA_MEMORY[STACK["swap"][-1] % 10])
         STACK["swap"].clear()
     else:
         STACK["swap"].append(arg)
@@ -106,25 +112,27 @@ def jmpm(arg: int):
     """jmp to an offset in file, according to the mode given"""
     global pointer
     if len(STACK["jmpm"]):
+        if pointer + arg < 0:
+            return
         l: int = STACK["jmpm"][-1]
         if l == 0:
             if FLAGS["ZF"]:  # equal
-                pointer += arg
+                pointer = flag_setter(pointer + arg)
         elif l == 1:
             if not FLAGS["ZF"]:  # not equal
-                pointer += arg
+                pointer = flag_setter(pointer + arg)
         elif l == 2:
             if FLAGS["SF"]:  # smaller
-                pointer += arg
+                pointer = flag_setter(pointer + arg)
         elif l == 3:
             if not FLAGS["SF"]:  # bigger
-                pointer += arg
+                pointer = flag_setter(pointer + arg)
         elif l == 4:
             if FLAGS["ZF"] or FLAGS["SF"]:  # <=
-                pointer += arg
+                pointer = flag_setter(pointer + arg)
         elif l == 5:
             if FLAGS["ZF"] or not FLAGS["SF"]:  # >=
-                pointer += arg
+                pointer = flag_setter(pointer + arg)
         STACK["jmpm"].clear()
     else:
         if arg < 0:
@@ -174,12 +182,16 @@ def main():
         char = data[pointer]
         if char > "9" or char < "0":
             continue
+        name: str = ACTION_MEMORY[int(char)].__name__
         if last == -1:
             ACTION_MEMORY[int(char)](int(char))
         else:
             ACTION_MEMORY[int(char)](last - int(char))
         last = int(char)
-        CALLING.append(ACTION_MEMORY[last].__name__)
-        if len(CALLING) > 2:
-            STACK[CALLING[-1]].clear()
-            CALLING.pop()
+        if name != CALLING[0]:
+            CALLING.append(name)
+            if len(CALLING) > 2:
+                STACK[CALLING[-1]].clear()
+                CALLING.pop()
+        if len(STACK["push"]) and name != "push":
+            STACK[name.lstrip("_")].append(STACK["push"].pop())
