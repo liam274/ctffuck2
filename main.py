@@ -2,12 +2,13 @@
 import argparse
 import os
 import sys
+import io
+import random
 from getch import getche  # type: ignore
 from typing import Callable, TextIO
 from pprint import pprint
 from contextlib import redirect_stdout, redirect_stderr
-import io
-import random
+from typing import Any
 
 
 def run(
@@ -15,8 +16,10 @@ def run(
     _input: str = "",
     debug: bool = False,
     FS: list[TextIO] = [sys.stdout, sys.stderr],
-):
+    seed: int | None = None,
+) -> tuple[list[int], tuple[Any, ...]]:
     """Run this to execute ctffuck v2.0"""
+    random.seed(seed)
     input: list[str] = list(_input)
     STACK: dict[str, list[int]] = {
         "read": [],
@@ -198,39 +201,42 @@ def run(
     char: str
     last: int = -1
     action_names: list[str] = [f.__name__.lstrip("_") for f in ACTION_MEMORY]
-    while pointer < length or transposus:
-        if transposus:
-            char_int: int = transposus.pop()
-        else:
-            pointer += 1
-            char = data[pointer]
-            if char > "9" or char < "0":
-                continue
-            char_int: int = ord(char) - 48
-        name: str = action_names[char_int]
-        if last == -1:
-            ACTION_MEMORY[char_int](char_int)
-        else:
-            ACTION_MEMORY[char_int](last - char_int)
-        last = char_int
-        if not CALLING or name != CALLING[0]:
-            CALLING.append(name)
-            if len(CALLING) > 2:
-                STACK[CALLING[0]].clear()
-                CALLING.pop()
-        if len(STACK["push"]) and name != "push":
-            STACK[name].append(STACK["push"].pop())
-        if debug:
-            print("-" * 50)
-            print("STACK\n")
-            pprint(STACK)
-            print("-" * 50)
-            print(f"action name: {name}")
-            print("-" * 50)
-            print(" |", " | ".join(str(i) for i in DATA_MEMORY), "|")
-            print("-" * 50)
-            print("CALLING: ", CALLING)
-    return DATA_MEMORY
+    try:
+        while pointer < length or transposus:
+            if transposus:
+                char_int: int = transposus.pop()
+            else:
+                pointer += 1
+                char = data[pointer]
+                if char > "9" or char < "0":
+                    continue
+                char_int: int = ord(char) - 48
+            name: str = action_names[char_int]
+            if last == -1:
+                ACTION_MEMORY[char_int](char_int)
+            else:
+                ACTION_MEMORY[char_int](last - char_int)
+            last = char_int
+            if not CALLING or name != CALLING[0]:
+                CALLING.append(name)
+                if len(CALLING) > 2:
+                    STACK[CALLING[0]].clear()
+                    CALLING.pop()
+            if len(STACK["push"]) and name != "push":
+                STACK[name].append(STACK["push"].pop())
+            if debug:
+                print("-" * 50)
+                print("STACK\n")
+                pprint(STACK)
+                print("-" * 50)
+                print(f"action name: {name}")
+                print("-" * 50)
+                print(" |", " | ".join(str(i) for i in DATA_MEMORY), "|")
+                print("-" * 50)
+                print("CALLING: ", CALLING)
+    except KeyboardInterrupt:
+        print("Interrupted by user...")
+    return DATA_MEMORY, random.getstate()
 
 
 def main():
@@ -257,7 +263,7 @@ def fun_ctffuck2(
     FS: list[TextIO] = [sys.stdout, sys.stderr],
     is_file: bool = False,
     capture_output: bool = True,
-) -> tuple[list[int], str]:
+) -> tuple[tuple[list[int], tuple[Any, ...]], str]:
     """Though fun is a typo, but it's really fun!"""
     if is_file:
         with open(data, "r") as file:
