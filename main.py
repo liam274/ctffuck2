@@ -115,6 +115,10 @@ def run(
                     ACTION_MEMORY[spindle],
                     ACTION_MEMORY[arg],
                 )
+                action_names[spindle], action_names[arg] = (
+                    action_names[arg],
+                    action_names[spindle],
+                )
             elif method == 8:
                 random.shuffle(ACTION_MEMORY)
                 action_names = [f.__name__.lstrip("_") for f in ACTION_MEMORY]
