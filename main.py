@@ -7,8 +7,14 @@ from typing import Callable, TextIO
 from pprint import pprint
 
 
-def run(data: str, debug: bool = False, FS: list[TextIO] = [sys.stdout, sys.stderr]):
+def run(
+    data: str,
+    _input: str = "",
+    debug: bool = False,
+    FS: list[TextIO] = [sys.stdout, sys.stderr],
+):
     """Run this to execute ctffuck v2.0"""
+    input: list[str] = list(_input)
     STACK: dict[str, list[int]] = {
         "read": [],
         "add": [],
@@ -92,7 +98,10 @@ def run(data: str, debug: bool = False, FS: list[TextIO] = [sys.stdout, sys.stde
         """get a char from console"""
         if arg < 0:
             return
-        DATA_MEMORY[arg] = ord(getche())  # type: ignore
+        if input:
+            DATA_MEMORY[arg] = ord(getche())  # type: ignore
+        else:
+            DATA_MEMORY[arg] = ord(input.pop())
 
     def jmpm(arg: int):
         """jmp to an offset in file, according to the mode given"""
@@ -197,7 +206,21 @@ def main():
     data: str
     with open(args.file, "r") as file:
         data = file.read().strip()
-    run(data, args.debug)
+    run(data, debug=args.debug)
+
+
+def fun_ctffuck2(
+    data: str,
+    _input: str = "",
+    debug: bool = False,
+    FS: list[TextIO] = [sys.stdout, sys.stderr],
+    is_file: bool = False,
+):
+    """Though fun is a typo, but it's really fun!"""
+    if is_file:
+        with open(data, "r") as file:
+            data = file.read().strip()
+    return run(data, _input, debug, FS)
 
 
 if __name__ == "__main__":
