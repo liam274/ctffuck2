@@ -34,8 +34,9 @@ def run(
     transposus: list[int] = []
 
     def flag_setter(data: int) -> int:
-        FLAGS["ZF"] = data == 0
-        FLAGS["SF"] = data < 0
+        nonlocal zf, sf
+        zf = data == 0
+        sf = data < 0
         return data
 
     def read(arg: int):
@@ -99,13 +100,13 @@ def run(
         if len(STACK["grow"]) > 1:
             method: int = STACK["grow"][-1]
             spindle: int = STACK["grow"][-2]
-            arg += random.randint(3, 3)
+            arg += random.randint(-3, 3)
             if method == 1:
                 transposus.append((spindle + arg) % 10)
             elif method == 2:
                 transposus.append(abs(spindle - arg) % 10)
             elif method == 3:
-                transposus.append(spindle % arg)
+                transposus.append(spindle % (arg or 1))
             elif method == 4:
                 transposus.append((spindle * arg) % 10)
             STACK["grow"].clear()
@@ -129,22 +130,22 @@ def run(
                 return
             l: int = STACK["jmpm"][-1]
             if l == 0:
-                if FLAGS["ZF"]:  # equal
+                if zf:  # equal
                     pointer = flag_setter(pointer + arg)
             elif l == 1:
-                if not FLAGS["ZF"]:  # not equal
+                if not zf:  # not equal
                     pointer = flag_setter(pointer + arg)
             elif l == 2:
-                if FLAGS["SF"]:  # smaller
+                if sf:  # smaller
                     pointer = flag_setter(pointer + arg)
             elif l == 3:
-                if not FLAGS["SF"]:  # bigger
+                if not sf:  # bigger
                     pointer = flag_setter(pointer + arg)
             elif l == 4:
-                if FLAGS["ZF"] or FLAGS["SF"]:  # <=
+                if zf or sf:  # <=
                     pointer = flag_setter(pointer + arg)
             elif l == 5:
-                if FLAGS["ZF"] or not FLAGS["SF"]:  # >=
+                if zf or not sf:  # >=
                     pointer = flag_setter(pointer + arg)
             STACK["jmpm"].clear()
         else:
@@ -154,12 +155,13 @@ def run(
 
     def revf(arg: int):
         """reverse a flag"""
+        nonlocal zf, sf
         if arg < 0:
             return
         if arg == 0:
-            FLAGS["ZF"] = not FLAGS["ZF"]
+            zf = not zf
         elif arg == 1:
-            FLAGS["SF"] = not FLAGS["SF"]
+            sf = not sf
 
     ACTION_MEMORY: list[Callable[[int], None]] = [
         read,
@@ -174,12 +176,14 @@ def run(
         revf,
     ]
     DATA_MEMORY: list[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FLAGS: dict[str, bool] = {"ZF": False, "SF": False}
+    zf: bool = False
+    sf: bool = False
     CALLING: list[str] = []
     length: int = len(data) - 1
     char: str
     last: int = -1
-    while pointer < length and not transposus:
+    ACTION_NAMES: list[str] = [f.__name__.lstrip("_") for f in ACTION_MEMORY]
+    while pointer < length or transposus:
         if transposus:
             char_int: int = transposus.pop()
         else:
@@ -187,8 +191,8 @@ def run(
             char = data[pointer]
             if char > "9" or char < "0":
                 continue
-            char_int: int = int(char)
-        name: str = ACTION_MEMORY[char_int].__name__
+            char_int: int = ord(char) - 48
+        name: str = ACTION_NAMES[char_int]
         if last == -1:
             ACTION_MEMORY[char_int](char_int)
         else:
@@ -197,10 +201,10 @@ def run(
         if not CALLING or name != CALLING[0]:
             CALLING.append(name)
             if len(CALLING) > 2:
-                STACK[CALLING[0].lstrip("_")].clear()
+                STACK[CALLING[0]].clear()
                 CALLING.pop()
         if len(STACK["push"]) and name != "push":
-            STACK[name.lstrip("_")].append(STACK["push"].pop())
+            STACK[name].append(STACK["push"].pop())
         if debug:
             print("-" * 50)
             print("STACK\n")
