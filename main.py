@@ -145,25 +145,9 @@ def run(
             if pointer + arg < 0:
                 return
             l: int = STACK["jmpm"][-1]
-            if l == 0:
-                if zf:  # equal
-                    pointer = flag_setter(pointer + arg)
-            elif l == 1:
-                if not zf:  # not equal
-                    pointer = flag_setter(pointer + arg)
-            elif l == 2:
-                if sf:  # smaller
-                    pointer = flag_setter(pointer + arg)
-            elif l == 3:
-                if not sf:  # bigger
-                    pointer = flag_setter(pointer + arg)
-            elif l == 4:
-                if zf or sf:  # <=
-                    pointer = flag_setter(pointer + arg)
-            elif l == 5:
-                if zf or not sf:  # >=
-                    pointer = flag_setter(pointer + arg)
-            elif l == 6:  # jmp
+            if l > len(JUMP_COND):
+                return
+            if JUMP_COND[l]():
                 pointer = flag_setter(pointer + arg)
             STACK["jmpm"].clear()
         else:
@@ -196,6 +180,15 @@ def run(
     DATA_MEMORY: list[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     zf: bool = False
     sf: bool = False
+    JUMP_COND: list[Callable[[], bool]] = [
+        lambda: zf,
+        lambda: not zf,
+        lambda: sf,
+        lambda: not sf,
+        lambda: zf or sf,
+        lambda: zf or not sf,
+        lambda: True,
+    ]
     CALLING: list[str] = []
     length: int = len(data) - 1
     char: str
