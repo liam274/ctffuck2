@@ -17,6 +17,7 @@ def run(
     debug: bool = False,
     FS: list[TextIO] = [sys.stdout, sys.stderr],
     seed: int | None = None,
+    max_step: int = -1,
 ) -> Generator[tuple[dict[str, list[int]], list[int], list[str]], Any, Any]:
     """Run this to execute ctffuck v2.0"""
     random.seed(seed)
@@ -194,12 +195,16 @@ def run(
     char: str
     last: int = -1
     action_names: list[str] = [f.__name__.lstrip("_") for f in ACTION_MEMORY]
+    step: int = -1
     try:
         while pointer < length or transposus:
+            if max_step > 0 and step > max_step:
+                return
             if transposus:
                 char_int: int = transposus.pop()
             else:
                 pointer += 1
+                step += 1
                 char = data[pointer]
                 if char > "9" or char < "0":
                     continue
@@ -257,6 +262,8 @@ def fun_ctffuck2(
     is_file: bool = False,
     capture_output: bool = True,
     as_generator: bool = False,
+    seed: int | None = None,
+    max_step: int = -1,
 ):
     """Though fun is a typo, but it's really fun!"""
     if is_file:
@@ -267,14 +274,14 @@ def fun_ctffuck2(
         stderr: TextIO = io.StringIO()
         with redirect_stderr(stderr), redirect_stdout(stdout):
             return (
-                run(data, _input, debug, FS)
+                run(data, _input, debug, FS, seed, max_step)
                 if as_generator
-                else list(i[1] for i in run(data, _input, debug, FS))
+                else list(i[1] for i in run(data, _input, debug, FS, seed, max_step))
             ), stdout.getvalue()
     return (
-        run(data, _input, debug, FS)
+        run(data, _input, debug, FS, seed, max_step)
         if as_generator
-        else list(i[1] for i in run(data, _input, debug, FS))
+        else list(i[1] for i in run(data, _input, debug, FS, seed, max_step))
     ), ""
 
 
