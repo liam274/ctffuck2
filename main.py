@@ -200,11 +200,11 @@ def run(
         while pointer < length or transposus:
             if max_step > 0 and step > max_step:
                 return
+            step += 1
             if transposus:
                 char_int: int = transposus.pop()
             else:
                 pointer += 1
-                step += 1
                 char = data[pointer]
                 if char > "9" or char < "0":
                     continue
