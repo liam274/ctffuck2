@@ -105,7 +105,6 @@ def run(
         if len(STACK["grow"]) > 1:
             method: int = STACK["grow"][-1]
             spindle: int = STACK["grow"][-2]
-            arg += random.randint(-3, 3)
             if method == 1:
                 transposus.append((spindle + arg) % 10)
             elif method == 2:
@@ -277,12 +276,14 @@ def fun_ctffuck2(
             return (
                 run(data, _input, debug, FS, seed, max_step)
                 if as_generator
-                else list(i[1] for i in run(data, _input, debug, FS, seed, max_step))
+                else list(i[1] for i in run(data, _input, debug, FS, seed, max_step))[
+                    -1
+                ]
             ), stdout.getvalue()
     return (
         run(data, _input, debug, FS, seed, max_step)
         if as_generator
-        else list(i[1] for i in run(data, _input, debug, FS, seed, max_step))
+        else list(i[1] for i in run(data, _input, debug, FS, seed, max_step))[-1]
     ), ""
 
 
