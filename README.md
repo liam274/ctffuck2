@@ -22,7 +22,7 @@ ctffuck2 is a minimalistic yet powerful esolang that operates on:
 - `push` - Push values onto operation stacks
 - `print` - Output characters to console
 - `swap` - Exchange values between memory cells
-- `halt` - Terminate program execution
+- `evo` - Modify the code itself
 - `inp` - Read character input from console
 - `jmpm` - Conditional jumps based on flag states
 - `revf` - Toggle ZF or SF flags
