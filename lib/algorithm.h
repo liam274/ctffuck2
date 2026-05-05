@@ -1,3 +1,30 @@
 #pragma once
+#include <termios.h>
+#include <unistd.h>
 
 constexpr int quick_mod(int data, int max);
+class TermiosRaw
+{
+private:
+    struct termios orig_;
+    int fd_;
+
+public:
+    TermiosRaw(int fd = STDIN_FILENO) : fd_(fd)
+    {
+        // 获取当前设置
+        tcgetattr(fd_, &orig_);
+        struct termios raw = orig_;
+        raw.c_lflag &= ~(ICANON | ECHO);
+        raw.c_cc[VMIN] = 1;
+        raw.c_cc[VTIME] = 0;
+        tcsetattr(fd_, TCSANOW, &raw);
+    }
+
+    ~TermiosRaw()
+    {
+        tcsetattr(fd_, TCSANOW, &orig_);
+    }
+    TermiosRaw(const TermiosRaw &) = delete;
+    TermiosRaw &operator=(const TermiosRaw &) = delete;
+};

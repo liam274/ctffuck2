@@ -34,7 +34,9 @@ Sign Flag (SF): Set when data is negative
 Conditional jumps support 6 comparison modes (=, ≠, <, ≥, ≤, >)
 Dual Output Streams: Supports both stdout and stderr
 
-## Installation
+## Installation for Babyish Version
+
+If you're not a baby, check [this](docs/hardcore.md) out!
 
 ### Requirements
 

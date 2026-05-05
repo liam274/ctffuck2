@@ -19,7 +19,7 @@ constexpr short MEMORY_SIZE = 10;
 constexpr short read_stack_length = 1, add_stack_length = 1,
                 set_stack_length = 0, push_stack_length = 0,
                 print_stack_length = 0, swap_stack_length = 1,
-                grow_stack_length = 0, inp_stack_length = 0,
+                grow_stack_length = 1, inp_stack_length = 0,
                 jmpm_stack_length = 1, revf_stack_length = 0;
 constexpr short read_offset = 0, add_offset = read_stack_length,
                 set_offset = add_offset + add_stack_length,
@@ -43,11 +43,13 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
         return data;
     };
     short read_ind = 0, add_ind = 0, swap_ind = 0,
-          jmpm_ind = 0, revf_ind = 0;
+          grow_ind = 0, jmpm_ind = 0, revf_ind = 0;
     data_type::fix_queue<int> stack(revf_offset + revf_stack_length);
     int pointer = 0,
         length = data.size();
     std::vector<int> transposus;
+    std::array<std::function<void(int)>, 10>
+        funcs;
     auto read = [&](int arg) -> void
     {
         if (arg < 0)
@@ -130,13 +132,46 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
         {
             return;
         }
-        transposus.push_back(arg);
+        if (grow_ind)
+        {
+            int res = stack.at(grow_offset),
+                spindle = MEMORY[arg];
+            switch (arg)
+            {
+            case 0:
+                res = flag_setter(res + spindle) % 10;
+                break;
+            case 1:
+                res = abs(flag_setter(res - spindle)) % 10;
+                break;
+            case 2:
+                res = flag_setter(res * spindle) % 10;
+                break;
+            case 3:
+                res = flag_setter(res % spindle);
+                break;
+            case 4:
+                res = spindle;
+                break;
+            case 5:
+                std::swap(funcs[arg], funcs[res]);
+                break;
+            }
+            transposus.push_back(res);
+            grow_ind = 0;
+        }
+        else
+        {
+            grow_ind++;
+            stack.push(arg);
+        }
     };
     auto inp = [&](int arg) -> void
     {
         if (arg > 0)
         {
-            MEMORY[arg] = getchar();
+            TermiosRaw raw;
+            MEMORY[arg] = std::cin.get();
         }
     };
     auto jmpm = [&](int arg) -> void
@@ -186,10 +221,16 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
     };
     auto revf = [&](int arg) -> void
     {
-        //
+        if (arg & 1)
+        {
+            zf = !zf;
+        }
+        else
+        {
+            sf = !sf;
+        }
     };
-    std::array<std::function<void(int)>, 10>
-        funcs = {read, add, set, push, print, swap, grow, inp, jmpm, revf};
+    funcs = {read, add, set, push, print, swap, grow, inp, jmpm, revf};
     char chr;
     short last = -1;
     while (pointer < length || transposus.size() > 0)
