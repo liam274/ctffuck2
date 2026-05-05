@@ -53,9 +53,9 @@ pip install -r requirements.txt
 
 Run a ctffuck2 program:
 
-`python main.py --file program.ctf`
+`python baby-ctffuck2.py --file program.ctf`<br />
 or
-`python main.py -f program.ctf`
+`python baby-ctffuck2.py -f program.ctf`<br />
 
 ## Language Specification
 
@@ -101,7 +101,7 @@ The interpreter reads the source file character by character:
 
 Create test files in .ctf format and verify output:
 
-`python main.py -f tests/test_basic.ctf`
+`python baby-ctffuck2.py -f tests/test_basic.ctf`
 
 ## Contributing
 
