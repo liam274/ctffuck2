@@ -2,7 +2,6 @@
 #include <termios.h>
 #include <unistd.h>
 
-constexpr int quick_mod(int data, int max);
 class TermiosRaw
 {
 private:

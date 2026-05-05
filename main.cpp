@@ -89,7 +89,7 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
         {
             return;
         }
-        MEMORY[arg] = 0;
+        MEMORY[arg] = flag_setter(0);
     };
     auto push = [&](int arg) -> void
     {
@@ -148,7 +148,7 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
                 res = flag_setter(res * spindle) % 10;
                 break;
             case 3:
-                res = flag_setter(res % spindle);
+                res = flag_setter(res % (spindle or 1));
                 break;
             case 4:
                 res = spindle;
