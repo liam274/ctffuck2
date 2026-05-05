@@ -145,8 +145,8 @@ def run(
             if pointer + arg < 0:
                 return
             l: int = STACK["jmpm"][-1]
-            if l > len(JUMP_COND):
-                return
+            if l == 8:
+                pointer = flag_setter(pointer + DATA_MEMORY[arg % 10])
             if JUMP_COND[l]():
                 pointer = flag_setter(pointer + arg)
             STACK["jmpm"].clear()
@@ -210,10 +210,10 @@ def run(
                 step += 1
                 char_int: int = ord(char) - 48
             name: str = action_names[char_int]
-            if last == -1:
-                ACTION_MEMORY[char_int](char_int)
-            else:
+            if last > -1:
                 ACTION_MEMORY[char_int](last - char_int)
+            else:
+                ACTION_MEMORY[char_int](char_int)
             last = char_int
             if not CALLING or name != CALLING[0]:
                 CALLING.append(name)
