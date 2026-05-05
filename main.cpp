@@ -7,7 +7,6 @@
 #include <sstream>
 #include <array>
 #include <functional>
-#include <random>
 #include <algorithm>
 #include <deque>
 #include "lib/argument-parse.h"
@@ -18,9 +17,9 @@ namespace fs = std::filesystem;
 
 constexpr short MEMORY_SIZE = 10;
 constexpr short read_stack_length = 1, add_stack_length = 1,
-                set_stack_length = 0, push_stack_length = 1,
-                print_stack_length = 1, swap_stack_length = 1,
-                grow_stack_length = 2, inp_stack_length = 0,
+                set_stack_length = 0, push_stack_length = 0,
+                print_stack_length = 0, swap_stack_length = 1,
+                grow_stack_length = 0, inp_stack_length = 0,
                 jmpm_stack_length = 1, revf_stack_length = 0;
 constexpr short read_offset = 0, add_offset = read_stack_length,
                 set_offset = add_offset + add_stack_length,
@@ -43,49 +42,147 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
         sf = (data < 0);
         return data;
     };
-    short read_ind = 0, add_int = 0, set_ind = 0, push_ind = 0,
-          print_ind = 0, swap_ind = 0, grow_ind = 0, inp_ind = 0,
+    short read_ind = 0, add_ind = 0, swap_ind = 0,
           jmpm_ind = 0, revf_ind = 0;
     data_type::fix_queue<int> stack(revf_offset + revf_stack_length);
+    int pointer = 0,
+        length = data.size();
+    std::vector<int> transposus;
     auto read = [&](int arg) -> void
     {
+        if (arg < 0)
+        {
+            return;
+        }
         if (read_ind)
         {
-            MEMORY[stack.at(read_offset)] = flag_setter(MEMORY[quick_mod(arg)]);
+            MEMORY[stack.at(read_offset)] = flag_setter(MEMORY[arg]);
+            read_ind = 0;
+        }
+        else
+        {
+            stack.push(arg);
+            read_ind++;
         }
     };
-    auto
-        add = [&](int arg) -> void
+    auto add = [&](int arg) -> void
     {
-        //
+        if (add_ind)
+        {
+            MEMORY[stack.at(add_offset)] = flag_setter(MEMORY[arg] + MEMORY[stack.at(add_offset)]);
+            add_ind = 0;
+        }
+        else
+        {
+            if (arg > 0)
+            {
+                stack.push(arg);
+                add_ind++;
+            }
+        }
     };
     auto set = [&](int arg) -> void
     {
-        //
+        if (arg < 0)
+        {
+            return;
+        }
+        MEMORY[arg] = 0;
     };
     auto push = [&](int arg) -> void
     {
-        //
+        if (arg < 0)
+        {
+            return;
+        }
+        stack.push(arg);
     };
     auto print = [&](int arg) -> void
     {
-        //
+        if (arg < 0)
+        {
+            return;
+        }
+        std::cout << (char)(MEMORY[arg]);
     };
     auto swap = [&](int arg) -> void
     {
-        //
+        if (arg < 0)
+        {
+            return;
+        }
+        if (swap_ind)
+        {
+            const int temp = MEMORY[arg];
+            MEMORY[arg] = MEMORY[stack.at(swap_offset)];
+            MEMORY[stack.at(swap_offset)] = temp;
+            swap_ind = 0;
+        }
+        else
+        {
+            stack.push(arg);
+            swap_ind++;
+        }
     };
     auto grow = [&](int arg) -> void
     {
-        //
+        if (arg < 0)
+        {
+            return;
+        }
+        transposus.push_back(arg);
     };
     auto inp = [&](int arg) -> void
     {
-        //
+        if (arg > 0)
+        {
+            MEMORY[arg] = getchar();
+        }
     };
     auto jmpm = [&](int arg) -> void
     {
-        //
+        if (arg < 0)
+        {
+            return;
+        }
+        if (jmpm_ind)
+        {
+            bool result = false;
+            switch (stack.at(jmpm_offset))
+            {
+            case 0: // equal
+                result = zf;
+                break;
+            case 1: // not equal
+                result = !zf;
+                break;
+            case 2: // smaller
+                result = sf;
+                break;
+            case 3: // bigger-or-equal
+                result = !sf;
+                break;
+            case 4: // smaller-or-equal
+                result = sf || zf;
+                break;
+            case 5:
+                result = !(sf || zf);
+                break;
+            case 6:
+                result = true;
+                break;
+            };
+            if (result)
+            {
+                pointer += MEMORY[arg];
+            }
+            jmpm_ind = 0;
+        }
+        else
+        {
+            stack.push(arg);
+            jmpm_ind++;
+        }
     };
     auto revf = [&](int arg) -> void
     {
@@ -95,13 +192,10 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
         funcs = {read, add, set, push, print, swap, grow, inp, jmpm, revf};
     char chr;
     short last = -1;
-    std::vector<int> transposus;
-    unsigned long long pointer = 0,
-                       length = data.size();
     while (pointer < length || transposus.size() > 0)
     {
         int chr_int;
-        if (transposus.size() > 0)
+        if (transposus.size())
         {
             chr_int = transposus.back();
             transposus.pop_back();
@@ -124,10 +218,6 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
             funcs.at(chr_int)(chr_int);
         }
     }
-    // piece of code to shuffle func mapping table. Will be used later
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(funcs.begin(), funcs.end(), g);
     return MEMORY;
 } int main(int argc, char *argv[])
 {
