@@ -80,7 +80,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
         }
         else
         {
-            if (arg > 0)
+            if (arg >= 0)
             {
                 stack.push(arg);
                 add_ind++;
@@ -173,7 +173,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
     };
     auto inp = [&](int arg) -> void
     {
-        if (arg > 0)
+        if (arg >= 0)
         {
             if (!input.empty())
             {
