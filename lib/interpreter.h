@@ -36,7 +36,9 @@ constexpr char separator[52] = {'-', '-', '-', '-', '-', '-', '-', '-', '-',
 inline int (&run(const std::string &data, const bool debug, std::string input = "")) [MEMORY_SIZE]
 {
     static int MEMORY[MEMORY_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    bool zf = false, sf = false;
+    bool zf = false, // zero flag
+        sf = false,  // signed flag
+        cf = false;  // control flag
 
     auto flag_setter = [&](int data) -> int
     {
@@ -218,6 +220,9 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             case 6:
                 result = true;
                 break;
+            case 7:
+                result = cf;
+                break;
             };
             if (result)
             {
@@ -237,13 +242,17 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
     };
     auto revf = [&](int arg) -> void
     {
-        if (arg & 1)
+        if (arg == 0)
         {
             zf = !zf;
         }
-        else
+        else if (arg == 1)
         {
             sf = !sf;
+        }
+        else if (arg == 2)
+        {
+            cf = !cf;
         }
     };
     funcs = {read, add, set, push, print, swap, grow, inp, jmpm, revf};
