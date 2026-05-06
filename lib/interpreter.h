@@ -58,10 +58,6 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
                                           "grow", "inp", "jmpm", "revf"};
     auto read = [&](int arg) -> void
     {
-        if (arg < 0)
-        {
-            return;
-        }
         if (read_ind)
         {
             MEMORY[stack.at(read_offset)] = flag_setter(MEMORY[arg]);
@@ -82,43 +78,28 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
         }
         else
         {
-            if (arg >= 0)
-            {
-                stack.push(arg);
-                add_ind++;
-            }
+            stack.push(abs(arg));
+            add_ind++;
         }
     };
     auto set = [&](int arg) -> void
     {
-        if (arg < 0)
-        {
-            return;
-        }
+        arg = abs(arg);
         MEMORY[arg] = flag_setter(0);
     };
     auto push = [&](int arg) -> void
     {
-        if (arg < 0)
-        {
-            return;
-        }
+        arg = abs(arg);
         stack.push(arg);
     };
     auto print = [&](int arg) -> void
     {
-        if (arg < 0)
-        {
-            return;
-        }
+        arg = abs(arg);
         std::cout << (char)(MEMORY[arg]);
     };
     auto swap = [&](int arg) -> void
     {
-        if (arg < 0)
-        {
-            return;
-        }
+        arg = abs(arg);
         if (swap_ind)
         {
             const int temp = MEMORY[arg];
@@ -134,10 +115,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
     };
     auto grow = [&](int arg) -> void
     {
-        if (arg < 0)
-        {
-            return;
-        }
+        arg = abs(arg);
         if (grow_ind)
         {
             int res = stack.at(grow_offset),
@@ -175,25 +153,20 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
     };
     auto inp = [&](int arg) -> void
     {
-        if (arg >= 0)
+        arg = abs(arg);
+        if (!input.empty())
         {
-            if (!input.empty())
-            {
-                MEMORY[arg] = input.back();
-                input.pop_back();
-            }
-            else
-            {
-                MEMORY[arg] = std::cin.get();
-            }
+            MEMORY[arg] = input.back();
+            input.pop_back();
+        }
+        else
+        {
+            MEMORY[arg] = std::cin.get();
         }
     };
     auto jmpm = [&](int arg) -> void
     {
-        if (arg < 0)
-        {
-            return;
-        }
+        arg = abs(arg);
         if (jmpm_ind)
         {
             bool result = false;
