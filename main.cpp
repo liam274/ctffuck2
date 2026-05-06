@@ -218,6 +218,10 @@ int (&run(const std::string &data, std::string input = "")) [MEMORY_SIZE]
             };
             if (result)
             {
+                if (pointer + MEMORY[arg] < 0)
+                {
+                    return;
+                }
                 pointer += MEMORY[arg];
             }
             jmpm_ind = 0;
