@@ -75,7 +75,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
     {
         if (add_ind)
         {
-            MEMORY[stack.at(add_offset)] = flag_setter(MEMORY[arg] + MEMORY[stack.at(add_offset)]);
+            MEMORY[stack.at(add_offset)] = flag_setter(arg + MEMORY[stack.at(add_offset)]);
             add_ind = 0;
         }
         else
