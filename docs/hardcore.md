@@ -112,8 +112,6 @@ You need a C++17 compiler (for `std::filesystem` and lambdas) and a Unix-like en
 ./ctffuck2-hardcore -f program.ctf # if you have the executable
 ```
 
-```
-
 ### Flags:
 
 - `-f`, `--file` : Path to the program file (a string of digits, other characters ignored).
@@ -151,4 +149,3 @@ Go stare into the abyss. The abyss will not stare back — it will just make you
 for its head pointer.
 
 [Back to baby version](../README.md)
-```
