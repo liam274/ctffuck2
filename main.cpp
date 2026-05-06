@@ -28,7 +28,7 @@ constexpr short read_offset = 0, add_offset = read_stack_length,
                 print_offset = push_offset + push_stack_length,
                 swap_offset = print_offset + print_stack_length,
                 grow_offset = swap_offset + swap_stack_length,
-                inp_offset = swap_offset + swap_stack_length,
+                inp_offset = grow_offset + grow_stack_length,
                 jmpm_offset = inp_offset + inp_stack_length,
                 revf_offset = jmpm_offset + jmpm_stack_length;
 
