@@ -1,4 +1,3 @@
-````markdown
 # CTFFuck2 - Hardcore
 
 If you're a baby, check [this](../README.md) out!
@@ -112,7 +111,8 @@ You need a C++17 compiler (for `std::filesystem` and lambdas) and a Unix-like en
 ```bash
 ./ctffuck2-hardcore -f program.ctf # if you have the executable
 ```
-````
+
+```
 
 ### Flags:
 
@@ -151,7 +151,4 @@ Go stare into the abyss. The abyss will not stare back — it will just make you
 for its head pointer.
 
 [Back to baby version](../README.md)
-
-```
-
 ```
