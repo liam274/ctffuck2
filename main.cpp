@@ -9,6 +9,7 @@
 #include <functional>
 #include <algorithm>
 #include <deque>
+#include <cassert>
 #include "lib/argument-parse.h"
 #include "lib/data-type.h"
 #include "lib/algorithm.h"
@@ -258,6 +259,7 @@ int (&run(const std::string &data, std::string input = "")) [MEMORY_SIZE]
             }
             chr_int = chr - '0';
         }
+        assert(chr_int >= 0 && chr <= 9 && "Error occurred when executing given code, found chr_int too big");
         if (last > -1)
         {
             funcs.at(chr_int)(last - chr_int);
