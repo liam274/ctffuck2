@@ -42,7 +42,7 @@ Module callers must ensure the stack is sanitized on calling, to ensure the modu
 
 ### Super-Volatile Memory Point
 
-This point's value shall never be considered, or used. Thus, any modules can dump any random values into it as they like, for keeping other parts of memory clean.
+Any modules can dump any random values into it as they like, for keeping other parts of memory clean. Thus, this point's value shall never be considered, or used.
 
 ### Volatile Memory Points
 
