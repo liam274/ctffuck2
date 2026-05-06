@@ -10,10 +10,10 @@
 
 ## Terms of Art
 
-| name     | definition                                                                                                                                                                                            |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `stack`  | In CTFFuck2 series, commands which receive multiple arguments will push its argument received(If the number is not enough, yet). Note that all the commands share a same cyclical buffer, in Hardcore |
-| `memory` | In CTFFuck2 series, commands share a `int[10]` array, as memory                                                                                                                                       |
+| name     | definition                                                                                                                                                                                                                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `stack`  | In CTFFuck2 series, commands which receive multiple arguments will push its argument received(If the number is not enough, yet). Note that all the commands share a same cyclical buffer, in Hardcore. And thus, `stack.at(0)` points to the newest value, while `stack.at(-1)` points to the oldest value pushed. |
+| `memory` | In CTFFuck2 series, commands share a `int[10]` array, as memory                                                                                                                                                                                                                                                    |
 
 ## Sanitize Query
 
@@ -25,6 +25,10 @@ Repeat `3` stack_length+1 times. For example: `333333`
 
 Module caller shall set the [CF](#cf---control-flag) on before calling, while the module itself shell set [CF](#cf---control-flag) off when it's done.
 Thus, modules' caller and themselves, shall use CF-based jumping conditions.
+
+```ctffuck2
+79; This shall reverse the value of CF.
+```
 
 Module callers must ensure the stack is sanitized on calling, to ensure the module works just as expected.
 
@@ -38,7 +42,7 @@ Module callers must ensure the stack is sanitized on calling, to ensure the modu
 
 ### Super-Volatile Memory Point
 
-This point's value shall never be considered, or used. Thus, any modules can dump random values into it, for keeping other parts of memory clean.
+This point's value shall never be considered, or used. Thus, any modules can dump any random values into it as they like, for keeping other parts of memory clean.
 
 ### Volatile Memory Points
 
@@ -53,4 +57,4 @@ ensure that on return, these values are as what they are at the beginning.
 
 Control flag is a flag, which can be set by `revf(2)`. It doesn't have an official usage,
 so you may use it in whatever way you'd like to. But in this ACI, we **STRONGLY** suggested
-you to use it for controlling execution flow.
+you to use it for controlling execution flow. _Please note that when the program begins, CF=false_

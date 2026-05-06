@@ -242,6 +242,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
     };
     auto revf = [&](int arg) -> void
     {
+        arg = -arg;
         if (arg == 0)
         {
             zf = !zf;
