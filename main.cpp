@@ -31,7 +31,7 @@ constexpr short read_offset = 0, add_offset = read_stack_length,
                 jmpm_offset = inp_offset + inp_stack_length,
                 revf_offset = jmpm_offset + jmpm_stack_length;
 
-int (&run(const std::string &data)) [MEMORY_SIZE]
+int (&run(const std::string &data, std::string input = "")) [MEMORY_SIZE]
 {
     static int MEMORY[MEMORY_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     bool zf = false, sf = false;
@@ -170,8 +170,16 @@ int (&run(const std::string &data)) [MEMORY_SIZE]
     {
         if (arg > 0)
         {
-            TermiosRaw raw;
-            MEMORY[arg] = std::cin.get();
+            if (!input.empty())
+            {
+                MEMORY[arg] = input.back();
+                input.pop_back();
+            }
+            else
+            {
+                TermiosRaw raw;
+                MEMORY[arg] = std::cin.get();
+            }
         }
     };
     auto jmpm = [&](int arg) -> void
