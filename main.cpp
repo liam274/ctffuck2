@@ -178,7 +178,6 @@ int (&run(const std::string &data, std::string input = "")) [MEMORY_SIZE]
             }
             else
             {
-                TermiosRaw raw;
                 MEMORY[arg] = std::cin.get();
             }
         }
@@ -246,6 +245,7 @@ int (&run(const std::string &data, std::string input = "")) [MEMORY_SIZE]
     funcs = {read, add, set, push, print, swap, grow, inp, jmpm, revf};
     char chr;
     short last = -1;
+    TermiosRaw raw;
     while (pointer < length || transposus.size() > 0)
     {
         int chr_int;
@@ -275,7 +275,8 @@ int (&run(const std::string &data, std::string input = "")) [MEMORY_SIZE]
         last = chr_int;
     }
     return MEMORY;
-} int main(int argc, char *argv[])
+};
+int main(int argc, char *argv[])
 {
     argv_verify verify("CTFFuck2");
     verify.append("-f", "--file", "The program file");
