@@ -52,7 +52,8 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
     std::vector<int> transposus;
     std::array<std::function<void(int)>, 10>
         funcs;
-    std::string func_name[10];
+    std::string func_name[MEMORY_SIZE] = {"read", "add", "set", "push", "print", "swap",
+                                          "grow", "inp", "jmpm", "revf"};
     auto read = [&](int arg) -> void
     {
         if (arg < 0)
@@ -158,6 +159,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
                 break;
             case 5:
                 std::swap(funcs[arg], funcs[res]);
+                std::swap(func_name[arg], func_name[res]);
                 break;
             }
             transposus.push_back(res);
@@ -266,14 +268,6 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             chr_int = chr - '0';
         }
         assert((chr_int < 0 || chr > 9) && "Error occurred when executing given code, found chr_int too big");
-        if (last > -1)
-        {
-            funcs.at(chr_int)(last - chr_int);
-        }
-        else
-        {
-            funcs.at(chr_int)(chr_int);
-        }
         if (debug)
         {
             std::cout << separator;
@@ -296,6 +290,20 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
                 t++;
             }
             std::cout << '\n';
+            std::cout << separator;
+            std::cout << "last: " << last << "; arg: "
+                      << (last > -1 ? last - chr_int : chr_int) << '\n';
+            std::cout << separator;
+            std::cout << '\n';
+            std::cout << std::flush;
+        }
+        if (last > -1)
+        {
+            funcs.at(chr_int)(last - chr_int);
+        }
+        else
+        {
+            funcs.at(chr_int)(chr_int);
         }
         last = chr_int;
     }
