@@ -272,6 +272,7 @@ int (&run(const std::string &data, std::string input = "")) [MEMORY_SIZE]
         {
             funcs.at(chr_int)(chr_int);
         }
+        last = chr_int;
     }
     return MEMORY;
 } int main(int argc, char *argv[])
