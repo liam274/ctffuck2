@@ -1,6 +1,6 @@
 # CTFFUCK2
 
-This is a very crazy language, a brain-teasing esoteric programming language interpreter written in Python. ctffuck2 is designed to challenge programmers with its unconventional syntax and stack-based architecture.
+This is a very crazy language, a brain-teasing esoteric programming language interpreter written in Python. ctffuck2 is designed to challenge programmers with its unconventional syntax and stack-based architecture. If you are not a baby, check [this](docs/hardcore.md) out.
 
 ## Overview
 
