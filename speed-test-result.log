@@ -1,22 +1,28 @@
-Generating test program with 1,000,000 instructions in benchmark_program.ctf...
+Generating test file with 10,000,000 instructions ...
+CPU max MHz: 4800
 
-=========== Benchmarks ===========
-  Running: Hardcore warm-up... 0.012s (OK)
-  Running: Hardcore run 1/5... 0.009s (OK)
-  Running: Hardcore run 2/5... 0.008s (OK)
-  Running: Hardcore run 3/5... 0.008s (OK)
-  Running: Hardcore run 4/5... 0.008s (OK)
-  Running: Hardcore run 5/5... 0.008s (OK)
-  Average: 0.009s
-  Running: Baby warm-up... 0.503s (OK)
-  Running: Baby run 1/5... 0.309s (OK)
-  Running: Baby run 2/5... 0.500s (OK)
-  Running: Baby run 3/5... 0.352s (OK)
-  Running: Baby run 4/5... 0.304s (OK)
-  Running: Baby run 5/5... 0.272s (OK)
-  Average: 0.348s
+Benchmarking with 10,000,000 instructions
 
-=========== Summary for 1,000,000 instructions ===========
-Hardcore (C++): 0.009 s
-Baby (Python):  0.348 s
-Speedup:        40.7x
+Hardcore (C++)
+  warm-up:    0.0538s
+  run 1/5:    0.0621s, avg freq 1555 MHz
+  run 2/5:    0.0617s, avg freq 1567 MHz
+  run 3/5:    0.0615s, avg freq 1835 MHz
+  run 4/5:    0.0618s, avg freq 2208 MHz
+  run 5/5:    0.0617s, avg freq 1058 MHz
+
+Baby (Python)
+  warm-up:    2.6759s
+  run 1/5:    2.4441s, avg freq 887 MHz
+  run 2/5:    2.5861s, avg freq 867 MHz
+  run 3/5:    2.7559s, avg freq 811 MHz
+  run 4/5:    2.6772s, avg freq 665 MHz
+  run 5/5:    2.5033s, avg freq 856 MHz
+
+==================================================
+Results for 10,000,000 instructions
+Hardcore (C++) :  0.0618s  (avg freq 1645 MHz)
+Baby (Python)  :  2.5933s  (avg freq 818 MHz)
+Speedup:          42.0x
+Hardcore: 161,908,802 digits/s  ≈ 10.2 cycles/digit
+Baby:     3,856,101 digits/s  ≈ 212.0 cycles/digit
