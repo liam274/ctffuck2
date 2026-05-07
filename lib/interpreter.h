@@ -37,7 +37,7 @@ constexpr char separator[52] = {'-', '-', '-', '-', '-', '-', '-', '-', '-',
 
 constexpr short total_length = revf_offset + revf_stack_length;
 
-constexpr int PERSISTENT_MEMORY[MEMORY_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+constexpr std::array<int, MEMORY_SIZE> PERSISTENT_MEMORY = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 struct Ctx;
 using op_func = void (*)(Ctx *, int);
@@ -54,7 +54,7 @@ void revf(Ctx *ctx, int arg);
 
 struct Ctx
 {
-    int MEMORY[MEMORY_SIZE];
+    std::array<int, MEMORY_SIZE> MEMORY;
     bool zf = false, // zero flag
         sf = false,  // signed flag
         cf = false;  // control flag
@@ -76,12 +76,12 @@ struct Ctx
     };
 };
 
-inline int (&run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)) [MEMORY_SIZE]
+inline std::array<int, MEMORY_SIZE> &run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)
 {
     Ctx ctx;
     ctx.length = data.size();
     ctx.transposus.reserve(1024);
-    std::memcpy(ctx.MEMORY, PERSISTENT_MEMORY, sizeof(PERSISTENT_MEMORY));
+    ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
     char chr;
     short last = -1;
