@@ -108,6 +108,7 @@ void inp(Ctx *ctx, int arg)
     else
     {
         ctx->MEMORY[arg] = std::cin.get();
+        std::cout << ctx->MEMORY[arg];
     }
 };
 void jmpm(Ctx *ctx, int arg)
