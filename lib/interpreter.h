@@ -76,9 +76,10 @@ struct Ctx
     };
 };
 
-inline std::array<int, MEMORY_SIZE> &run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)
+inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)
 {
     Ctx ctx;
+    ctx.stack.set_size(total_length);
     ctx.length = data.size();
     ctx.transposus.reserve(1024);
     ctx.MEMORY = PERSISTENT_MEMORY;
