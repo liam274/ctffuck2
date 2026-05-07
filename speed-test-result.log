@@ -1,0 +1,22 @@
+Generating test program with 1,000,000 instructions in benchmark_program.ctf...
+
+=========== Benchmarks ===========
+  Running: Hardcore warm-up... 0.012s (OK)
+  Running: Hardcore run 1/5... 0.009s (OK)
+  Running: Hardcore run 2/5... 0.008s (OK)
+  Running: Hardcore run 3/5... 0.008s (OK)
+  Running: Hardcore run 4/5... 0.008s (OK)
+  Running: Hardcore run 5/5... 0.008s (OK)
+  Average: 0.009s
+  Running: Baby warm-up... 0.503s (OK)
+  Running: Baby run 1/5... 0.309s (OK)
+  Running: Baby run 2/5... 0.500s (OK)
+  Running: Baby run 3/5... 0.352s (OK)
+  Running: Baby run 4/5... 0.304s (OK)
+  Running: Baby run 5/5... 0.272s (OK)
+  Average: 0.348s
+
+=========== Summary for 1,000,000 instructions ===========
+Hardcore (C++): 0.009 s
+Baby (Python):  0.348 s
+Speedup:        40.7x
