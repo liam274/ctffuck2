@@ -16,9 +16,9 @@ mkdir build
 cd build
 
 # 运行 CMake 配置
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 
 # 构建（默认 Release）
-cmake --build . --config Release
+cmake --build .
 
 echo "Build successful! Executable: $(pwd)/ctffuck2-hardcore"

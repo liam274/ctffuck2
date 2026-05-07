@@ -33,7 +33,7 @@ constexpr char separator[52] = {'-', '-', '-', '-', '-', '-', '-', '-', '-',
                                 '-', '-', '-', '-', '-', '-', '-', '-', '-',
                                 '-', '-', '-', '-', '-', '-', '-', '-',
                                 '-', '-', '-', '-', '-', '-', '\n', '\0'};
-inline int (&run(const std::string &data, const bool debug, std::string input = "")) [MEMORY_SIZE]
+inline int (&run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)) [MEMORY_SIZE]
 {
     static int MEMORY[MEMORY_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     bool zf = false, // zero flag
@@ -52,11 +52,12 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
     int pointer = 0,
         length = data.size();
     std::vector<int> transposus;
-    std::array<std::function<void(int)>, 10>
+    transposus.reserve(1024);
+    std::array<std::function<void(int)> *, 10>
         funcs;
     std::string func_name[MEMORY_SIZE] = {"read", "add", "set", "push", "print", "swap",
                                           "grow", "inp", "jmpm", "revf"};
-    auto read = [&](int arg) -> void
+    std::function<void(int)> read = [&](int arg) -> void
     {
         if (read_ind)
         {
@@ -69,7 +70,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             read_ind++;
         }
     };
-    auto add = [&](int arg) -> void
+    std::function<void(int)> add = [&](int arg) -> void
     {
         if (add_ind)
         {
@@ -82,22 +83,22 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             add_ind++;
         }
     };
-    auto set = [&](int arg) -> void
+    std::function<void(int)> set = [&](int arg) -> void
     {
         arg = abs(arg);
         MEMORY[arg] = flag_setter(0);
     };
-    auto push = [&](int arg) -> void
+    std::function<void(int)> push = [&](int arg) -> void
     {
         arg = abs(arg);
         stack.push(arg);
     };
-    auto print = [&](int arg) -> void
+    std::function<void(int)> print = [&](int arg) -> void
     {
         arg = abs(arg);
         std::cout << (char)(MEMORY[arg]);
     };
-    auto swap = [&](int arg) -> void
+    std::function<void(int)> swap = [&](int arg) -> void
     {
         arg = abs(arg);
         if (swap_ind)
@@ -113,7 +114,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             swap_ind++;
         }
     };
-    auto grow = [&](int arg) -> void
+    std::function<void(int)> grow = [&](int arg) -> void
     {
         arg = abs(arg);
         if (grow_ind)
@@ -151,7 +152,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             stack.push(arg);
         }
     };
-    auto inp = [&](int arg) -> void
+    std::function<void(int)> inp = [&](int arg) -> void
     {
         arg = abs(arg);
         if (!input.empty())
@@ -164,7 +165,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             MEMORY[arg] = std::cin.get();
         }
     };
-    auto jmpm = [&](int arg) -> void
+    std::function<void(int)> jmpm = [&](int arg) -> void
     {
         arg = abs(arg);
         if (jmpm_ind)
@@ -213,7 +214,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             jmpm_ind++;
         }
     };
-    auto revf = [&](int arg) -> void
+    std::function<void(int)> revf = [&](int arg) -> void
     {
         arg = -arg;
         if (arg == 0)
@@ -229,19 +230,14 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             cf = !cf;
         }
     };
-    funcs = {read, add, set, push, print, swap, grow, inp, jmpm, revf};
+    funcs = {&read, &add, &set, &push, &print, &swap, &grow, &inp, &jmpm, &revf};
     char chr;
     short last = -1;
     TermiosRaw raw;
-    while (pointer < length || transposus.size() > 0)
+    while (pointer < length || !transposus.empty())
     {
         int chr_int;
-        if (transposus.size())
-        {
-            chr_int = transposus.back();
-            transposus.pop_back();
-        }
-        else
+        if (transposus.empty())
         {
             chr = data[pointer++];
             if (chr >= '0' + MEMORY_SIZE or chr < '0')
@@ -249,6 +245,11 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
                 continue;
             }
             chr_int = chr - '0';
+        }
+        else
+        {
+            chr_int = transposus.back();
+            transposus.pop_back();
         }
         assert((chr_int < 0 || chr > 9) && "Error occurred when executing given code, found chr_int too big");
         if (debug)
@@ -282,11 +283,11 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
         }
         if (last > -1)
         {
-            funcs.at(chr_int)(last - chr_int);
+            (*funcs.at(chr_int))(last - chr_int);
         }
         else
         {
-            funcs.at(chr_int)(chr_int);
+            (*funcs.at(chr_int))(chr_int);
         }
         last = chr_int;
     }
