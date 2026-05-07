@@ -1,28 +1,56 @@
-Generating test file with 10,000,000 instructions ...
-CPU max MHz: 4800
+CPU(s) scaling MHz:                      54%
+CPU max MHz:                             4800.0000
+CPU min MHz:                             400.0000
 
-Benchmarking with 10,000,000 instructions
+Generating test file with 10,000,000 instructions ...
+
+=========== Benchmarks (perf stat) ===========
 
 Hardcore (C++)
-  warm-up:    0.0538s
-  run 1/5:    0.0621s, avg freq 1555 MHz
-  run 2/5:    0.0617s, avg freq 1567 MHz
-  run 3/5:    0.0615s, avg freq 1835 MHz
-  run 4/5:    0.0618s, avg freq 2208 MHz
-  run 5/5:    0.0617s, avg freq 1058 MHz
+  Hardcore run 1/3 ... 109,526,535 cycles, 419,707,436 instructions, 0.053s
+  Hardcore run 2/3 ... 147,923,391 cycles, 479,956,571 instructions, 0.055s
+  Hardcore run 3/3 ... 167,427,589 cycles, 545,832,058 instructions, 0.057s
 
 Baby (Python)
-  warm-up:    2.6759s
-  run 1/5:    2.4441s, avg freq 887 MHz
-  run 2/5:    2.5861s, avg freq 867 MHz
-  run 3/5:    2.7559s, avg freq 811 MHz
-  run 4/5:    2.6772s, avg freq 665 MHz
-  run 5/5:    2.5033s, avg freq 856 MHz
+  Baby run 1/3 ... 15,374,287,677 cycles, 62,311,335,126 instructions, 2.859s
+  Baby run 2/3 ... 15,822,399,293 cycles, 66,931,612,554 instructions, 2.759s
+  Baby run 3/3 ... 13,664,162,386 cycles, 53,503,362,850 instructions, 2.696s
 
 ==================================================
-Results for 10,000,000 instructions
-Hardcore (C++) :  0.0618s  (avg freq 1645 MHz)
-Baby (Python)  :  2.5933s  (avg freq 818 MHz)
-Speedup:          42.0x
-Hardcore: 161,908,802 digits/s  ≈ 10.2 cycles/digit
-Baby:     3,856,101 digits/s  ≈ 212.0 cycles/digit
+Results for 10,000,000 instructions (digits)
+Hardcore (C++) :  141,625,838.33333334 cycles, 481,832,021.6666667 CPU instructions, 0.055 s
+Baby (Python)  :   14,953,616,452 cycles, 60,915,436,843.333336 CPU instructions, 2.772 s
+
+Per CTFFuck2 digit:
+Hardcore :    14.16 cycles,   48.18 CPU instructions
+Baby     :  1495.36 cycles, 6091.54 CPU instructions
+Speedup (cycles) : 105.6x
+Speedup (time)   : 50.4x
+
+In performance mode:
+
+
+Generating test file with 10,000,000 instructions ...
+
+=========== Benchmarks (perf stat) ===========
+
+Hardcore (C++)
+  Hardcore run 1/3 ... 182,098,112 cycles, 700,202,530 instructions, 0.034s
+  Hardcore run 2/3 ... 105,074,529 cycles, 418,843,237 instructions, 0.028s
+  Hardcore run 3/3 ... 153,753,002 cycles, 556,895,962 instructions, 0.031s
+
+Baby (Python)
+  Baby run 1/3 ... 15,438,478,555 cycles, 56,082,521,832 instructions, 2.382s
+  Baby run 2/3 ... 13,819,657,605 cycles, 52,492,834,581 instructions, 2.411s
+  Baby run 3/3 ... 13,364,227,900 cycles, 50,896,495,965 instructions, 2.457s
+
+==================================================
+Results for 10,000,000 instructions (digits)
+Hardcore (C++) :  146,975,214.33333334 cycles,     558,647,243 CPU instructions, 0.031 s
+Baby (Python)  :  14,207,454,686.666666 cycles,  53,157,284,126 CPU instructions, 2.417 s
+
+Per CTFFuck2 digit:
+Hardcore :    14.70 cycles,   55.86 CPU instructions
+Baby     :  1420.75 cycles, 5315.73 CPU instructions
+Speedup (cycles) : 96.7x
+Speedup (time)   : 77.7x
