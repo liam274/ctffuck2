@@ -14,7 +14,7 @@ namespace data_type
         std::vector<T> data;
 
     public:
-        fix_queue(const int max_size)
+        void set_size(const int max_size)
         {
             this->max_size = max_size;
             data.resize(max_size);

@@ -8,8 +8,11 @@
 #include <algorithm>
 #include <deque>
 #include <cassert>
+#include <cstring>
 #include "data-type.h"
 #include "algorithm.h"
+
+using op_func = void (*)(Ctx *, int);
 
 constexpr short MEMORY_SIZE = 10;
 constexpr short read_stack_length = 1, add_stack_length = 1,
@@ -33,213 +36,230 @@ constexpr char separator[52] = {'-', '-', '-', '-', '-', '-', '-', '-', '-',
                                 '-', '-', '-', '-', '-', '-', '-', '-', '-',
                                 '-', '-', '-', '-', '-', '-', '-', '-',
                                 '-', '-', '-', '-', '-', '-', '\n', '\0'};
-inline int (&run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)) [MEMORY_SIZE]
+
+constexpr short total_length = revf_offset + revf_stack_length;
+
+constexpr int PERSISTENT_MEMORY[MEMORY_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+void read(Ctx *ctx, int arg);
+void add(Ctx *ctx, int arg);
+void set(Ctx *ctx, int arg);
+void push(Ctx *ctx, int arg);
+void print(Ctx *ctx, int arg);
+void swap(Ctx *ctx, int arg);
+void grow(Ctx *ctx, int arg);
+void inp(Ctx *ctx, int arg);
+void jmpm(Ctx *ctx, int arg);
+void revf(Ctx *ctx, int arg);
+struct Ctx
 {
-    static int MEMORY[MEMORY_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int MEMORY[MEMORY_SIZE];
     bool zf = false, // zero flag
         sf = false,  // signed flag
         cf = false;  // control flag
-
-    auto flag_setter = [&](int data) -> int
+    short read_ind = 0, add_ind = 0, swap_ind = 0,
+          grow_ind = 0, jmpm_ind = 0;
+    data_type::fix_queue<int> stack;
+    std::vector<int> transposus;
+    int pointer = 0;
+    int length;
+    std::string input;
+    std::string func_name[MEMORY_SIZE] = {"read", "add", "set", "push", "print", "swap",
+                                          "grow", "inp", "jmpm", "revf"};
+    op_func funcs[MEMORY_SIZE] = {&read, &add, &set, &push, &print, &swap, &grow, &inp, &jmpm, &revf};
+    int flag_setter(int data)
     {
         zf = (data == 0);
         sf = (data < 0);
         return data;
     };
-    short read_ind = 0, add_ind = 0, swap_ind = 0,
-          grow_ind = 0, jmpm_ind = 0;
-    data_type::fix_queue<int> stack(revf_offset + revf_stack_length);
-    int pointer = 0,
-        length = data.size();
-    std::vector<int> transposus;
-    transposus.reserve(1024);
-    std::array<std::function<void(int)> *, 10>
-        funcs;
-    std::string func_name[MEMORY_SIZE] = {"read", "add", "set", "push", "print", "swap",
-                                          "grow", "inp", "jmpm", "revf"};
-    std::function<void(int)> read = [&](int arg) -> void
+};
+void read(Ctx *ctx, int arg)
+{
+    if (ctx->read_ind)
     {
-        if (read_ind)
-        {
-            MEMORY[stack.at(read_offset)] = flag_setter(MEMORY[arg]);
-            read_ind = 0;
-        }
-        else
-        {
-            stack.push(arg);
-            read_ind++;
-        }
-    };
-    std::function<void(int)> add = [&](int arg) -> void
+        ctx->MEMORY[ctx->stack.at(read_offset)] = ctx->flag_setter(ctx->MEMORY[arg]);
+        ctx->read_ind = 0;
+    }
+    else
     {
-        if (add_ind)
-        {
-            MEMORY[stack.at(add_offset)] = flag_setter(arg + MEMORY[stack.at(add_offset)]);
-            add_ind = 0;
-        }
-        else
-        {
-            stack.push(abs(arg));
-            add_ind++;
-        }
-    };
-    std::function<void(int)> set = [&](int arg) -> void
+        ctx->stack.push(arg);
+        ctx->read_ind++;
+    }
+};
+void add(Ctx *ctx, int arg)
+{
+    if (ctx->add_ind)
     {
-        arg = abs(arg);
-        MEMORY[arg] = flag_setter(0);
-    };
-    std::function<void(int)> push = [&](int arg) -> void
+        ctx->MEMORY[ctx->stack.at(add_offset)] = ctx->flag_setter(arg + ctx->MEMORY[ctx->stack.at(add_offset)]);
+        ctx->add_ind = 0;
+    }
+    else
     {
-        arg = abs(arg);
-        stack.push(arg);
-    };
-    std::function<void(int)> print = [&](int arg) -> void
+        ctx->stack.push(abs(arg));
+        ctx->add_ind++;
+    }
+};
+void set(Ctx *ctx, int arg)
+{
+    arg = abs(arg);
+    ctx->MEMORY[arg] = ctx->flag_setter(0);
+};
+void push(Ctx *ctx, int arg)
+{
+    arg = abs(arg);
+    ctx->stack.push(arg);
+};
+void print(Ctx *ctx, int arg)
+{
+    arg = abs(arg);
+    std::cout << (char)(ctx->MEMORY[arg]);
+};
+void swap(Ctx *ctx, int arg)
+{
+    arg = abs(arg);
+    if (ctx->swap_ind)
     {
-        arg = abs(arg);
-        std::cout << (char)(MEMORY[arg]);
-    };
-    std::function<void(int)> swap = [&](int arg) -> void
+        const int temp = ctx->MEMORY[arg];
+        ctx->MEMORY[arg] = ctx->MEMORY[ctx->stack.at(swap_offset)];
+        ctx->MEMORY[ctx->stack.at(swap_offset)] = temp;
+        ctx->swap_ind = 0;
+    }
+    else
     {
-        arg = abs(arg);
-        if (swap_ind)
-        {
-            const int temp = MEMORY[arg];
-            MEMORY[arg] = MEMORY[stack.at(swap_offset)];
-            MEMORY[stack.at(swap_offset)] = temp;
-            swap_ind = 0;
-        }
-        else
-        {
-            stack.push(arg);
-            swap_ind++;
-        }
-    };
-    std::function<void(int)> grow = [&](int arg) -> void
+        ctx->stack.push(arg);
+        ctx->swap_ind++;
+    }
+};
+void grow(Ctx *ctx, int arg)
+{
+    arg = abs(arg);
+    if (ctx->grow_ind)
     {
-        arg = abs(arg);
-        if (grow_ind)
+        int res = ctx->stack.at(grow_offset),
+            spindle = ctx->MEMORY[arg];
+        switch (arg)
         {
-            int res = stack.at(grow_offset),
-                spindle = MEMORY[arg];
-            switch (arg)
-            {
-            case 0:
-                res = flag_setter(res + spindle) % 10;
-                break;
-            case 1:
-                res = abs(flag_setter(res - spindle)) % 10;
-                break;
-            case 2:
-                res = flag_setter(res * spindle) % 10;
-                break;
-            case 3:
-                res = flag_setter(res % (spindle or 1));
-                break;
-            case 4:
-                res = spindle;
-                break;
-            case 5:
-                std::swap(funcs[arg], funcs[res]);
-                std::swap(func_name[arg], func_name[res]);
-                break;
-            }
-            transposus.push_back(res);
-            grow_ind = 0;
+        case 0:
+            res = ctx->flag_setter(res + spindle) % 10;
+            break;
+        case 1:
+            res = abs(ctx->flag_setter(res - spindle)) % 10;
+            break;
+        case 2:
+            res = ctx->flag_setter(res * spindle) % 10;
+            break;
+        case 3:
+            res = ctx->flag_setter(res % (spindle or 1));
+            break;
+        case 4:
+            res = spindle;
+            break;
+        case 5:
+            op_func temp = ctx->funcs[arg];
+            ctx->funcs[arg] = ctx->funcs[res];
+            ctx->funcs[res] = temp;
+            std::swap(ctx->func_name[arg], ctx->func_name[res]);
+            break;
         }
-        else
-        {
-            grow_ind++;
-            stack.push(arg);
-        }
-    };
-    std::function<void(int)> inp = [&](int arg) -> void
+        ctx->transposus.push_back(res);
+        ctx->grow_ind = 0;
+    }
+    else
     {
-        arg = abs(arg);
-        if (!input.empty())
-        {
-            MEMORY[arg] = input.back();
-            input.pop_back();
-        }
-        else
-        {
-            MEMORY[arg] = std::cin.get();
-        }
-    };
-    std::function<void(int)> jmpm = [&](int arg) -> void
+        ctx->grow_ind++;
+        ctx->stack.push(arg);
+    }
+};
+void inp(Ctx *ctx, int arg)
+{
+    arg = abs(arg);
+    if (!ctx->input.empty())
     {
-        arg = abs(arg);
-        if (jmpm_ind)
-        {
-            bool result = false;
-            switch (stack.at(jmpm_offset))
-            {
-            case 0: // equal
-                result = zf;
-                break;
-            case 1: // not equal
-                result = !zf;
-                break;
-            case 2: // smaller
-                result = sf;
-                break;
-            case 3: // bigger-or-equal
-                result = !sf;
-                break;
-            case 4: // smaller-or-equal
-                result = sf || zf;
-                break;
-            case 5:
-                result = !(sf || zf);
-                break;
-            case 6:
-                result = true;
-                break;
-            case 7:
-                result = cf;
-                break;
-            };
-            if (result)
-            {
-                if (pointer + MEMORY[arg] < 0)
-                {
-                    return;
-                }
-                pointer += MEMORY[arg];
-            }
-            jmpm_ind = 0;
-        }
-        else
-        {
-            stack.push(arg);
-            jmpm_ind++;
-        }
-    };
-    std::function<void(int)> revf = [&](int arg) -> void
+        ctx->MEMORY[arg] = ctx->input.back();
+        ctx->input.pop_back();
+    }
+    else
     {
-        arg = -arg;
-        if (arg == 0)
+        ctx->MEMORY[arg] = std::cin.get();
+    }
+};
+void jmpm(Ctx *ctx, int arg)
+{
+    arg = abs(arg);
+    if (ctx->jmpm_ind)
+    {
+        bool result = false;
+        switch (ctx->stack.at(jmpm_offset))
         {
-            zf = !zf;
-        }
-        else if (arg == 1)
+        case 0: // equal
+            result = ctx->zf;
+            break;
+        case 1: // not equal
+            result = !ctx->zf;
+            break;
+        case 2: // smaller
+            result = ctx->sf;
+            break;
+        case 3: // bigger-or-equal
+            result = !ctx->sf;
+            break;
+        case 4: // smaller-or-equal
+            result = ctx->sf || ctx->zf;
+            break;
+        case 5:
+            result = !(ctx->sf || ctx->zf);
+            break;
+        case 6:
+            result = true;
+            break;
+        case 7:
+            result = ctx->cf;
+            break;
+        };
+        if (result && ctx->pointer + ctx->MEMORY[arg] > 0)
         {
-            sf = !sf;
+            ctx->pointer += ctx->MEMORY[arg];
         }
-        else if (arg == 2)
-        {
-            cf = !cf;
-        }
-    };
-    funcs = {&read, &add, &set, &push, &print, &swap, &grow, &inp, &jmpm, &revf};
+        ctx->jmpm_ind = 0;
+    }
+    else
+    {
+        ctx->stack.push(arg);
+        ctx->jmpm_ind++;
+    }
+};
+void revf(Ctx *ctx, int arg)
+{
+    arg = -arg;
+    if (arg == 0)
+    {
+        ctx->zf = !ctx->zf;
+    }
+    else if (arg == 1)
+    {
+        ctx->sf = !ctx->sf;
+    }
+    else if (arg == 2)
+    {
+        ctx->cf = !ctx->cf;
+    }
+};
+inline int (&run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)) [MEMORY_SIZE]
+{
+    Ctx ctx;
+    ctx.length = data.size();
+    ctx.transposus.reserve(1024);
+    std::memcpy(ctx.MEMORY, PERSISTENT_MEMORY, sizeof(PERSISTENT_MEMORY));
+    ctx.input = std::move(input);
     char chr;
     short last = -1;
     TermiosRaw raw;
-    while (pointer < length || !transposus.empty())
+    while (ctx.pointer < ctx.length || !ctx.transposus.empty())
     {
         int chr_int;
-        if (transposus.empty())
+        if (ctx.transposus.empty())
         {
-            chr = data[pointer++];
+            chr = data[ctx.pointer++];
             if (chr >= '0' + MEMORY_SIZE or chr < '0')
             {
                 continue;
@@ -248,15 +268,15 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
         }
         else
         {
-            chr_int = transposus.back();
-            transposus.pop_back();
+            chr_int = ctx.transposus.back();
+            ctx.transposus.pop_back();
         }
         assert((chr_int < 0 || chr > 9) && "Error occurred when executing given code, found chr_int too big");
         if (debug)
         {
             std::cout << separator;
             std::cout << "MEMORY\n| ";
-            for (const int &cell : MEMORY)
+            for (const int &cell : ctx.MEMORY)
             {
                 std::cout << cell << " | ";
             }
@@ -264,7 +284,7 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
             std::cout << separator;
             std::cout << "FUNC_MEMORY\n| ";
             int t = 0;
-            for (const std::string &name : func_name)
+            for (const std::string &name : ctx.func_name)
             {
                 if (t == chr_int)
                 {
@@ -283,13 +303,13 @@ inline int (&run(const std::string &data, const bool debug, std::string input = 
         }
         if (last > -1)
         {
-            (*funcs.at(chr_int))(last - chr_int);
+            ctx.funcs[chr_int](&ctx, last - chr_int);
         }
         else
         {
-            (*funcs.at(chr_int))(chr_int);
+            ctx.funcs[chr_int](&ctx, chr_int);
         }
         last = chr_int;
     }
-    return MEMORY;
+    return ctx.MEMORY;
 };
