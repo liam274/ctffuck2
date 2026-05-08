@@ -74,6 +74,43 @@ struct Ctx
     };
 };
 
+inline void print_debug(Ctx *ctx, int chr_int, int last)
+{
+    std::cout << separator;
+    std::cout << "STACK\n| ";
+    for (int i = 0; i < total_length; i++)
+    {
+        std::cout << ctx->stack.true_at(i) << " | ";
+    }
+    std::cout << '\n';
+    std::cout << separator;
+    std::cout << "MEMORY\n| ";
+    for (const int &cell : ctx->MEMORY)
+    {
+        std::cout << cell << " | ";
+    }
+    std::cout << '\n';
+    std::cout << separator;
+    std::cout << "FUNC_MEMORY\n| ";
+    int t = 0;
+    for (const std::string &name : ctx->func_name)
+    {
+        if (t == chr_int)
+        {
+            std::cout << "> ";
+        }
+        std::cout << name << " | ";
+        t++;
+    }
+    std::cout << '\n';
+    std::cout << separator;
+    std::cout << "last: " << last << "; arg: "
+              << (last > -1 ? last - chr_int : chr_int) << '\n';
+    std::cout << separator;
+    std::cout << '\n';
+    std::cout << std::flush;
+}
+
 inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)
 {
     Ctx ctx;
@@ -85,9 +122,9 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
     char chr;
     short last = -1;
     TermiosRaw raw;
+    int chr_int;
     while (ctx.pointer < ctx.length || !ctx.transposus.empty())
     {
-        int chr_int;
         if (ctx.transposus.empty())
         {
             chr = data[ctx.pointer++];
@@ -102,35 +139,9 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
             chr_int = ctx.transposus.back();
             ctx.transposus.pop_back();
         }
-        assert((chr_int < 0 || chr > 9) && "Error occurred when executing given code, found chr_int too big");
         if (debug)
         {
-            std::cout << separator;
-            std::cout << "MEMORY\n| ";
-            for (const int &cell : ctx.MEMORY)
-            {
-                std::cout << cell << " | ";
-            }
-            std::cout << '\n';
-            std::cout << separator;
-            std::cout << "FUNC_MEMORY\n| ";
-            int t = 0;
-            for (const std::string &name : ctx.func_name)
-            {
-                if (t == chr_int)
-                {
-                    std::cout << "> ";
-                }
-                std::cout << name << " | ";
-                t++;
-            }
-            std::cout << '\n';
-            std::cout << separator;
-            std::cout << "last: " << last << "; arg: "
-                      << (last > -1 ? last - chr_int : chr_int) << '\n';
-            std::cout << separator;
-            std::cout << '\n';
-            std::cout << std::flush;
+            print_debug(&ctx, chr_int, last);
         }
         if (last > -1)
         {
@@ -141,6 +152,10 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
             ctx.funcs[chr_int](&ctx, chr_int);
         }
         last = chr_int;
+    }
+    if (debug)
+    {
+        print_debug(&ctx, chr_int, last);
     }
     return ctx.MEMORY;
 }

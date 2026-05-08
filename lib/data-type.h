@@ -41,5 +41,14 @@ namespace data_type
             }
             return data[ind];
         }
+        const T &true_at(int ind) const
+        {
+            if (ind >= max_size)
+            {
+                std::cerr << "Error occurred when trying to access index " << ind << " out of range " << max_size << std::endl;
+                throw std::runtime_error("Index out of range");
+            }
+            return data[ind];
+        }
     };
 }
