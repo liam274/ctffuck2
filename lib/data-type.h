@@ -21,11 +21,11 @@ namespace data_type
         }
         void push(const T &value)
         {
-            data[head_pointer++] = value;
-            if (head_pointer == max_size)
+            if (++head_pointer == max_size)
             {
                 head_pointer = 0;
             }
+            data[head_pointer] = value;
         }
         const T &at(int ind) const
         {

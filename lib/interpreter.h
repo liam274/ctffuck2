@@ -2,13 +2,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <unordered_map>
 #include <array>
-#include <functional>
 #include <algorithm>
-#include <deque>
 #include <cassert>
-#include <cstring>
 #include "data-type.h"
 #include "algorithm.h"
 
