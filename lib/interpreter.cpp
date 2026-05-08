@@ -29,7 +29,9 @@ void add(Ctx *ctx, int arg)
 void set(Ctx *ctx, int arg)
 {
     arg = abs(arg);
-    ctx->MEMORY[arg] = ctx->flag_setter(0);
+    ctx->MEMORY[arg] = 0;
+    ctx->sf = false;
+    ctx->zf = true;
 };
 void push(Ctx *ctx, int arg)
 {

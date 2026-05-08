@@ -37,14 +37,16 @@ Repeat `34` stack_length times, and add `3`. For example: `34343434343`
 
 ## Module Standard Format
 
-Module caller shall set the [CF](#cf---control-flag) on before calling, while the module itself shell set [CF](#cf---control-flag) off when it's done.
-Thus, modules' caller and themselves, shall use CF-based jumping conditions.
+1. Module caller shall set the [CF](#cf---control-flag) on before calling, while the module itself shell set [CF](#cf---control-flag) off when it's done.
+   Thus, modules' caller and themselves, shall use CF-based jumping conditions.
 
-```ctffuck2
-79; This shall reverse the value of CF.
-```
+    ```ctffuck2
+    79; This shall reverse the value of CF.
+    ```
 
-Module callers must ensure the stack is sanitized on calling, to ensure the module works just as expected.
+2. Module callers must ensure the stack is sanitized on calling, to ensure the module works just as expected.
+
+3. Module must ensure ZF=0,SF=0,CF=0,\_IF=1,OF=1 when returning, and module should expect that, too.
 
 ## Memory Protocol
 
