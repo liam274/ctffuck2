@@ -58,7 +58,8 @@ struct Ctx
     short read_ind = 0, add_ind = 0, swap_ind = 0,
           grow_ind = 0, jmpm_ind = 0;
     data_type::fix_queue<int> stack;
-    std::vector<int> transposus;
+    int transposus;
+    bool transposus_ok = false;
     int pointer = 0;
     int length;
     std::string input;
@@ -110,21 +111,20 @@ inline void print_debug(Ctx *ctx, int chr_int, int last)
     std::cout << std::flush;
 }
 
-inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug, std::string input = "", int smallest_size = 1024)
+inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug, std::string input = "")
 {
     Ctx ctx;
     ctx.stack.set_size(total_length);
     ctx.length = data.size();
-    ctx.transposus.reserve(smallest_size);
     ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
     char chr;
     short last = -1;
     TermiosRaw raw;
     int chr_int;
-    while (ctx.pointer < ctx.length || !ctx.transposus.empty())
+    while (ctx.pointer < ctx.length || !ctx.transposus_ok)
     {
-        if (ctx.transposus.empty())
+        if (!ctx.transposus_ok)
         {
             chr = data[ctx.pointer++];
             if (chr >= '0' + MEMORY_SIZE or chr < '0')
@@ -135,8 +135,8 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
         }
         else
         {
-            chr_int = ctx.transposus.back();
-            ctx.transposus.pop_back();
+            chr_int = ctx.transposus;
+            ctx.transposus_ok = false;
         }
         if (debug)
         {
