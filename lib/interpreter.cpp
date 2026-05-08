@@ -79,9 +79,10 @@ void grow(Ctx *ctx, int arg)
             res = ctx->flag_setter(res % (spindle ? spindle : 1));
             break;
         case 4:
-            res = spindle;
+            res = spindle % 10;
             break;
         case 5:
+            res = abs(res % 10);
             op_func temp = ctx->funcs[arg];
             ctx->funcs[arg] = ctx->funcs[res];
             ctx->funcs[res] = temp;
@@ -108,7 +109,7 @@ void inp(Ctx *ctx, int arg)
     else
     {
         ctx->MEMORY[arg] = std::cin.get();
-        std::cout << ctx->MEMORY[arg];
+        std::cout << (char)ctx->MEMORY[arg];
     }
 };
 void jmpm(Ctx *ctx, int arg)
