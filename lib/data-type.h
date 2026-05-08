@@ -50,5 +50,9 @@ namespace data_type
             }
             return data[ind];
         }
+        const int heap() const
+        {
+            return head_pointer;
+        }
     };
 }

@@ -78,8 +78,13 @@ inline void print_debug(Ctx *ctx, int chr_int, int last)
 {
     std::cout << separator;
     std::cout << "STACK\n| ";
+    int p = ctx->stack.heap();
     for (int i = 0; i < total_length; i++)
     {
+        if (i == p)
+        {
+            std::cout << "*";
+        }
         std::cout << ctx->stack.true_at(i) << " | ";
     }
     std::cout << '\n';
