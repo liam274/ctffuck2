@@ -4,7 +4,6 @@
 #include <string>
 #include <array>
 #include <algorithm>
-#include <cassert>
 #include "data-type.h"
 #include "algorithm.h"
 
