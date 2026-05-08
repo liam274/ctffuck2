@@ -11,7 +11,6 @@ private:
 public:
     TermiosRaw(int fd = STDIN_FILENO) : fd_(fd)
     {
-        // 获取当前设置
         tcgetattr(fd_, &orig_);
         struct termios raw = orig_;
         raw.c_lflag &= ~(ICANON | ECHO);
