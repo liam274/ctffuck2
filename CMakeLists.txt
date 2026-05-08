@@ -10,7 +10,7 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(ctffuck2-hardcore 
+add_executable(ctffuck2 
     main.cpp 
     lib/algorithm.cpp 
     lib/argument-parse.cpp 
@@ -20,13 +20,13 @@ add_executable(ctffuck2-hardcore
 
 # ---------- Optimization Settings ----------
 # Enable link-time optimisation (works with GCC, Clang, MSVC)
-set_target_properties(ctffuck2-hardcore PROPERTIES
+set_target_properties(ctffuck2 PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION TRUE
 )
 
 # Add aggressive optimisation flags for the Release build (Unix-like)
 if(NOT MSVC)
-    target_compile_options(ctffuck2-hardcore PRIVATE
+    target_compile_options(ctffuck2 PRIVATE
         $<$<CONFIG:Release>:-O3 -march=native -DNDEBUG>
     )
 endif()

@@ -1,124 +1,126 @@
-# CTFFUCK2
+# CTFFuck2
 
-This is a very crazy language, a brain-teasing esoteric programming language interpreter written in Python. ctffuck2 is designed to challenge programmers with its unconventional syntax and stack-based architecture. If you are not a baby, check [this](docs/hardcore.md) out.
+Welcome to the abyss.
 
-## Overview
+## Table of Contents
 
-ctffuck2 is a minimalistic yet powerful esolang that operates on:
+- [What is this?](#what-is-this)
+- [Key differences from the Python version](#key-differences-from-the-python-version)
+- [The Core Mechanic: Global Shared Ring Buffer](#the-core-mechanic-global-shared-ring-buffer)
+- [Instruction Behavior (Hardcore Edition)](#instruction-behavior-hardcore-edition)
+- [The `push` instruction: instant injection](#the-push-instruction-instant-injection)
+- [The `grow` instruction: transposon](#the-grow-instruction-transposon)
+- [Building and Running](#building-and-running)
+- [The Philosophy of Hardcore](#the-philosophy-of-hardcore)
+- [Credits](#credits)
 
-- 10 memory cells (DATA_MEMORY) for integer storage
-- Two status flags: Zero Flag (ZF) and Sign Flag (SF)
-- Multiple operation stacks for managing instruction state
-- Conditional jumps based on flag states
-- The language uses a unique execution model where consecutive digits in the source file determine operations and their operands through subtraction logic.
+## Table of Technical Contents
 
-## Features
+- [Application CTFFuck2 Interface(Kind of ABI)](docs/ACI.md)
 
-10 Core Operations:
+---
 
-- `read` - Read from memory
-- `add` - Increment memory values
-- `set` - Reset memory cells to zero
-- `push` - Push values onto operation stacks
-- `print` - Output characters to console
-- `swap` - Exchange values between memory cells
-- `grow` - Modify the code itself
-- `inp` - Read character input from console
-- `jmpm` - Conditional jumps based on flag states
-- `revf` - Toggle ZF or SF flags
+## What is this?
 
-### Flag System
+This is **CTFFuck2**. It's a surgical reconstruction of
+the language's soul, built to weaponize
+_deterministic chaos_ against anyone foolish enough to try writing a working program.
 
-Zero Flag (ZF): Set when data equals 0
-Sign Flag (SF): Set when data is negative
-Conditional jumps support 6 comparison modes (=, ≠, <, ≥, ≤, >)
-Dual Output Streams: Supports both stdout and stderr
+The original CTFFuck2 already turned programming into a sparse constraint-solving nightmare.
+Hardcore pushes that nightmare into a new dimension: **global state coupling via a shared
+ring buffer and path-dependent operand resolution.**
 
-## Installation for Babyish Version
+There is no randomness. No encryption. Just a handful of rules and a **mandatory
+full-history integration** over every parameter ever pushed.
 
-If you're not a baby, check [this](docs/hardcore.md) out!
+---
 
-### Requirements
+## The Core Mechanic: Global Shared Ring Buffer
 
-- Python 3.8+
-- getch library (`pip install getch`)
+All instructions' temporary arguments live in a single `fix_queue` with a global `head_pointer`.
+Every time any instruction calls `stack.push(value)`, the head advances by **1** and the value is
+written at the previous head position. When an instruction later needs its saved argument, it
+reads via `stack.at(offset)` — where `offset` is a **compile-time constant** indicating how many
+steps back in the buffer the value should be.
 
-### Setup
+Because the head keeps moving, the same `offset` might point to completely different memory
+depending on _when_ the read occurs. This means:
 
-```sh
-git clone https://github.com/liam274/ctffuck2.git
-cd ctffuck2
-pip install -r requirements.txt
+- You cannot statically determine what operand an instruction will receive.
+- You must **integrate** every push that happened between the write and the read.
+- Even instructions that "finished" their pairing leave residues that can be accidentally
+  consumed by a mistimed `at()`.
+
+---
+
+## Instruction Behavior
+
+| Opcode | Name    | Stack length | Notes                                                                |
+| ------ | ------- | ------------ | -------------------------------------------------------------------- |
+| 0      | `read`  | 1            | First call pushes address, second call reads memory.                 |
+| 1      | `add`   | 1            | First call pushes address, second call adds to memory.               |
+| 2      | `set`   | 0            | Zeros a memory cell.                                                 |
+| 3      | `push`  | 0            | Pushes a value **directly into the shared buffer** (no indirection). |
+| 4      | `print` | 0            | Prints the character at the given memory address.                    |
+| 5      | `swap`  | 1            | Two-step pairing to swap memory contents.                            |
+| 6      | `grow`  | 1            | **Transposon.** Generates new instructions and injects them.         |
+| 7      | `inp`   | 0            | Reads one character from stdin into a memory cell.                   |
+| 8      | `jmpm`  | 1            | Conditional jump based on flags.                                     |
+| 9      | `revf`  | 0            | Flips zero flag, sign flag or control flag.                          |
+
+The stack length indicates how many values the instruction will push into the global buffer
+during a single complete operation. Those values will be read back later using `at(offset)` where
+the offset equals the instruction’s starting offset plus its stack depth minus 1… unless
+the head has been moved by other instructions.
+
+---
+
+## The `push` instruction: instant injection
+
+`push` no longer has its own stack. It writes directly to the global buffer at the current head
+and advances the head. The next instruction that reads from the buffer _will_ consume that value
+if its `at(offset)` happens to land on it — but only if the offset and head align correctly.
+This makes `push` an art form of aligning the head position so the injected value reaches
+the right consumer.
+
+---
+
+## The `grow` instruction: transposon
+
+`grow` still takes three parameters (spindle, method, argument) and can produce new digits
+that are pushed into a _vector_ (`transposus`) which then get executed as if they were part of
+the original program. Methods 0–4 compute a new digit from the current memory state; method 5
+swaps function pointers in the opcode table.
+
+The Python version’s random noise is **completely removed.** Every `grow` outcome is now a
+deterministic consequence of the current state and the instruction’s arguments. This makes
+the language **fully deterministic** — yet whose behavior remains fundamentally unpredictable
+without executing it.
+
+---
+
+## Building and Running
+
+You need a C++17 compiler (for `std::filesystem` and lambdas) and a Unix-like environment
+(the terminal raw mode uses `termios.h`).
+
+```bash
+./ctffuck2 -f program.ctf # if you have the executable
 ```
 
-## Usage
+### Flags:
 
-Run a ctffuck2 program:
+- `-f`, `--file` : Path to the program file (a string of digits, other characters ignored).
+- `--debug` : (Currently a no-op; debugging is done by staring into the void.)
 
-`python baby-ctffuck2.py --file program.ctf`<br />
-or
-`python baby-ctffuck2.py -f program.ctf`<br />
+---
 
-## Language Specification
+## Credits
 
-### Memory Model
+The CTFFuck2 was created for
+whom equations are the only
+language worth speaking.
 
-- DATA_MEMORY: Array of 10 integers (indices 0-9)
-- All memory accesses are modulo 10
-- Flags are automatically updated after operations
-
-### Execution Flow
-
-The interpreter reads the source file character by character:
-
-1. Non-digit characters are ignored
-2. Consecutive digits determine operations:
-    - First digit selects the operation
-    - Subsequent digits provide operands via subtraction logic
-
-3. Operation stacks manage multi-step instructions
-
-### Jump Modes (jmpm)
-
-| Mode | Condition | Description         |
-| ---- | --------- | ------------------- |
-| 0    | ZF        | Jump if equal       |
-| 1    | !ZF       | Jump if not equal   |
-| 2    | SF        | Jump if smaller     |
-| 3    | !SF       | Jump if bigger      |
-| 4    | ZF ∨ SF   | Jump if ≤           |
-| 5    | ZF ∨ !SF  | Jump if ≥           |
-| 6    | True      | Jump no matter what |
-
-## Development
-
-## Adding New Operations
-
-1. Define a new function in the global scope
-2. Add it to ACTION_MEMORY list
-3. Update STACK dictionary with a new key
-4. Ensure proper integration with the execution loop
-
-## Testing
-
-Create test files in .ctf format and verify output:
-
-`python baby-ctffuck2.py -f tests/test_basic.ctf`
-
-## Contributing
-
-Contributions are welcome! Please:
-
-- Fork the repository
-- Create a feature branch
-- Submit a pull request with clear descriptions
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-Inspired by other esoteric languages like Brainfuck and Whitespace, ctffuck2 pushes the boundaries of minimalistic programming paradigms.
-
-Note: This is an esoteric language primarily intended for educational purposes and CTF challenges. Production use is not recommended.
+Go stare into the abyss. The abyss will not stare back
+— it will just make you solve
+for its head pointer.

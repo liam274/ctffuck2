@@ -46,7 +46,8 @@ Repeat `34` stack_length times, and add `3`. For example: `34343434343`
 
 2. Module callers must ensure the stack is sanitized on calling, to ensure the module works just as expected.
 
-3. Module must ensure ZF=0,SF=0,CF=0,\_IF=1,OF=1 when returning, and module should expect that, too.
+3. Module must ensure [ZF](#zf---zero-flag)=0,[SF](#sf---sign-flag)=0,[CF](#cf---control-flag)=0,
+   [\_IF](#_if---input-flag)=1,[OF](#of---output-flag)=1 when returning, and module should expect that, too.
 
 ## Memory Protocol
 
@@ -70,8 +71,28 @@ These points' value will **NOT** be preserved, module callers should expect. Thu
 These points' value **WILL** be preserved, module callers will expect. Thus, any module follows ACI must
 ensure that on return, these values are as what they are at the beginning.
 
-## CF - Control Flag
+## Flags
+
+### ZF - Zero Flag
+
+This flag will be set when the value calculated is zero.
+
+### SF - Sign Flag
+
+This flag will be set when the value's highest bit is set.
+
+### CF - Control Flag
 
 Control flag is a flag, which can be set by `revf(2)`. It doesn't have an official usage,
 so you may use it in whatever way you'd like to. But in this ACI, we **STRONGLY** suggested
 you to use it for controlling execution flow. _Please note that when the program begins, CF=false_
+
+### \_IF - Input Flag
+
+Input flag is a flag, which can be set by `revf(3)`. This flag will disable the input command
+(though you may still call it.)
+
+### OF - Output Flag
+
+Output flag is a flag, which can be set by `revf(4)`. THis flag will disable the output command
+(though you may still call it.)
