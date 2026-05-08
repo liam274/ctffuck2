@@ -10,8 +10,7 @@ import os
 import re
 import statistics
 
-HARDCORE_BIN = "./executable/ctffuck2-hardcore"
-BABY_SCRIPT = "baby-ctffuck2.py"
+HARDCORE_BIN = "./executable/ctffuck2"
 INSTRUCTIONS = 10_000_000  # digits in the test program
 
 
@@ -81,9 +80,6 @@ def main():
     if not os.path.isfile(HARDCORE_BIN):
         print(f"Error: Hardcore binary not found at '{HARDCORE_BIN}'.")
         sys.exit(1)
-    if not os.path.isfile(BABY_SCRIPT):
-        print(f"Error: Baby script not found at '{BABY_SCRIPT}'.")
-        sys.exit(1)
 
     if subprocess.run(["which", "perf"], capture_output=True).returncode != 0:
         print("Error: 'perf' not found. Install it (e.g., sudo pacman -S perf).")
@@ -93,37 +89,23 @@ def main():
 
     print("\n=========== Benchmarks (perf stat) ===========")
     hardcore_cmd = [HARDCORE_BIN, "-f", test_file]
-    baby_cmd = ["python3", BABY_SCRIPT, "-f", test_file]
 
     print("\nHardcore (C++)")
     h_cycles, h_ins, h_time = run_perf(hardcore_cmd, "Hardcore", runs=3)
-
-    print("\nBaby (Python)")
-    b_cycles, b_ins, b_time = run_perf(baby_cmd, "Baby", runs=3)
 
     print("\n==================================================")
     print(f"Results for {INSTRUCTIONS:,} instructions (digits)")
     print(
         f"Hardcore (C++) :  {h_cycles:>15,} cycles, {h_ins:>15,} CPU instructions, {h_time:.3f} s"
     )
-    print(
-        f"Baby (Python)  :  {b_cycles:>15,} cycles, {b_ins:>15,} CPU instructions, {b_time:.3f} s"
-    )
 
     h_cyc_per_digit = h_cycles / INSTRUCTIONS
-    b_cyc_per_digit = b_cycles / INSTRUCTIONS
     h_ins_per_digit = h_ins / INSTRUCTIONS
-    b_ins_per_digit = b_ins / INSTRUCTIONS
 
     print(f"\nPer CTFFuck2 digit:")
     print(
         f"Hardcore :  {h_cyc_per_digit:7.2f} cycles, {h_ins_per_digit:7.2f} CPU instructions"
     )
-    print(
-        f"Baby     :  {b_cyc_per_digit:7.2f} cycles, {b_ins_per_digit:7.2f} CPU instructions"
-    )
-    print(f"Speedup (cycles) : {b_cycles/h_cycles:.1f}x")
-    print(f"Speedup (time)   : {b_time/h_time:.1f}x")
 
     os.remove(test_file)
 
