@@ -122,7 +122,7 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
     short last = -1;
     TermiosRaw raw;
     int chr_int;
-    while (ctx.pointer < ctx.length || !ctx.transposus_ok)
+    while (ctx.pointer < ctx.length || ctx.transposus_ok)
     {
         if (!ctx.transposus_ok)
         {
