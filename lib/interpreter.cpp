@@ -38,6 +38,10 @@ void push(Ctx *ctx, int arg)
 };
 void print(Ctx *ctx, int arg)
 {
+    if (!ctx->of)
+    {
+        return;
+    }
     arg = abs(arg);
     std::cout << (char)(ctx->MEMORY[arg]);
 };
@@ -100,6 +104,10 @@ void grow(Ctx *ctx, int arg)
 };
 void inp(Ctx *ctx, int arg)
 {
+    if (!ctx->_if)
+    {
+        return;
+    }
     arg = abs(arg);
     if (!ctx->input.empty())
     {
@@ -160,16 +168,22 @@ void jmpm(Ctx *ctx, int arg)
 void revf(Ctx *ctx, int arg)
 {
     arg = -arg;
-    if (arg == 0)
+    switch (arg)
     {
+    case 0:
         ctx->zf = !ctx->zf;
-    }
-    else if (arg == 1)
-    {
+        break;
+    case 1:
         ctx->sf = !ctx->sf;
-    }
-    else if (arg == 2)
-    {
+        break;
+    case 2:
         ctx->cf = !ctx->cf;
-    }
+        break;
+    case 3:
+        ctx->_if = !ctx->_if;
+        break;
+    case 4:
+        ctx->of = !ctx->of;
+        break;
+    };
 };

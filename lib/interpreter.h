@@ -53,7 +53,9 @@ struct Ctx
     std::array<int, MEMORY_SIZE> MEMORY;
     bool zf = false, // zero flag
         sf = false,  // signed flag
-        cf = false;  // control flag
+        cf = false,  // control flag
+        _if = true,  // input flag
+        of = true;   // output flag
     short read_ind = 0, add_ind = 0, swap_ind = 0,
           grow_ind = 0, jmpm_ind = 0;
     data_type::fix_queue<int> stack;
@@ -141,4 +143,4 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
         last = chr_int;
     }
     return ctx.MEMORY;
-};
+}
