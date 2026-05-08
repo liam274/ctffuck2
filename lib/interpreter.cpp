@@ -76,7 +76,7 @@ void grow(Ctx *ctx, int arg)
             res = ctx->flag_setter(res * spindle) % 10;
             break;
         case 3:
-            res = ctx->flag_setter(res % (spindle or 1));
+            res = ctx->flag_setter(res % (spindle ? spindle : 1));
             break;
         case 4:
             res = spindle;
@@ -144,7 +144,7 @@ void jmpm(Ctx *ctx, int arg)
             result = ctx->cf;
             break;
         };
-        if (result && ctx->pointer + ctx->MEMORY[arg] > 0)
+        if (result && ctx->pointer + ctx->MEMORY[arg] >= 0)
         {
             ctx->pointer += ctx->MEMORY[arg];
         }

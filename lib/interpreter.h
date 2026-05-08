@@ -81,7 +81,7 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
     Ctx ctx;
     ctx.stack.set_size(total_length);
     ctx.length = data.size();
-    ctx.transposus.reserve(1024);
+    ctx.transposus.reserve(smallest_size);
     ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
     char chr;
