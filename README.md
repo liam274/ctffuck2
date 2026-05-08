@@ -5,9 +5,8 @@ Welcome to the abyss.
 ## Table of Contents
 
 - [What is this?](#what-is-this)
-- [Key differences from the Python version](#key-differences-from-the-python-version)
 - [The Core Mechanic: Global Shared Ring Buffer](#the-core-mechanic-global-shared-ring-buffer)
-- [Instruction Behavior (Hardcore Edition)](#instruction-behavior-hardcore-edition)
+- [Instruction Behavior](#instruction-behavior)
 - [The `push` instruction: instant injection](#the-push-instruction-instant-injection)
 - [The `grow` instruction: transposon](#the-grow-instruction-transposon)
 - [Building and Running](#building-and-running)
