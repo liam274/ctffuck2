@@ -43,7 +43,10 @@ void print(Ctx *ctx, int arg)
         return;
     }
     arg = abs(arg);
-    std::cout << (char)(ctx->MEMORY[arg]);
+    if (ctx->MEMORY[arg]) // never print null
+    {
+        std::cout << (char)(ctx->MEMORY[arg]);
+    }
 };
 void swap(Ctx *ctx, int arg)
 {
