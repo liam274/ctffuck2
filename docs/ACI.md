@@ -3,7 +3,7 @@
 ## Table of Contents
 
 - [Terms of Art](#terms-of-art)
-- [Sanitize Query](#sanitize-query)
+- [Specific Query](#specific-query)
 - [Module Standard Format](#module-standard-format)
 - [Memory Protocol](#memory-protocol)
 - [Terminologies](#terminologies)
@@ -15,11 +15,24 @@
 | `stack`  | In CTFFuck2 series, commands which receive multiple arguments will push its argument received(If the number is not enough, yet). Note that all the commands share a same cyclical buffer, in Hardcore. And thus, `stack.at(0)` points to the newest value, while `stack.at(-1)` points to the oldest value pushed. |
 | `memory` | In CTFFuck2 series, commands share a `int[10]` array, as memory                                                                                                                                                                                                                                                    |
 
-## Sanitize Query
+## Specific Query
 
-This query will sanitize the entire stack
+### Index
+
+| query                       | function              |
+| --------------------------- | --------------------- |
+| [Sanitize](#sanitize-query) | Sanitize the stack    |
+| [Set](#set-query)           | Set stack to all ones |
+
+### Sanitize Query
+
+This query will sanitize the entire stack.
 
 Repeat `3` stack_length+1 times. For example: `333333`
+
+### Set Query
+
+Repeat `34` stack_length times, and add `3`. For example: `34343434343`
 
 ## Module Standard Format
 
