@@ -47,7 +47,7 @@ void print(Ctx *ctx, int arg)
     arg = abs(arg);
     if (ctx->MEMORY[arg]) // never print null
     {
-        std::cout << (char)(ctx->MEMORY[arg]);
+        putchar(ctx->MEMORY[arg]);
     }
 };
 void swap(Ctx *ctx, int arg)
@@ -122,7 +122,7 @@ void inp(Ctx *ctx, int arg)
     }
     else
     {
-        int temp = std::cin.get();
+        int temp = getchar();
         if (temp == EOF)
         {
             ctx->MEMORY[arg] = -1;
@@ -130,7 +130,7 @@ void inp(Ctx *ctx, int arg)
         else
         {
             ctx->MEMORY[arg] = temp;
-            std::cout << (char)temp;
+            putchar(temp);
         }
     }
 };
