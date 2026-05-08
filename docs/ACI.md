@@ -10,10 +10,11 @@
 
 ## Terms of Art
 
-| name     | definition                                                                                                                                                                                                                                                                                                         |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `stack`  | In CTFFuck2 series, commands which receive multiple arguments will push its argument received(If the number is not enough, yet). Note that all the commands share a same cyclical buffer, in Hardcore. And thus, `stack.at(0)` points to the newest value, while `stack.at(-1)` points to the oldest value pushed. |
-| `memory` | In CTFFuck2 series, commands share a `int[10]` array, as memory                                                                                                                                                                                                                                                    |
+| name        | definition                                                                                                                                                                                                                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `stack`     | In CTFFuck2 series, commands which receive multiple arguments will push its argument received(If the number is not enough, yet). Note that all the commands share a same cyclical buffer, in Hardcore. And thus, `stack.at(0)` points to the newest value, while `stack.at(-1)` points to the oldest value pushed. |
+| `memory`    | In CTFFuck2 series, commands share a `int[10]` array, as memory                                                                                                                                                                                                                                                    |
+| stack cycle | A stack cycle, means the head pointer runs around the stack one time                                                                                                                                                                                                                                               |
 
 ## Specific Query
 
