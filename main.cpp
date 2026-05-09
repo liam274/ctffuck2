@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 int main(int argc, char *argv[])
 {
     argv_verify verify("CTFFuck2");
-    verify.append("-f", "--file", "The program file", "", {"-r"});
+    verify.append("-f", "--file", "The program file", "stdin", {"-r"});
     verify.append("--debug", "--debug", "Trigger debug mode", "false");
     verify.append("-r", "--run", "Run an execution to the given code", "", {"-f"});
     std::unordered_map<std::string, std::string> args = verify.verify(argv, argc);
