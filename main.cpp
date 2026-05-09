@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     {
         debug = true;
     }
-    if (args.at("-r").size())
+    if (verify.has("-r"))
     {
         run(args.at("-r"), debug);
     }
