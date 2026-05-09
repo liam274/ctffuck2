@@ -100,11 +100,23 @@ without executing it.
 
 ## Building and Running
 
-You need a C++17 compiler (for `std::filesystem` and lambdas) and a Unix-like environment
+### Build from source code
+
+If you want to build from source code, you need a C++17 compiler (for `std::filesystem` and lambdas) and a Unix-like environment
 (the terminal raw mode uses `termios.h`).
 
+### Run the binary
+
+If you just want to execute from the binary
+
 ```bash
-./ctffuck2 -f program.ctf # if you have the executable
+./ctffuck2 -f program.ctf # execute from file
+```
+
+or
+
+```bash
+./ctffuck2 -r "8754" # execute immediately
 ```
 
 ### Flags:
