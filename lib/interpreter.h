@@ -57,7 +57,7 @@ struct Ctx
         of = true;   // output flag
     short read_ind = 0, add_ind = 0, swap_ind = 0,
           grow_ind = 0, jmpm_ind = 0;
-    data_type::fix_queue<int, MEMORY_SIZE> stack;
+    data_type::fix_queue<int, total_length> stack;
     int transposus;
     bool transposus_ok = false;
     int pointer = 0;
