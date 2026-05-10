@@ -20,7 +20,7 @@ def generate_test_file(filename, num_instr):
         f.write("2" * num_instr)
 
 
-def run_perf(cmd, description, runs=3):
+def run_perf(cmd, description, runs=100):
     """
     Run cmd under 'perf stat -e cycles,instructions'.
     Parse output that may contain per-core-type lines (e.g. cpu_atom/cycles/u).
@@ -91,7 +91,7 @@ def main():
     hardcore_cmd = [HARDCORE_BIN, "-f", test_file]
 
     print("\nHardcore (C++)")
-    h_cycles, h_ins, h_time = run_perf(hardcore_cmd, "Hardcore", runs=3)
+    h_cycles, h_ins, h_time = run_perf(hardcore_cmd, "Hardcore", 100)
 
     print("\n==================================================")
     print(f"Results for {INSTRUCTIONS:,} instructions (digits)")
