@@ -5,20 +5,15 @@
 
 namespace data_type
 {
-    template <typename T>
+    template <typename T, std::size_t _max_size>
     class fix_queue
     {
     private:
-        int max_size;
+        static constexpr std::size_t max_size = _max_size;
         size_t head_pointer = 0;
-        std::vector<T> data;
+        std::array<T, _max_size> data{};
 
     public:
-        void set_size(const int max_size)
-        {
-            this->max_size = max_size;
-            data.resize(max_size);
-        }
         void push(const T &value)
         {
             if (++head_pointer == max_size)

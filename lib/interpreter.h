@@ -57,7 +57,7 @@ struct Ctx
         of = true;   // output flag
     short read_ind = 0, add_ind = 0, swap_ind = 0,
           grow_ind = 0, jmpm_ind = 0;
-    data_type::fix_queue<int> stack;
+    data_type::fix_queue<int, MEMORY_SIZE> stack;
     int transposus;
     bool transposus_ok = false;
     int pointer = 0;
@@ -119,7 +119,6 @@ inline void print_debug(Ctx *ctx, int chr_int, int last)
 inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug, std::string input = "")
 {
     Ctx ctx;
-    ctx.stack.set_size(total_length);
     ctx.length = data.size();
     ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
