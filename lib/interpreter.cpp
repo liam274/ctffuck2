@@ -2,6 +2,7 @@
 
 void read(Ctx *ctx, short arg)
 {
+    arg = abs(arg);
     if (ctx->read_ind)
     {
         ctx->MEMORY[ctx->stack.at(read_offset)] = ctx->flag_setter(ctx->MEMORY[arg]);
@@ -92,11 +93,11 @@ void grow(Ctx *ctx, short arg)
             break;
         case 5:
             res = abs(res % 10);
-            op_func temp = ctx->funcs[arg];
-            ctx->funcs[arg] = ctx->funcs[res];
-            ctx->funcs[res] = temp;
+            std::swap(ctx->op_mapping[arg], ctx->op_mapping[res]);
             std::swap(ctx->func_name[arg], ctx->func_name[res]);
             break;
+        default:
+            return;
         }
         ctx->transposus = res;
         ctx->transposus_ok = true;
@@ -182,7 +183,7 @@ void jmpm(Ctx *ctx, short arg)
 };
 void revf(Ctx *ctx, short arg)
 {
-    arg = -arg;
+    arg = abs(arg);
     switch (arg)
     {
     case 0:
