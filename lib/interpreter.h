@@ -125,6 +125,7 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
     ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
     ctx.pointer = data.data();
+    ctx.begin = data.data();
     TermiosRaw raw;
     short chr_int;
     short last = -1;
