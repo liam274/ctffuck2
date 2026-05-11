@@ -46,7 +46,7 @@ void grow(Ctx *ctx, short arg);
 void inp(Ctx *ctx, short arg);
 void jmpm(Ctx *ctx, short arg);
 void revf(Ctx *ctx, short arg);
-
+using op_func = void (*)(Ctx *, short);
 struct Ctx
 {
     std::array<int, MEMORY_SIZE> MEMORY;
@@ -65,13 +65,13 @@ struct Ctx
     std::string input;
     std::string func_name[MEMORY_SIZE] = {"read", "add", "set", "push", "print", "swap",
                                           "grow", "inp", "jmpm", "revf"};
+    op_func funcs[MEMORY_SIZE] = {&read, &add, &set, &push, &print, &swap, &grow, &inp, &jmpm, &revf};
     int flag_setter(int data)
     {
         zf = (data == 0);
         sf = (data < 0);
         return data;
     };
-    std::array<short, MEMORY_SIZE> op_mapping = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 };
 
 inline void print_debug(Ctx *ctx, short chr_int, short last)
@@ -147,39 +147,7 @@ inline std::array<int, MEMORY_SIZE> run(std::stringstream &_data, const bool deb
         {
             print_debug(&ctx, chr_int, last);
         }
-        switch (ctx.op_mapping[chr_int])
-        {
-        case 0:
-            read(&ctx, last - chr_int);
-            break;
-        case 1:
-            add(&ctx, last - chr_int);
-            break;
-        case 2:
-            set(&ctx, last - chr_int);
-            break;
-        case 3:
-            push(&ctx, last - chr_int);
-            break;
-        case 4:
-            print(&ctx, last - chr_int);
-            break;
-        case 5:
-            swap(&ctx, last - chr_int);
-            break;
-        case 6:
-            grow(&ctx, last - chr_int);
-            break;
-        case 7:
-            inp(&ctx, last - chr_int);
-            break;
-        case 8:
-            jmpm(&ctx, last - chr_int);
-            break;
-        case 9:
-            revf(&ctx, last - chr_int);
-            break;
-        }
+        ctx.funcs[chr_int](&ctx, last - chr_int);
         last = chr_int;
         if (!ctx.transposus_ok)
         {

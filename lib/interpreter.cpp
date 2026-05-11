@@ -93,11 +93,11 @@ void grow(Ctx *ctx, short arg)
             break;
         case 5:
             res = abs(res % 10);
-            std::swap(ctx->op_mapping[arg], ctx->op_mapping[res]);
+            op_func temp = ctx->funcs[arg];
+            ctx->funcs[arg] = ctx->funcs[res];
+            ctx->funcs[res] = temp;
             std::swap(ctx->func_name[arg], ctx->func_name[res]);
             break;
-        default:
-            return;
         }
         ctx->transposus = res;
         ctx->transposus_ok = true;
