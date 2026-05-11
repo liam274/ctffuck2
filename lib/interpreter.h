@@ -156,6 +156,7 @@ inline std::array<int, MEMORY_SIZE> run(std::stringstream &_data, const bool deb
         {
             chr_int = ctx.transposus;
             ctx.transposus_ok = false;
+            ctx.pointer--;
         }
     }
     if (debug)
