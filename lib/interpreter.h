@@ -128,7 +128,7 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
     TermiosRaw raw;
     short chr_int;
     short last = -1;
-    const char *const end = data.data() + data.size() - 1;
+    const char *const end = data.data() + data.size();
     while (ctx.pointer < end || ctx.transposus_ok)
     {
         if (!ctx.transposus_ok)
