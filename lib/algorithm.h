@@ -9,7 +9,7 @@ private:
     int fd_;
 
 public:
-    TermiosRaw(int fd = STDIN_FILENO) : fd_(fd)
+    explicit TermiosRaw(int fd = STDIN_FILENO) : fd_(fd)
     {
         tcgetattr(fd_, &orig_);
         struct termios raw = orig_;

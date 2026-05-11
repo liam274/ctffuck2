@@ -4,6 +4,7 @@
 #include <string>
 #include <array>
 #include <algorithm>
+#include <sstream>
 #include "data-type.h"
 #include "algorithm.h"
 
@@ -116,13 +117,21 @@ inline void print_debug(Ctx *ctx, int chr_int, int last)
     std::cout << std::flush;
 }
 
-inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug, std::string input = "")
+inline std::array<int, MEMORY_SIZE> run(std::stringstream &_data, const bool debug, std::string input = "")
 {
+    std::string data;
+    char chr;
+    while (_data >> chr)
+    {
+        if (std::isdigit(chr))
+        {
+            data += chr;
+        }
+    }
     Ctx ctx;
     ctx.length = data.size();
     ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
-    char chr;
     short last = -1;
     TermiosRaw raw;
     int chr_int;
@@ -131,10 +140,6 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
         if (!ctx.transposus_ok)
         {
             chr = data[ctx.pointer++];
-            if (chr >= '0' + MEMORY_SIZE or chr < '0')
-            {
-                continue;
-            }
             chr_int = chr - '0';
         }
         else

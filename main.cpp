@@ -20,20 +20,16 @@ int main(int argc, char *argv[])
     }
     if (verify.has("-r"))
     {
-        run(args.at("-r"), debug);
+        std::stringstream temp(args.at("-r"));
+        run(temp, debug);
     }
     else
     {
         const std::string FILE_PATH = args.at("-f");
+        std::stringstream buffer;
         if (FILE_PATH == "stdin")
         {
-            std::string line;
-            std::string total;
-            while (std::getline(std::cin, line))
-            {
-                total += line;
-            }
-            run(total, debug);
+            buffer << std::cin.rdbuf();
         }
         else
         {
@@ -48,9 +44,8 @@ int main(int argc, char *argv[])
                 std::cerr << "Error occurred when trying to open script file \"" << FILE_PATH << "\"." << std::endl;
                 return -1;
             }
-            std::stringstream buffer;
             buffer << file.rdbuf();
-            run(buffer.str(), debug);
         }
+        run(buffer, debug);
     }
 }
