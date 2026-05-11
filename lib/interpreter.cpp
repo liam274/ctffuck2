@@ -1,6 +1,6 @@
 #include "interpreter.h"
 
-void read(Ctx *ctx, short arg)
+void read(Ctx *ctx, int arg)
 {
     arg = abs(arg);
     if (ctx->read_ind)
@@ -14,7 +14,7 @@ void read(Ctx *ctx, short arg)
         ctx->read_ind++;
     }
 };
-void add(Ctx *ctx, short arg)
+void add(Ctx *ctx, int arg)
 {
     if (ctx->add_ind)
     {
@@ -27,19 +27,19 @@ void add(Ctx *ctx, short arg)
         ctx->add_ind++;
     }
 };
-void set(Ctx *ctx, short arg)
+void set(Ctx *ctx, int arg)
 {
     arg = abs(arg);
     ctx->MEMORY[arg] = 0;
     ctx->sf = false;
     ctx->zf = true;
 };
-void push(Ctx *ctx, short arg)
+void push(Ctx *ctx, int arg)
 {
     arg = abs(arg);
     ctx->stack.push(arg);
 };
-void print(Ctx *ctx, short arg)
+void print(Ctx *ctx, int arg)
 {
     if (!ctx->of)
     {
@@ -51,7 +51,7 @@ void print(Ctx *ctx, short arg)
         putchar(ctx->MEMORY[arg]);
     }
 };
-void swap(Ctx *ctx, short arg)
+void swap(Ctx *ctx, int arg)
 {
     arg = abs(arg);
     if (ctx->swap_ind)
@@ -67,7 +67,7 @@ void swap(Ctx *ctx, short arg)
         ctx->swap_ind++;
     }
 };
-void grow(Ctx *ctx, short arg)
+void grow(Ctx *ctx, int arg)
 {
     arg = abs(arg);
     if (ctx->grow_ind)
@@ -109,7 +109,7 @@ void grow(Ctx *ctx, short arg)
         ctx->stack.push(arg);
     }
 };
-void inp(Ctx *ctx, short arg)
+void inp(Ctx *ctx, int arg)
 {
     if (!ctx->_if)
     {
@@ -135,7 +135,7 @@ void inp(Ctx *ctx, short arg)
         }
     }
 };
-void jmpm(Ctx *ctx, short arg)
+void jmpm(Ctx *ctx, int arg)
 {
     arg = abs(arg);
     if (ctx->jmpm_ind)
@@ -181,7 +181,7 @@ void jmpm(Ctx *ctx, short arg)
         ctx->jmpm_ind++;
     }
 };
-void revf(Ctx *ctx, short arg)
+void revf(Ctx *ctx, int arg)
 {
     arg = abs(arg);
     switch (arg)

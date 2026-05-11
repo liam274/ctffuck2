@@ -35,17 +35,17 @@ constexpr short total_length = revf_offset + revf_stack_length;
 
 constexpr std::array<int, MEMORY_SIZE> PERSISTENT_MEMORY = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 struct Ctx;
-void read(Ctx *ctx, short arg);
-void add(Ctx *ctx, short arg);
-void set(Ctx *ctx, short arg);
-void push(Ctx *ctx, short arg);
-void print(Ctx *ctx, short arg);
-void swap(Ctx *ctx, short arg);
-void grow(Ctx *ctx, short arg);
-void inp(Ctx *ctx, short arg);
-void jmpm(Ctx *ctx, short arg);
-void revf(Ctx *ctx, short arg);
-using op_func = void (*)(Ctx *, short);
+void read(Ctx *ctx, int arg);
+void add(Ctx *ctx, int arg);
+void set(Ctx *ctx, int arg);
+void push(Ctx *ctx, int arg);
+void print(Ctx *ctx, int arg);
+void swap(Ctx *ctx, int arg);
+void grow(Ctx *ctx, int arg);
+void inp(Ctx *ctx, int arg);
+void jmpm(Ctx *ctx, int arg);
+void revf(Ctx *ctx, int arg);
+using op_func = void (*)(Ctx *, int);
 struct Ctx
 {
     std::array<int, MEMORY_SIZE> MEMORY;
@@ -73,7 +73,7 @@ struct Ctx
     };
 };
 
-inline void print_debug(Ctx *ctx, short chr_int, short last)
+inline void print_debug(Ctx *ctx, int chr_int, int last)
 {
     std::cout << separator;
     std::cout << "STACK\n| ";
@@ -127,8 +127,8 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
     ctx.pointer = data.data();
     ctx.begin = data.data();
     TermiosRaw raw;
-    short chr_int;
-    short last = -1;
+    int chr_int;
+    int last = -1;
     const char *const end = data.data() + data.size();
     while (ctx.pointer < end || ctx.transposus_ok)
     {
