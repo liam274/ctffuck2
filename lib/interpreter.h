@@ -143,7 +143,6 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
         {
             chr_int = ctx.transposus;
             ctx.transposus_ok = false;
-            ctx.pointer--;
         }
         if (last < 0)
         {
