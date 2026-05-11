@@ -146,7 +146,7 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
         }
         if (last < 0)
         {
-            last = chr_int * 2;
+            last = chr_int + chr_int;
         }
         ctx.funcs[chr_int](&ctx, last - chr_int);
         if (debug)
