@@ -22,3 +22,4 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 
 echo "Build successful! Executable: $(pwd)/ctffuck2"
+mv ctffuck2 ../executable/
