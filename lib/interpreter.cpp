@@ -168,7 +168,7 @@ void jmpm(Ctx *ctx, short arg)
             result = ctx->cf;
             break;
         };
-        const unsigned char *next = ctx->pointer + ctx->MEMORY[arg];
+        const char *next = ctx->pointer + ctx->MEMORY[arg];
         if (result && next >= ctx->begin)
         {
             ctx->pointer += ctx->MEMORY[arg];

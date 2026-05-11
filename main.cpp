@@ -20,8 +20,7 @@ int main(int argc, char *argv[])
     }
     if (verify.has("-r"))
     {
-        std::stringstream temp(args.at("-r"));
-        run(temp, debug);
+        run(args.at("-r"), debug);
     }
     else
     {
@@ -29,7 +28,9 @@ int main(int argc, char *argv[])
         std::stringstream buffer;
         if (FILE_PATH == "stdin")
         {
-            buffer << std::cin.rdbuf();
+            std::string content((std::istreambuf_iterator<char>(std::cin)),
+                                std::istreambuf_iterator<char>());
+            run(content, debug);
         }
         else
         {
@@ -44,8 +45,9 @@ int main(int argc, char *argv[])
                 std::cerr << "Error occurred when trying to open script file \"" << FILE_PATH << "\"." << std::endl;
                 return -1;
             }
-            buffer << file.rdbuf();
+            std::string content((std::istreambuf_iterator<char>(file)),
+                                std::istreambuf_iterator<char>());
+            run(content, debug);
         }
-        run(buffer, debug);
     }
 }

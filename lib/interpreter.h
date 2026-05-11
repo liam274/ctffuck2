@@ -59,8 +59,8 @@ struct Ctx
     data_type::fix_queue<int, total_length> stack;
     int transposus;
     bool transposus_ok = false;
-    const unsigned char *pointer;
-    const unsigned char *begin;
+    const char *pointer;
+    const char *begin;
     std::string input;
     std::string func_name[MEMORY_SIZE] = {"read", "add", "set", "push", "print", "swap",
                                           "grow", "inp", "jmpm", "revf"};
@@ -115,31 +115,20 @@ inline void print_debug(Ctx *ctx, short chr_int, short last)
     std::cout << std::flush;
 }
 
-inline std::array<int, MEMORY_SIZE> run(std::stringstream &_data, const bool debug, std::string input = "")
+inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug, std::string input = "")
 {
-    std::vector<unsigned char> data;
-    data.reserve(_data.str().size());
-    char chr;
-    while (_data >> chr)
-    {
-        if (std::isdigit(chr))
-        {
-            data.push_back(static_cast<unsigned char>(chr - '0'));
-        }
-    }
-    if (data.empty())
+    if (data.size() == 0)
     {
         return PERSISTENT_MEMORY;
     }
     Ctx ctx;
     ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
-    ctx.begin = data.data();
-    ctx.pointer = data.data();
+    ctx.pointer = 0;
     TermiosRaw raw;
     short chr_int = *ctx.pointer;
     short last = chr_int * 2;
-    const unsigned char *const end = data.data() + data.size();
+    const char *const end = data.data() + data.size();
     while (ctx.pointer++ < end || ctx.transposus_ok)
     {
         if (debug)
