@@ -124,22 +124,20 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
     Ctx ctx;
     ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
-    ctx.pointer = 0;
+    ctx.pointer = data.data();
     TermiosRaw raw;
-    short chr_int = *ctx.pointer;
-    short last = chr_int * 2;
-    const char *const end = data.data() + data.size();
-    while (ctx.pointer++ < end || ctx.transposus_ok)
+    short chr_int;
+    short last = -1;
+    const char *const end = data.data() + data.size() - 1;
+    while (ctx.pointer < end || ctx.transposus_ok)
     {
-        if (debug)
-        {
-            print_debug(&ctx, chr_int, last);
-        }
-        ctx.funcs[chr_int](&ctx, last - chr_int);
-        last = chr_int;
         if (!ctx.transposus_ok)
         {
-            chr_int = *ctx.pointer;
+            chr_int = *ctx.pointer++ - '0';
+            if (chr_int >= MEMORY_SIZE || chr_int < 0)
+            {
+                continue;
+            }
         }
         else
         {
@@ -147,10 +145,16 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
             ctx.transposus_ok = false;
             ctx.pointer--;
         }
-    }
-    if (debug)
-    {
-        print_debug(&ctx, chr_int, last);
+        if (last < 0)
+        {
+            last = chr_int * 2;
+        }
+        ctx.funcs[chr_int](&ctx, last - chr_int);
+        if (debug)
+        {
+            print_debug(&ctx, chr_int, last);
+        }
+        last = chr_int;
     }
     return ctx.MEMORY;
 }
