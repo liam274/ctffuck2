@@ -21,5 +21,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 # 构建（默认 Release）
 cmake --build .
 
-echo "Build successful! Executable: $(pwd)/ctffuck2"
-mv ctffuck2 ../executable/
+cd ..
+
+echo "Build successful! Executable: $(pwd)/executable/ctffuck2"
+mv build/ctffuck2 executable/

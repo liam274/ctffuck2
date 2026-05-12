@@ -8,10 +8,11 @@ namespace fs = std::filesystem;
 
 int main(int argc, char *argv[])
 {
-    argv_verify verify("CTFFuck2");
+    argv_verify verify("CTFFuck2", true, "is an esolang interpreter");
     verify.append("-f", "--file", "The program file", "stdin", {"-r"});
-    verify.append("--debug", "--debug", "Trigger debug mode", "false");
+    verify.append("-d", "--debug", "Trigger debug mode", "false");
     verify.append("-r", "--run", "Run an execution to the given code", "", {"-f"});
+    verify.append("-i", "--input", "The input string for the program", "");
     std::unordered_map<std::string, std::string> args = verify.verify(argv, argc);
     bool debug = false;
     if (args.at("--debug") != "false")
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
         {
             std::string content((std::istreambuf_iterator<char>(std::cin)),
                                 std::istreambuf_iterator<char>());
-            run(content, debug);
+            run(content, debug, args.at("-i"));
         }
         else
         {
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
             }
             std::string content((std::istreambuf_iterator<char>(file)),
                                 std::istreambuf_iterator<char>());
-            run(content, debug);
+            run(content, debug, args.at("-i"));
         }
     }
 }

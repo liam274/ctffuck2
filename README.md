@@ -122,7 +122,8 @@ or
 ### Flags:
 
 - `-f`, `--file` : Path to the program file (a string of digits, other characters ignored).
-- `--debug` : (Currently a no-op; debugging is done by staring into the void.)
+- `-d`， `--debug` : (Currently a no-op; debugging is done by staring into the void.)
+- `-i`, `--input` : The input for the program
 
 ---
 
