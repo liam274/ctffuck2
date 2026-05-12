@@ -9,19 +9,19 @@ namespace fs = std::filesystem;
 int main(int argc, char *argv[])
 {
     argv_verify verify("CTFFuck2", true, "is an esolang interpreter");
-    verify.append("-f", "--file", "The program file", "stdin", {"-r"});
-    verify.append("-d", "--debug", "Trigger debug mode", "false");
-    verify.append("-r", "--run", "Run an execution to the given code", "", {"-f"});
-    verify.append("-i", "--input", "The input string for the program", "");
+    verify.append("-f", "--file", "The program file", false, "stdin", {"-r"});
+    verify.append("-d", "--debug", "Trigger debug mode", false);
+    verify.append("-r", "--run", "Run an execution to the given code", false, "", {"-f"});
+    verify.append("-i", "--input", "The input string for the program", false);
     std::unordered_map<std::string, std::string> args = verify.verify(argv, argc);
     bool debug = false;
-    if (args.at("--debug") != "false")
+    if (verify.has("--debug"))
     {
         debug = true;
     }
     if (verify.has("-r"))
     {
-        run(args.at("-r"), debug);
+        run(args.at("-r"), debug, verify.has("-i") ? args.at("-i") : "");
     }
     else
     {
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
         {
             std::string content((std::istreambuf_iterator<char>(std::cin)),
                                 std::istreambuf_iterator<char>());
-            run(content, debug, args.at("-i"));
+            run(content, debug, verify.has("-i") ? args.at("-i") : "");
         }
         else
         {
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
             }
             std::string content((std::istreambuf_iterator<char>(file)),
                                 std::istreambuf_iterator<char>());
-            run(content, debug, args.at("-i"));
+            run(content, debug, verify.has("-i") ? args.at("-i") : "");
         }
     }
 }
