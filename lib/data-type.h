@@ -22,7 +22,7 @@ namespace data_type
             }
             data[head_pointer] = value;
         }
-        const T &at(int ind) const
+        const T &at(std::size_t ind) const
         {
             if (ind >= max_size)
             {
@@ -36,7 +36,7 @@ namespace data_type
             }
             return data[ind];
         }
-        const T &true_at(int ind) const
+        const T &true_at(std::size_t ind) const
         {
             if (ind >= max_size)
             {
@@ -45,7 +45,7 @@ namespace data_type
             }
             return data[ind];
         }
-        const int heap() const
+        std::size_t heap() const
         {
             return head_pointer;
         }
