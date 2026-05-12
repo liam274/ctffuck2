@@ -7,7 +7,7 @@ To whom are reading this:
 If you use this ACI to program, you are a coward who doesn't willing to face _CTFFuck2_'s strength.
 This document is for formatting _CTFFuck2_ codes, so as to make using it to program a lot easier.
 
-So if you're for challenge, get back, please.
+So if you're for challenge, [get back](/README.md), please.
 
 If you're for showing-off, scroll down.
 
