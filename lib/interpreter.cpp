@@ -86,7 +86,7 @@ void grow(Ctx *ctx, int arg)
             res = ctx->flag_setter(res * spindle) % 10;
             break;
         case 3:
-            res = ctx->flag_setter(res % (spindle ? spindle : 1));
+            res = ctx->flag_setter(res % (spindle > 0 ? spindle : 1));
             break;
         case 4:
             res = spindle % 10;
