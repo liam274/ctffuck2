@@ -25,12 +25,11 @@ This is **CTFFuck2**. It's a surgical reconstruction of
 the language's soul, built to weaponize
 _deterministic chaos_ against anyone foolish enough to try writing a working program.
 
-The original CTFFuck2 already turned programming into a sparse constraint-solving nightmare.
-Hardcore pushes that nightmare into a new dimension: **global state coupling via a shared
+The well-known digital esolangs already turned programming into a nightmare.
+CTFFuck2 pushes that nightmare into a new dimension: **global state coupling via a shared
 ring buffer and path-dependent operand resolution.**
 
-There is no randomness. No encryption. Just a handful of rules and a **mandatory
-full-history integration** over every parameter ever pushed.
+There is no randomness. No encryption. Just a handful of rules that burnt your brains up.
 
 ---
 
@@ -91,9 +90,8 @@ that are pushed into a _vector_ (`transposus`) which then get executed as if the
 the original program. Methods 0–4 compute a new digit from the current memory state; method 5
 swaps function pointers in the opcode table.
 
-The Python version’s random noise is **completely removed.** Every `grow` outcome is now a
-deterministic consequence of the current state and the instruction’s arguments. This makes
-the language **fully deterministic** — yet whose behavior remains fundamentally unpredictable
+Every `grow` outcome is a deterministic consequence of the current state and the instruction’s arguments.
+This makes the language **fully deterministic** — yet whose behavior remains fundamentally unpredictable
 without executing it.
 
 ---
