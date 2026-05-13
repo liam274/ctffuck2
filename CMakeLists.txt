@@ -12,7 +12,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(ctffuck2 
     main.cpp 
-    lib/algorithm.cpp 
     lib/argument-parse.cpp 
     lib/data-type.cpp 
     lib/interpreter.cpp
