@@ -1,5 +1,5 @@
 #pragma once
-#include <cstdio>
+#include <iostream>
 #include <vector>
 #include <string>
 #include <array>
@@ -76,34 +76,37 @@ struct Ctx
 
 inline void print_debug(Ctx *ctx, int chr_int, int last)
 {
-    printf("%sSTACK\n| ", separator);
+    std::cout << separator << "STACK\n| ";
     int p = ctx->stack.heap();
     for (int i = 0; i < total_length; i++)
     {
         if (i == p)
         {
-            printf("*");
+            std::cout << "*";
         }
-        printf("%d | ", ctx->stack.true_at(i));
+        std::cout << ctx->stack.true_at(i) << " | ";
     }
-    printf("\n%sMEMORY\n| ", separator);
+    std::cout << '\n'
+              << separator << "MEMORY\n |";
     for (const int &cell : ctx->MEMORY)
     {
-        printf("%d | ", cell);
+        std::cout << cell << " | ";
     }
-    printf("\n%sFUNC_MEMORY\n| ", separator);
+    std::cout << '\n'
+              << separator << "FUNC_MEMORY\n| ";
     int t = 0;
     for (const std::string &name : ctx->func_name)
     {
         if (t == chr_int)
         {
-            printf("> ");
+            std::cout << "> ";
         }
-        printf("%s | ", name);
+        std::cout << name << " | ";
         t++;
     }
-    printf("\n%slast: %d; arg: %d\n", separator, last, (last > -1 ? last - chr_int : chr_int));
-    printf("%s\n", separator);
+    std::cout << '\n'
+              << separator << "last: " << last << "; arg: " << (last > -1 ? last - chr_int : chr_int) << '\n';
+    std::cout << separator << '\n';
 }
 
 class TermiosRaw
