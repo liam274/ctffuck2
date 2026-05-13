@@ -1,7 +1,7 @@
 # CTFFuck2
 
 Welcome to the abyss.
-To its [esolang wiki](https://esolangs.org/wiki/Main_Page).
+To its [esolang wiki](https://esolangs.org/wiki/CTFFuck2).
 
 ## Table of Contents
 
