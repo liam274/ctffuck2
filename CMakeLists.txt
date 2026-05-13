@@ -10,6 +10,11 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 add_executable(ctffuck2 
     main.cpp 
     lib/argument-parse.cpp 
@@ -17,17 +22,39 @@ add_executable(ctffuck2
     lib/interpreter.cpp
 )
 
-# ---------- Optimization Settings ----------
-# Enable link-time optimisation (works with GCC, Clang, MSVC)
+
+target_compile_options(ctffuck2 PRIVATE
+    $<$<CONFIG:Release>:
+        -O3
+        -march=native
+        -DNDEBUG
+
+        -ffunction-sections
+        -fdata-sections
+
+        -fno-rtti
+
+        -fno-unwind-tables
+        -fno-asynchronous-unwind-tables
+    >
+)
+
+
+target_link_options(ctffuck2 PRIVATE
+    $<$<CONFIG:Release>:
+
+        -Wl,--gc-sections
+
+        -s
+
+        -Wl,--strip-all
+
+
+        -Wl,--no-eh-frame-hdr
+    >
+)
+
+
 set_target_properties(ctffuck2 PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION TRUE
 )
-
-# Add aggressive optimisation flags for the Release build (Unix-like)
-if(NOT MSVC)
-    target_compile_options(ctffuck2 PRIVATE
-        $<$<CONFIG:Release>:-O3 -march=native -DNDEBUG>
-    )
-endif()
-# For MSVC, /O2 is already default in Release, and /GL is set by LTO.
-# You could add /arch:AVX2 if you want, but that’s optional.
