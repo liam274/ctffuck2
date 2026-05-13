@@ -25,3 +25,5 @@ cd ..
 
 echo "Build successful! Executable: $(pwd)/executable/ctffuck2"
 mv build/ctffuck2 executable/
+cd executable
+strip ctffuck2
