@@ -107,9 +107,9 @@ This flag will be set when the value calculated is zero.
 
 This flag will be set when the value's highest bit is set.
 
-### CF - Control Flag
+### CF - Customized Flag
 
-Control flag is a flag, which can be set by `revf(2)`. It doesn't have an official usage,
+Customized flag is a flag, which can be set by `revf(2)`. It doesn't have an official usage,
 so you may use it in whatever way you'd like to. But in this ACI, we **STRONGLY** suggested
 you to use it for controlling execution flow. _Please note that when the program begins, CF=false_
 
