@@ -99,6 +99,10 @@ void grow(Ctx *ctx, int arg)
             std::swap(ctx->func_name[arg], ctx->func_name[res]);
             break;
         }
+        if (res < 0)
+        {
+            return;
+        }
         ctx->transposus = res;
         ctx->transposus_ok = true;
         ctx->grow_ind = 0;
