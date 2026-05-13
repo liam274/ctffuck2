@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     verify.append("-d", "--debug", "Trigger debug mode", false);
     verify.append("-r", "--run", "Run an execution to the given code", false, "", {"-f"});
     verify.append("-i", "--input", "The input string for the program", false);
+    verify.append("-c", "--code", "The entry point for the CTFFuck2 program", false);
     std::unordered_map<std::string, std::string> args = verify.verify(argv, argc);
     bool debug = false;
     if (verify.has("--debug"))
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
     }
     if (verify.has("-r"))
     {
-        run(args.at("-r"), debug, verify.has("-i") ? args.at("-i") : "");
+        run(args.at("-r"), debug, verify.has("-i") ? args.at("-i") : "", verify.has("-c") ? args.at("-c") : "");
     }
     else
     {
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
         {
             std::string content((std::istreambuf_iterator<char>(std::cin)),
                                 std::istreambuf_iterator<char>());
-            run(content, debug, verify.has("-i") ? args.at("-i") : "");
+            run(content, debug, verify.has("-i") ? args.at("-i") : ""), verify.has("-c") ? args.at("-c") : "";
         }
         else
         {
@@ -48,7 +49,7 @@ int main(int argc, char *argv[])
             }
             std::string content((std::istreambuf_iterator<char>(file)),
                                 std::istreambuf_iterator<char>());
-            run(content, debug, verify.has("-i") ? args.at("-i") : "");
+            run(content, debug, verify.has("-i") ? args.at("-i") : "", verify.has("-c") ? args.at("-c") : "");
         }
     }
 }

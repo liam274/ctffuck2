@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+#include <cstdio>
 #include <vector>
 #include <string>
 #include <array>
@@ -76,44 +76,34 @@ struct Ctx
 
 inline void print_debug(Ctx *ctx, int chr_int, int last)
 {
-    std::cout << separator;
-    std::cout << "STACK\n| ";
+    printf("%sSTACK\n| ", separator);
     int p = ctx->stack.heap();
     for (int i = 0; i < total_length; i++)
     {
         if (i == p)
         {
-            std::cout << "*";
+            printf("*");
         }
-        std::cout << ctx->stack.true_at(i) << " | ";
+        printf("%d | ", ctx->stack.true_at(i));
     }
-    std::cout << '\n';
-    std::cout << separator;
-    std::cout << "MEMORY\n| ";
+    printf("\n%sMEMORY\n| ", separator);
     for (const int &cell : ctx->MEMORY)
     {
-        std::cout << cell << " | ";
+        printf("%d | ", cell);
     }
-    std::cout << '\n';
-    std::cout << separator;
-    std::cout << "FUNC_MEMORY\n| ";
+    printf("\n%sFUNC_MEMORY\n| ", separator);
     int t = 0;
     for (const std::string &name : ctx->func_name)
     {
         if (t == chr_int)
         {
-            std::cout << "> ";
+            printf("> ");
         }
-        std::cout << name << " | ";
+        printf("%s | ", name);
         t++;
     }
-    std::cout << '\n';
-    std::cout << separator;
-    std::cout << "last: " << last << "; arg: "
-              << (last > -1 ? last - chr_int : chr_int) << '\n';
-    std::cout << separator;
-    std::cout << '\n';
-    std::cout << std::flush;
+    printf("\n%slast: %d; arg: %d\n", separator, last, (last > -1 ? last - chr_int : chr_int));
+    printf("%s\n", separator);
 }
 
 class TermiosRaw
@@ -141,17 +131,23 @@ public:
     TermiosRaw &operator=(const TermiosRaw &) = delete;
 };
 
-inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug, std::string input = "")
+inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debug,
+                                        const std::string &input = "", const std::string &heading = "")
 {
     if (data.size() == 0)
+    {
+        return PERSISTENT_MEMORY;
+    }
+    const std::size_t entry_point = heading.size() ? data.find(heading) : 0;
+    if (entry_point == std::string::npos)
     {
         return PERSISTENT_MEMORY;
     }
     Ctx ctx;
     ctx.MEMORY = PERSISTENT_MEMORY;
     ctx.input = std::move(input);
-    ctx.pointer = data.data();
-    ctx.begin = data.data();
+    ctx.pointer = data.data() + entry_point;
+    ctx.begin = data.data() + entry_point;
     TermiosRaw raw;
     int chr_int;
     int last = -1;

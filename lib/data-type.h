@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include <iostream>
+#include <cstdio>
 #include <stdexcept>
 
 namespace data_type
@@ -26,7 +26,7 @@ namespace data_type
         {
             if (ind >= max_size)
             {
-                std::cerr << "Error occurred when trying to access index " << ind << " out of range " << max_size << std::endl;
+                fprintf(stderr, "Error occurred when trying to access index %d out of range %d\n", static_cast<int>(ind), static_cast<int>(max_size));
                 throw std::runtime_error("Index out of range");
             }
             ind += head_pointer;
@@ -40,7 +40,7 @@ namespace data_type
         {
             if (ind >= max_size)
             {
-                std::cerr << "Error occurred when trying to access index " << ind << " out of range " << max_size << std::endl;
+                fprintf(stderr, "Error occurred when trying to access index %d out of range %d\n", static_cast<int>(ind), static_cast<int>(max_size));
                 throw std::runtime_error("Index out of range");
             }
             return data[ind];
