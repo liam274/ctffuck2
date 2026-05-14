@@ -141,7 +141,7 @@ inline std::array<int, MEMORY_SIZE> run(const std::string &data, const bool debu
     {
         return PERSISTENT_MEMORY;
     }
-    const std::size_t entry_point = heading.size() ? data.find(heading) : 0;
+    const std::size_t entry_point = heading.empty() ? 0 : data.find(heading);
     if (entry_point == std::string::npos)
     {
         return PERSISTENT_MEMORY;
