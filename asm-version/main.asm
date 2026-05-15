@@ -524,7 +524,7 @@ jump_table:
     dq ins_inp
     dq ins_jmpm
     dq ins_revf
-align 8
+align 16
 memory: times 10 dq 0
 
 
@@ -629,8 +629,6 @@ char resb 1          ; 存放读取的字符
 getch:
     push rdx
     push rcx
-    push rdx
-    push rsi
 
     mov rax, 0
     mov rdi, 0
@@ -638,8 +636,6 @@ getch:
     mov rdx, 1
     syscall
 
-    pop rsi
-    pop rdi
     pop rcx
     pop rdx
     jmp here
