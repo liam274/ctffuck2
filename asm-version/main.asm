@@ -77,6 +77,32 @@ main:
     mov rax, 3
     syscall
 
+    ; set raw mode
+
+    mov rax, 16
+    mov rdi, 0
+    mov rsi, TCGETS
+    mov rdx, old_termios
+    syscall
+
+    mov rsi, old_termios
+    mov rdi, new_termios
+    mov rcx, 60
+    rep movsb
+
+    mov eax, dword [new_termios + 12]
+    and eax, ~(ICANON | ECHO)
+    mov dword [new_termios + 12], eax
+
+    mov byte [new_termios + 16 + 6], 1
+    mov byte [new_termios + 16 + 5], 0
+    
+    mov rax, 16
+    mov rdi, 0
+    mov rsi, TCSETS
+    mov rdx, new_termios
+    syscall
+
     ; init
     xor rdx,rdx ; ctx->pointer
     mov r15,-1 ; last
@@ -129,6 +155,13 @@ exit:
     xor edi, edi
     jmp norm_exit
 norm_exit:
+    ; recover to normal mode
+    mov rax, 16
+    mov rdi, 0
+    mov rsi, TCSETS
+    mov rdx, old_termios
+    syscall
+    ; exit
     mov eax, 60 ; sys_exit
     syscall
 
@@ -603,51 +636,13 @@ getch:
     push rcx
     push rdx
     push rsi
-    mov rax, 16                 ; sys_ioctl
-    mov rdi, 0                  ; stdin 文件描述符
-    mov rsi, TCGETS
-    mov rdx, old_termios
-    syscall
 
-    ; ---------- 2. 复制并修改属性（原始模式） ----------
-    ; 复制 old_termios 到 new_termios
-    mov rsi, old_termios
-    mov rdi, new_termios
-    mov rcx, 60
-    rep movsb
-
-    ; 清除 c_lflag 中的 ICANON 和 ECHO
-    mov eax, dword [new_termios + 12]   ; c_lflag 偏移 12
-    and eax, ~(ICANON | ECHO)
-    mov dword [new_termios + 12], eax
-
-    ; 设置 c_cc[VMIN] = 1, c_cc[VTIME] = 0
-    ; VMIN 索引 6，VTIME 索引 5；c_cc 数组从偏移 16 开始
-    mov byte [new_termios + 16 + 6], 1
-    mov byte [new_termios + 16 + 5], 0
-
-    ; ---------- 3. 应用新属性 ----------
-    mov rax, 16
+    mov rax, 0
     mov rdi, 0
-    mov rsi, TCSETS
-    mov rdx, new_termios
-    syscall
-
-    ; ---------- 4. 读取一个字符（无需 Enter） ----------
-    mov rax, 0                  ; sys_read
-    mov rdi, 0                  ; stdin
     mov rsi, char
     mov rdx, 1
     syscall
 
-    ; ---------- 5. 恢复原始终端属性 ----------
-    mov rax, 16
-    mov rdi, 0
-    mov rsi, TCSETS
-    mov rdx, old_termios
-    syscall
-
-    ; ---------- 6. 强制跳转到标签 here ----------
     pop rsi
     pop rdi
     pop rcx
