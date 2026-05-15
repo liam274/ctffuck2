@@ -26,7 +26,7 @@ ehdrsize equ $ - ehdr
 
 phdr:
     dd 1
-    dd 5
+    dd 7
     dq 0
     dq ehdr
     dq ehdr
@@ -38,7 +38,7 @@ phdrsize equ $ - phdr
 main:
     pop rcx ; argc
     cmp rcx,2
-    jb .exit_no_arg
+    jb exit_no_arg
     pop rdi ; argv[0]
     pop rdi ; argv[1]
     xor esi,esi
@@ -46,18 +46,20 @@ main:
     mov rax,2
     syscall
     test rax,rax ; test if success
-    js .exit_fail_open
+    js exit_fail_open
+    mov rdi,rax ; fd
 
-    mov rdi,rax
-    sub rsp, 144
-    mov rsi,rsp
-    mov rax,5
+    ; get file length
+    mov rax,8
+    xor rsi,rsi
+    mov rdx,2
     syscall
-    mov r13,[rsp+48]
-    add rsp,144
+    test rax,rax
+    je exit_fail_lseek
+    mov r13,rax
+    ; store size in r13
 
-    ; store it somewhere
-
+    ; store it somewhere(mmap)
     mov r8,rdi
     xor rdi,rdi
     mov rsi,r13
@@ -67,36 +69,88 @@ main:
     mov rax,9
     syscall
     test rax,rax
-    js .exit_fail_store
-    mov rdi, r8
-    mov r14, rax;
+    js exit_fail_store
+
+    mov rdi, r8 ; recover registries
+    mov r14, rax ; base addr
     ; close the file since we no longer need it
     mov rax, 3
     syscall
 
-    xor rdx,rdx
-.loop:
-    movzx ecx, byte [r14+rdx]
+    ; init
+    xor rdx,rdx ; init pointer
+    mov r15,-1 ; last
+    xor rcx,rcx ; clear
+loop:
+    movzx rcx, byte [r14+rdx]
+    ; digit filter
+    sub rcx,48
+    jb loop
+    cmp rcx,9
+    ja loop
+    ; calc arg
+    sub r15,rcx
+    jmp [rcx*8+jump_table]
+    ;loop end
+    jmp exit
+exit_no_arg:
+    mov edi,1
+    jmp norm_exit
+exit_fail_open:
+    mov edi,2
+    jmp norm_exit
+exit_fail_store:
+    mov edi,3
+    jmp norm_exit
+exit_fail_lseek:
+    mov edi,4
+    jmp norm_exit
+exit:
+    xor edi, edi
+    jmp norm_exit
+norm_exit:
+    mov eax, 60 ; sys_exit
+    syscall
+
+next:
     inc rdx
     cmp rdx, r13
-    jnz .loop
+    jnz loop
+    jmp exit
+ins_read:
+    jmp next
+ins_add:
+    jmp next
+ins_set:
+    jmp next
+ins_push:
+    jmp next
+ins_print:
+    jmp next
+ins_swap:
+    jmp next
+ins_grow:
+    jmp next
+ins_inp:
+    jmp next
+ins_jmpm:
+    jmp next
+ins_revf:
+    jmp next
 
-    jmp .exit
-.exit_no_arg:
-    mov eax,60
-    mov edi,1
-    syscall
-.exit_fail_open:
-    mov eax,60
-    mov edi,2
-    syscall
-.exit_fail_store:
-    mov eax,60
-    mov edi,3
-    syscall
-.exit:
-    mov eax, 60 ; sys_exit
-    xor edi, edi
-    syscall
+align 8
+jump_table:
+    dq ins_read
+    dq ins_add
+    dq ins_set
+    dq ins_push
+    dq ins_print
+    dq ins_swap
+    dq ins_grow
+    dq ins_inp
+    dq ins_jmpm
+    dq ins_revf
+
+memory: times 10 dq 0
 
 filesize equ $ - ehdr
