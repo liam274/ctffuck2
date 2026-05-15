@@ -83,17 +83,17 @@ main:
     xor rcx,rcx ; arg
     xor rbx,rbx ; head_pointer
 loop:
-    test byte [flag],0b00000100
+    test byte [flag],0b00000100 ; check if has transposus
     jz .main_loop
     and byte [flag],0b11111011
     jmp loop_exe
     .main_loop:
     movzx rcx, byte [r14+rdx]
     ; digit filter
-    sub rcx,48
-    jb loop
+    sub rcx,'0'
+    jb next
     cmp rcx,9
-    ja loop
+    ja next
 loop_exe:
     ; calc arg
     add r15,0
@@ -132,20 +132,25 @@ norm_exit:
     syscall
 
 ins_read:
+    push .start
+    push rcx
+    jmp get_abs
+    .start:
+    pop rcx
     test byte [counters], 0b10000000
     jz .next
     ; mov memory
-    push [.return_here]
+    push .return_here
     push 0
     jmp get_val
     .return_here:
     pop rax
     push [memory+rcx]
     pop [memory+rax]
-    push [.finish]
+    push .finish
     jmp setf
     .next:
-        push [.finish]
+        push .finish
         push rcx
         jmp push_in
     .finish:
@@ -154,38 +159,51 @@ ins_read:
 ins_add:
     test byte [counters],0b01000000
     jz .next
-    push [.return_here]
+    push .return_here
     push 1
     jmp get_val
     .return_here:
     pop rax
     add [memory+rax],rcx
-    push [.finish]
+    push .finish
     jmp setf
     .next:
-        push [.finish]
+        push .finish
         push rcx
         jmp push_in
     .finish:
     xor byte [counters],0b01000000
     jmp next
 ins_set:
+    push .start
+    push rcx
+    jmp get_abs
+    .start:
+    pop rcx
     mov [memory+rcx],0
     or [flag],0b10000000
     and [flag],0b10111111
     jmp next
 ins_push:
-    push [next]
+    push next
     push rcx
     jmp push_in
 ins_print:
     test [flag],0b00001000
     jz next
+    push .start
+    push rcx
+    jmp get_abs
+    .start:
+    pop rcx
+    cmp qword [memory+rcx], 0
+    jz next
     mov rax, 1
     push rdi
     mov rdi,1
     push rdx
-    mov rdx, [memory+rcx]
+    lea rsi, [memory+rcx]
+    mov rdx, 1
     syscall
     pop rdx
     pop rdi
@@ -193,7 +211,12 @@ ins_print:
 ins_swap:
     test byte [counters],0b00100000
     jz .next
-    push [.return_here]
+    push .start
+    push rcx
+    jmp get_abs
+    .start:
+    pop rcx
+    push .return_here
     push 2
     jmp get_val
     .return_here:
@@ -204,7 +227,7 @@ ins_swap:
     pop [memory+rcx]
     jmp .finish
     .next:
-        push [.finish]
+        push .finish
         push rcx
         jmp push_in
     .finish:
@@ -213,21 +236,27 @@ ins_swap:
 ins_grow:
     test byte [counters],0b00010000
     jz .next
-    push [.return_here]
+    push .start
+    push rcx
+    jmp get_abs
+    .start:
+    pop rcx
+    push .return_here
     push 3
     jmp get_val
     .return_here:
     pop rax
-    push [.finish]
+    push .finish
     push rax
     jmp [rax*8+grow_table]
     .next:
-        push [.finish]
+        push .finish
         push rcx
         jmp push_in
     .finish:
     or byte [flag], 0b00000100
     xor byte [counters],0b00010000
+    dec rdx
     jmp next
 add_grow:
     pop rax
@@ -288,23 +317,34 @@ default_grow:
 ins_inp:
     test [flag],0b00010000
     jz next
+    push .start
+    push rcx
+    jmp get_abs
+    .start:
+    pop rcx
     jmp getch
     here:
-    mov [memory+rcx],al
+    movzx rax,al
+    mov [memory+rcx],rax
     jmp next
 ins_jmpm:
     test byte [counters],0b00001000
     jz .next
-    push [.return_here]
+    push .start
+    push rcx
+    jmp get_abs
+    .start:
+    pop rcx
+    push .return_here
     push 4
     jmp get_val
     .return_here:
     pop rax
-    push [.finish]
+    push .finish
     push [memory+rcx]
     jmp [rax*8+jmpm_table]
     .next:
-        push [.finish]
+        push .finish
         push rcx
         jmp push_in
     .finish:
@@ -314,7 +354,7 @@ jmp_z:
     pop rax
     test byte [flag],0b1000000
     jz .return
-    add rcx,rax
+    add rdx,rax
     ;return
     .return:
     pop rax
@@ -323,7 +363,7 @@ jmp_nz:
     pop rax
     test byte [flag],0b1000000
     jnz .return
-    add rcx,rax
+    add rdx,rax
     ;return
     .return:
     pop rax
@@ -332,7 +372,7 @@ jmp_s:
     pop rax
     test byte [flag],0b0100000
     jz .return
-    add rcx,rax
+    add rdx,rax
     ;return
     .return:
     pop rax
@@ -341,7 +381,7 @@ jmp_ns:
     pop rax
     test byte [flag],0b0100000
     jnz .return
-    add rcx,rax
+    add rdx,rax
     ;return
     .return:
     pop rax
@@ -352,7 +392,7 @@ jmp_sz:
     jz .return
     test byte [flag],0b1100000
     jz .return
-    add rcx,rax
+    add rdx,rax
     ;return
     .return:
     pop rax
@@ -363,14 +403,14 @@ jmp_nsz:
     jnz .return
     test byte [flag],0b1100000
     jnz .return
-    add rcx,rax
+    add rdx,rax
     ;return
     .return:
     pop rax
     jmp rax
 jmp_:
     pop rax
-    add rcx,rax
+    add rdx,rax
     ;return
     pop rax
     jmp rax
@@ -378,7 +418,7 @@ jmp_c:
     pop rax
     test byte [flag],0b0010000
     jz .return
-    add rcx,rax
+    add rdx,rax
     ;return
     .return:
     pop rax
@@ -389,7 +429,12 @@ jmp_default:
     pop rax
     jmp rax
 ins_revf:
-    push [next]
+    push .start
+    push rcx
+    jmp get_abs
+    .start:
+    pop rcx
+    push next
     jmp [revf_table+rcx*8]
 revzf:
     xor byte [flag],0b10000000
@@ -488,34 +533,38 @@ push_in:
     jnz .not_too_big
     xor rbx,rbx
     .not_too_big:
-    pop rax
-    push [.here]
+    pop rax ; get arg
+    push .here
     push rax
     jmp get_abs
     .here:
-    pop rax
-    mov [stack+rbx*8],rax
-    pop rax
+    pop rax ; get abs
+    mov [stack+rbx*8],rax ; write abs
+    pop rax ; get addr
     jmp rax
 get_val:
-    pop rax
+    pop rax ; get arg
     add rax,rbx
     cmp rax,5
-    jnz .not_too_big
+    jna .not_too_big
     sub rax,5
     .not_too_big:
     mov r12, [stack+rax*8]
-    pop rax
+    pop rax ; get addr
     push r12
     jmp rax
 setf:
-    jz .is_zero
+    pushf
+    pop r12
+    test r12, 0b1000000
+    jnz .is_zero
     and [flag], 0b01111111
     jmp .next
     .is_zero:
     or [flag], 0b10000000
     .next:
-    js .is_sign
+    test r12,0b10000000
+    jnz .is_sign
     and [flag],0b10111111
     pop rax
     jmp rax
