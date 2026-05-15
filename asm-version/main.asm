@@ -100,7 +100,7 @@ loop_exe:
     sub rax,rcx
     mov r15,rcx
     xchg rax,rcx
-    jmp [rcx*8+jump_table]
+    jmp [r15*8+jump_table]
     ;loop end
     jmp exit
 exit_no_arg:
