@@ -96,9 +96,10 @@ loop:
     ja loop
 loop_exe:
     ; calc arg
-    push rcx
-    sub rcx,r15
-    pop r15
+    mov rax,r15
+    sub rax,rcx
+    mov r15,rcx
+    xchg rax,rcx
     jmp [rcx*8+jump_table]
     ;loop end
     jmp exit
@@ -215,7 +216,7 @@ ins_grow:
     pop rax
     push [.finish]
     push rax
-    jmp [rcx*8+grow_table]
+    jmp [rax*8+grow_table]
     .next:
         push [.finish]
         push rcx
