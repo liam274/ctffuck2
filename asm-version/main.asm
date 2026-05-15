@@ -83,12 +83,18 @@ main:
     xor rcx,rcx ; arg
     xor rbx,rbx ; head_pointer
 loop:
+    test byte [flag],0b00000100
+    jz .main_loop
+    and byte [flag],0b00000100
+    jmp loop_exe
+    .main_loop:
     movzx rcx, byte [r14+rdx]
     ; digit filter
     sub rcx,48
     jb loop
     cmp rcx,9
     ja loop
+loop_exe:
     ; calc arg
     sub r15,rcx
     jmp [rcx*8+jump_table]
@@ -213,30 +219,58 @@ ins_grow:
         push rcx
         jmp push_in
     .finish:
+    or byte [flag], 0b00000100
     xor byte [counters],0b00010000
     jmp next
 add_grow:
     pop rax
+    add rax,[memory+rcx]
+    push rdx
+    xor rdx,rdx
+    mov r11,10
+    div r11
+    pop rdx
+    mov rcx,rax
     ; return
-    pop rax
-    jmp rax
+    jmp setf
 sub_grow:
     pop rax
+    sub rax,[memory+rcx]
+    push rdx
+    xor rdx,rdx
+    mov r11,10
+    div r11
+    pop rdx
+    mov rcx,rax
     ; return
-    pop rax
-    jmp rax
+    jmp setf
 mul_grow:
     pop rax
+    imul rax,[memory+rcx]
+    push rdx
+    xor rdx,rdx
+    mov r11,10
+    div r11
+    pop rdx
+    mov rcx,rax
     ; return
-    pop rax
-    jmp rax
+    jmp setf
 div_grow:
     pop rax
+    push rdx
+    xor rdx,rdx
+    mov r11,10
+    div r11
+    pop rdx
+    mov rcx,rax
     ; return
-    pop rax
-    jmp rax
+    jmp setf
 xchg_grow:
     pop rax
+    push [jump_table+rax]
+    push [jump_table+rcx]
+    pop [jump_table+rax]
+    pop [jump_table+rcx]
     ; return
     pop rax
     jmp rax
@@ -247,12 +281,136 @@ default_grow:
 ins_inp:
     test [flag],0b00010000
     jz next
+    jmp getch
+    here:
     mov [memory+rcx],al
     jmp next
 ins_jmpm:
+    test byte [counters],0b00001000
+    jz .next
+    push [.return_here]
+    push 4
+    jmp get_val
+    .return_here:
+    pop rax
+    push [.finish]
+    push [memory+rcx]
+    jmp [rax*8+jmpm_table]
+    .next:
+        push [.finish]
+        push rcx
+        jmp push_in
+    .finish:
+    xor byte [counters],0b00001000
     jmp next
+jmp_z:
+    pop rax
+    test byte [flag],0b1000000
+    jz .return
+    add rcx,rax
+    ;return
+    .return:
+    pop rax
+    jmp rax
+jmp_nz:
+    pop rax
+    test byte [flag],0b1000000
+    jnz .return
+    add rcx,rax
+    ;return
+    .return:
+    pop rax
+    jmp rax
+jmp_s:
+    pop rax
+    test byte [flag],0b0100000
+    jz .return
+    add rcx,rax
+    ;return
+    .return:
+    pop rax
+    jmp rax
+jmp_ns:
+    pop rax
+    test byte [flag],0b0100000
+    jnz .return
+    add rcx,rax
+    ;return
+    .return:
+    pop rax
+    jmp rax
+jmp_sz:
+    pop rax
+    test byte [flag],0b0100000
+    jz .return
+    test byte [flag],0b1100000
+    jz .return
+    add rcx,rax
+    ;return
+    .return:
+    pop rax
+    jmp rax
+jmp_nsz:
+    pop rax
+    test byte [flag],0b0100000
+    jnz .return
+    test byte [flag],0b1100000
+    jnz .return
+    add rcx,rax
+    ;return
+    .return:
+    pop rax
+    jmp rax
+jmp_:
+    pop rax
+    add rcx,rax
+    ;return
+    pop rax
+    jmp rax
+jmp_c:
+    pop rax
+    test byte [flag],0b0010000
+    jz .return
+    add rcx,rax
+    ;return
+    .return:
+    pop rax
+    jmp rax
+jmp_default:
+    pop rax
+    ;return
+    pop rax
+    jmp rax
 ins_revf:
     jmp next
+revzf:
+    xor byte [flag],0b10000000
+    ;return
+    pop rax
+    jmp rax
+revsf:
+    xor byte [flag],0b01000000
+    ;return
+    pop rax
+    jmp rax
+revcf:
+    xor byte [flag],0b00100000
+    ;return
+    pop rax
+    jmp rax
+revif:
+    xor byte [flag],0b00010000
+    ;return
+    pop rax
+    jmp rax
+revof:
+    xor byte [flag],0b00001000
+    ;return
+    pop rax
+    jmp rax
+revf_default:
+    pop rax
+    jmp rax
 
 align 8
 jump_table:
@@ -284,6 +442,7 @@ flag: db 0
 ; 2 = cf
 ; 3 = if
 ; 4 = of
+; 5 = trans_ok
 align 8
 termios_buf: times 36 db 0
 key_buf: db 0
@@ -295,6 +454,25 @@ grow_table:
     dq div_grow
     dq xchg_grow
     times 5 dq default_grow
+jmpm_table:
+    dq jmp_z
+    dq jmp_nz
+    dq jmp_s
+    dq jmp_ns
+    dq jmp_sz
+    dq jmp_nsz
+    dq jmp_
+    dq jmp_c
+    times 2 dq jmp_default
+revf_table:
+    dq revzf
+    dq revsf
+    dq revcf
+    dq revif
+    dq revof
+    times 5 dq revf_default
+
+; --- methods ---
 
 push_in:
     inc rbx
@@ -319,17 +497,17 @@ get_val:
     jmp rax
 setf:
     jz .is_zero
-    or [flag], 0b10000000
+    and [flag], 0b01111111
     jmp .next
     .is_zero:
-    and [flag], 0b01111111
+    or [flag], 0b10000000
     .next:
     js .is_sign
-    or [flag],0b01000000
+    and [flag],0b10111111
     pop rax
     jmp rax
     .is_sign:
-    and [flag],0b10111111
+    or [flag],0b01000000
     pop rax
     jmp rax
 
@@ -410,7 +588,7 @@ getch:
     pop rcx
     pop rbx
     pop rax
-    ret
+    jmp here
 
 ; --- end ---
 ; do never write after it
