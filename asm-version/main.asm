@@ -85,7 +85,7 @@ main:
 loop:
     test byte [flag],0b00000100
     jz .main_loop
-    and byte [flag],0b00000100
+    and byte [flag],0b11111011
     jmp loop_exe
     .main_loop:
     movzx rcx, byte [r14+rdx]
@@ -96,7 +96,9 @@ loop:
     ja loop
 loop_exe:
     ; calc arg
-    sub r15,rcx
+    push rcx
+    sub rcx,r15
+    pop r15
     jmp [rcx*8+jump_table]
     ;loop end
     jmp exit
@@ -170,7 +172,7 @@ ins_set:
 ins_push:
     push [next]
     push rcx
-    jmp get_val
+    jmp push_in
 ins_print:
     test [flag],0b00001000
     jz next
@@ -382,7 +384,8 @@ jmp_default:
     pop rax
     jmp rax
 ins_revf:
-    jmp next
+    push [next]
+    jmp [revf_table+rcx*8]
 revzf:
     xor byte [flag],0b10000000
     ;return
@@ -481,7 +484,7 @@ push_in:
     xor rbx,rbx
     .not_too_big:
     pop rax
-    mov [stack+rbx],rax
+    mov [stack+rbx*8],rax
     pop rax
     jmp rax
 get_val:
@@ -491,7 +494,7 @@ get_val:
     jnz .not_too_big
     sub rax,5
     .not_too_big:
-    mov r12, [stack+rax]
+    mov r12, [stack+rax*8]
     pop rax
     push r12
     jmp rax
