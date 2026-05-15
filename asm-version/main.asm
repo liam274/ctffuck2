@@ -146,10 +146,10 @@ ins_read:
     jmp get_val
     .return_here:
     pop rax
-    push [memory+rcx]
-    pop [memory+rax]
+    push [memory+rcx*8]
+    pop [memory+rax*8]
     push .finish
-    push [memory+rax]
+    push [memory+rax*8]
     jmp setf
     .next:
         push .finish
@@ -166,9 +166,9 @@ ins_add:
     jmp get_val
     .return_here:
     pop rax
-    add [memory+rax],rcx
+    add [memory+rax*8],rcx
     push .finish
-    push [memory+rax]
+    push [memory+rax*8]
     jmp setf
     .next:
         push .finish
@@ -183,7 +183,7 @@ ins_set:
     jmp get_abs
     .start:
     pop rcx
-    mov [memory+rcx],0
+    mov [memory+rcx*8],0
     or [flag],0b10000000
     and [flag],0b10111111
     jmp next
@@ -199,13 +199,13 @@ ins_print:
     jmp get_abs
     .start:
     pop rcx
-    cmp qword [memory+rcx], 0
+    cmp qword [memory+rcx*8], 0
     jz next
     mov rax, 1
     push rdi
     mov rdi,1
     push rdx
-    lea rsi, [memory+rcx]
+    lea rsi, [memory+rcx*8]
     mov rdx, 1
     syscall
     pop rdx
@@ -224,10 +224,10 @@ ins_swap:
     jmp get_val
     .return_here:
     pop rax
-    push [memory+rax]
-    push [memory+rcx]
-    pop [memory+rax]
-    pop [memory+rcx]
+    push [memory+rax*8]
+    push [memory+rcx*8]
+    pop [memory+rax*8]
+    pop [memory+rcx*8]
     jmp .finish
     .next:
         push .finish
@@ -263,7 +263,7 @@ ins_grow:
     jmp next
 add_grow:
     pop rax
-    add rax,[memory+rcx]
+    add rax,[memory+rcx*8]
     push rdx
     xor rdx,rdx
     mov r11,10
@@ -275,7 +275,7 @@ add_grow:
     jmp setf
 sub_grow:
     pop rax
-    sub rax,[memory+rcx]
+    sub rax,[memory+rcx*8]
     push rdx
     xor rdx,rdx
     mov r11,10
@@ -287,7 +287,7 @@ sub_grow:
     jmp setf
 mul_grow:
     pop rax
-    imul rax,[memory+rcx]
+    imul rax,[memory+rcx*8]
     push rdx
     xor rdx,rdx
     mov r11,10
@@ -310,10 +310,10 @@ div_grow:
     jmp setf
 xchg_grow:
     pop rax
-    push [jump_table+rax]
-    push [jump_table+rcx]
-    pop [jump_table+rax]
-    pop [jump_table+rcx]
+    push [jump_table+rax*8]
+    push [jump_table+rcx*8]
+    pop [jump_table+rax*8]
+    pop [jump_table+rcx*8]
     ; return
     pop rax
     jmp rax
@@ -348,7 +348,7 @@ ins_jmpm:
     .return_here:
     pop rax
     push .finish
-    push [memory+rcx]
+    push [memory+rcx*8]
     jmp [rax*8+jmpm_table]
     .next:
         push .finish
