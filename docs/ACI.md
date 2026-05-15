@@ -44,11 +44,11 @@ If you're for showing-off, scroll down.
 
 This query will sanitize the entire stack.
 
-Repeat `3` stack_length+1 times. For example: `333333`
+Repeat `3` stack_length+1 times. For example: `333333333`
 
 ### Set Query
 
-Repeat `34` stack_length times, and add `3`. For example: `34343434343`
+Repeat `34` stack_length times, and add `3`. For example: `34343434343434343`
 
 ---
 
@@ -68,7 +68,7 @@ Repeat `34` stack_length times, and add `3`. For example: `34343434343`
 
 ### Align
 
-Commands must align to the stack length(as standard, it's 5), to ensure the command is accessing the correct command.
+Commands must align to the stack length(as standard, it's 8), to ensure the command is accessing the correct command.
 May you use `3`s to do so, but that's very ugly.
 
 ---

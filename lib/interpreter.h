@@ -32,7 +32,7 @@ constexpr char separator[52] = {'-', '-', '-', '-', '-', '-', '-', '-', '-',
                                 '-', '-', '-', '-', '-', '-', '-', '-',
                                 '-', '-', '-', '-', '-', '-', '\n', '\0'};
 
-constexpr short total_length = revf_offset + revf_stack_length;
+constexpr short total_length = 8;
 
 constexpr std::array<int, MEMORY_SIZE> PERSISTENT_MEMORY = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 struct Ctx;

@@ -11,6 +11,7 @@ import re
 import statistics
 
 HARDCORE_BIN = "./executable/ctffuck2"
+ASM_BIN = "./asm-version/ctffuck2"          # 汇编版二进制路径
 INSTRUCTIONS = 10_000_000  # digits in the test program
 
 
@@ -44,7 +45,6 @@ def run_perf(cmd, description, runs=100):
         ins_total = 0
         for line in stderr.splitlines():
             if "cycles" in line:
-                # match the number at start of line or after whitespace
                 match = re.search(r"([\d,]+)\s", line)
                 if match:
                     cycles_total += int(match.group(1).replace(",", ""))
@@ -80,6 +80,9 @@ def main():
     if not os.path.isfile(HARDCORE_BIN):
         print(f"Error: Hardcore binary not found at '{HARDCORE_BIN}'.")
         sys.exit(1)
+    if not os.path.isfile(ASM_BIN):
+        print(f"Error: ASM binary not found at '{ASM_BIN}'.")
+        sys.exit(1)
 
     if subprocess.run(["which", "perf"], capture_output=True).returncode != 0:
         print("Error: 'perf' not found. Install it (e.g., sudo pacman -S perf).")
@@ -89,22 +92,34 @@ def main():
 
     print("\n=========== Benchmarks (perf stat) ===========")
     hardcore_cmd = [HARDCORE_BIN, "-f", test_file]
+    asm_cmd = [ASM_BIN, test_file]   # 汇编版没有 -f，直接传文件名
 
     print("\nHardcore (C++)")
     h_cycles, h_ins, h_time = run_perf(hardcore_cmd, "Hardcore", 100)
+
+    print("\nASM version")
+    a_cycles, a_ins, a_time = run_perf(asm_cmd, "ASM", 100)
 
     print("\n==================================================")
     print(f"Results for {INSTRUCTIONS:,} instructions (digits)")
     print(
         f"Hardcore (C++) :  {h_cycles:>15,} cycles, {h_ins:>15,} CPU instructions, {h_time:.3f} s"
     )
+    print(
+        f"ASM version    :  {a_cycles:>15,} cycles, {a_ins:>15,} CPU instructions, {a_time:.3f} s"
+    )
 
     h_cyc_per_digit = h_cycles / INSTRUCTIONS
     h_ins_per_digit = h_ins / INSTRUCTIONS
+    a_cyc_per_digit = a_cycles / INSTRUCTIONS
+    a_ins_per_digit = a_ins / INSTRUCTIONS
 
     print(f"\nPer CTFFuck2 digit:")
     print(
         f"Hardcore :  {h_cyc_per_digit:7.2f} cycles, {h_ins_per_digit:7.2f} CPU instructions"
+    )
+    print(
+        f"ASM      :  {a_cyc_per_digit:7.2f} cycles, {a_ins_per_digit:7.2f} CPU instructions"
     )
 
     os.remove(test_file)

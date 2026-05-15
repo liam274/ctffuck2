@@ -108,11 +108,18 @@ main:
     mov r15,-1 ; last
     xor rcx,rcx ; arg
     xor rbx,rbx ; head_pointer
-    mov byte [flag], 0b00011000
+    xor r8b,r8b ; counter
+    mov r9b, 0b00011000 ; flag
+    ; 0 = zf
+    ; 1 = sf
+    ; 2 = cf
+    ; 3 = if
+    ; 4 = of
+    ; 5 = trans_ok
 loop:
-    test byte [flag],0b00000100 ; check if has transposus
+    test r9b,0b00000100 ; check if has transposus
     jz .main_loop
-    and byte [flag],0b11111011
+    and r9b,0b11111011
     jmp loop_exe
     .main_loop:
     movzx rcx, byte [r14+rdx]
@@ -171,7 +178,7 @@ ins_read:
     jmp get_abs
     .start:
     pop rcx
-    test byte [counters], 0b10000000
+    test r8b, 0b10000000
     jz .next
     ; mov memory
     push .return_here
@@ -189,10 +196,10 @@ ins_read:
         push rcx
         jmp push_in
     .finish:
-    xor byte [counters], 0b10000000
+    xor r8b, 0b10000000
     jmp next
 ins_add:
-    test byte [counters],0b01000000
+    test r8b,0b01000000
     jz .next
     push .return_here
     push 1
@@ -208,7 +215,7 @@ ins_add:
         push rcx
         jmp push_in
     .finish:
-    xor byte [counters],0b01000000
+    xor r8b,0b01000000
     jmp next
 ins_set:
     push .start
@@ -217,15 +224,15 @@ ins_set:
     .start:
     pop rcx
     mov [memory+rcx*8],0
-    or [flag],0b10000000
-    and [flag],0b10111111
+    or r9b,0b10000000
+    and r9b,0b10111111
     jmp next
 ins_push:
     push next
     push rcx
     jmp push_in
 ins_print:
-    test [flag],0b00001000
+    test r9b,0b00001000
     jz next
     push .start
     push rcx
@@ -245,7 +252,7 @@ ins_print:
     pop rdi
     jmp next
 ins_swap:
-    test byte [counters],0b00100000
+    test r8b,0b00100000
     jz .next
     push .start
     push rcx
@@ -267,10 +274,10 @@ ins_swap:
         push rcx
         jmp push_in
     .finish:
-    xor byte [counters],0b00100000
+    xor r8b,0b00100000
     jmp next
 ins_grow:
-    test byte [counters],0b00010000
+    test r8b,0b00010000
     jz .next
     push .start
     push rcx
@@ -290,8 +297,8 @@ ins_grow:
         push rcx
         jmp push_in
     .finish:
-    or byte [flag], 0b00000100
-    xor byte [counters],0b00010000
+    or r9b, 0b00000100
+    xor r8b,0b00010000
     dec rdx
     jmp next
 add_grow:
@@ -355,7 +362,7 @@ default_grow:
     pop rax
     jmp rax
 ins_inp:
-    test [flag],0b00010000
+    test r9b,0b00010000
     jz next
     push .start
     push rcx
@@ -368,7 +375,7 @@ ins_inp:
     mov [memory+rcx*8],rax
     jmp next
 ins_jmpm:
-    test byte [counters],0b00001000
+    test r8b,0b00001000
     jz .next
     push .start
     push rcx
@@ -388,11 +395,11 @@ ins_jmpm:
         push rcx
         jmp push_in
     .finish:
-    xor byte [counters],0b00001000
+    xor r8b,0b00001000
     jmp next
 jmp_z:
     pop rax
-    test byte [flag],0b1000000
+    test r9b,0b1000000
     jz .return
     add rdx,rax
     ;return
@@ -401,7 +408,7 @@ jmp_z:
     jmp rax
 jmp_nz:
     pop rax
-    test byte [flag],0b1000000
+    test r9b,0b1000000
     jnz .return
     add rdx,rax
     ;return
@@ -410,7 +417,7 @@ jmp_nz:
     jmp rax
 jmp_s:
     pop rax
-    test byte [flag],0b0100000
+    test r9b,0b0100000
     jz .return
     add rdx,rax
     ;return
@@ -419,7 +426,7 @@ jmp_s:
     jmp rax
 jmp_ns:
     pop rax
-    test byte [flag],0b0100000
+    test r9b,0b0100000
     jnz .return
     add rdx,rax
     ;return
@@ -428,9 +435,9 @@ jmp_ns:
     jmp rax
 jmp_sz:
     pop rax
-    test byte [flag],0b0100000
+    test r9b,0b0100000
     jz .return
-    test byte [flag],0b1100000
+    test r9b,0b1100000
     jz .return
     add rdx,rax
     ;return
@@ -439,9 +446,9 @@ jmp_sz:
     jmp rax
 jmp_nsz:
     pop rax
-    test byte [flag],0b0100000
+    test r9b,0b0100000
     jnz .return
-    test byte [flag],0b1100000
+    test r9b,0b1100000
     jnz .return
     add rdx,rax
     ;return
@@ -456,7 +463,7 @@ jmp_:
     jmp rax
 jmp_c:
     pop rax
-    test byte [flag],0b0010000
+    test r9b,0b0010000
     jz .return
     add rdx,rax
     ;return
@@ -477,27 +484,27 @@ ins_revf:
     push next
     jmp [revf_table+rcx*8]
 revzf:
-    xor byte [flag],0b10000000
+    xor r9b,0b10000000
     ;return
     pop rax
     jmp rax
 revsf:
-    xor byte [flag],0b01000000
+    xor r9b,0b01000000
     ;return
     pop rax
     jmp rax
 revcf:
-    xor byte [flag],0b00100000
+    xor r9b,0b00100000
     ;return
     pop rax
     jmp rax
 revif:
-    xor byte [flag],0b00010000
+    xor r9b,0b00010000
     ;return
     pop rax
     jmp rax
 revof:
-    xor byte [flag],0b00001000
+    xor r9b,0b00001000
     ;return
     pop rax
     jmp rax
@@ -517,10 +524,10 @@ jump_table:
     dq ins_inp
     dq ins_jmpm
     dq ins_revf
-
+align 8
 memory: times 10 dq 0
 
-counters: db 0
+
 ; 0 = read_counter
 ; 1 = add_counter
 ; 2 = swap counter
@@ -528,14 +535,7 @@ counters: db 0
 ; 4 = jmpm counter
 ; 5 = revf coutner
 align 8
-stack: times 5 dq 0
-flag: db 0
-; 0 = zf
-; 1 = sf
-; 2 = cf
-; 3 = if
-; 4 = of
-; 5 = trans_ok
+stack: times 8 dq 0
 align 8
 grow_table:
     dq add_grow
@@ -544,6 +544,7 @@ grow_table:
     dq div_grow
     dq xchg_grow
     times 5 dq default_grow
+align 8
 jmpm_table:
     dq jmp_z
     dq jmp_nz
@@ -554,6 +555,7 @@ jmpm_table:
     dq jmp_
     dq jmp_c
     times 2 dq jmp_default
+align 8
 revf_table:
     dq revzf
     dq revsf
@@ -566,10 +568,7 @@ revf_table:
 
 push_in:
     inc rbx
-    cmp rbx,5
-    jnz .not_too_big
-    xor rbx,rbx
-    .not_too_big:
+    and rbx,7
     pop rax ; get arg
     push .here
     push rax
@@ -582,39 +581,35 @@ push_in:
 get_val:
     pop rax ; get arg
     add rax,rbx
-    cmp rax,5
-    jb .not_too_big
-    sub rax,5
+    and rax,7
     .not_too_big:
     mov r12, [stack+rax*8]
     pop rax ; get addr
     push r12
     jmp rax
 setf:
-    pop r12
-    add r12,0
-    pushf
-    pop r12
-    test r12, 0b1000000
-    jnz .is_zero
-    and [flag], 0b01111111
-    jmp .next
-    .is_zero:
-    or [flag], 0b10000000
-    .next:
-    test r12,0b10000000
-    jnz .is_sign
-    and [flag],0b10111111
-    pop rax
-    jmp rax
-    .is_sign:
-    or [flag],0b01000000
+    jz .zero
+    js .sign_not_zero
+    and r9b,0b00111111
+    .sign_not_zero:
+    and r9b, 0b01111111
+    or r9b,0b01000000
+    .zero:
+    js .sign_zero
+    jmp .sign_no_zero
+    .sign_zero:
+    or r9b, 0b11000000
+    jmp .exit
+    .sign_no_zero:
+    or r9b,0b01000000
+    and r9b,0b01111111
+    .exit:
     pop rax
     jmp rax
 get_abs:
     pop rax ; get arg
     pop r12 ; get return addr
-    add rax,0
+    test rax,rax
     jns .return
     neg rax
     .return:
