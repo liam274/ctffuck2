@@ -36,8 +36,7 @@ void set(Ctx *ctx, int arg)
 };
 void push(Ctx *ctx, int arg)
 {
-    arg = abs(arg);
-    ctx->stack.push(arg);
+    ctx->stack.push(abs(arg));
 };
 void print(Ctx *ctx, int arg)
 {
