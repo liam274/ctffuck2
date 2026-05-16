@@ -347,10 +347,8 @@ ins_inp:
     test r9b,0b00010000 ; test if
     jz next ; if not set, bye bye
     push .start
-    push rcx
-    jmp get_abs
+    jmp get_abs_rcx
     .start:
-    pop rcx ; get abs
     jmp getch
     here:
     movzx rax, byte [char] ; get char
@@ -374,7 +372,9 @@ ins_jmpm:
         jmp push_in
     jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
-    jmp next
+    cmp rdx, r13
+    jnz loop
+    jmp exit
 jmp_z:
     mov rax,[memory+rcx*8]
     test r9b,0b1000000
@@ -402,12 +402,13 @@ jmp_ns:
     jmp jmp_finish
 jmp_sz:
     test r9b,0b0100000
-    jz jmp_finish
+    jnz .good
     test r9b,0b1100000
-    jz jmp_finish
-    add rdx,[memory+rcx*8]
+    jnz .good
     ;return
     jmp jmp_finish
+    .good:
+    add rdx,[memory+rcx*8]
 jmp_nsz:
     test r9b,0b0100000
     jnz jmp_finish
@@ -581,7 +582,9 @@ getch:
     mov rsi, char
     mov rdx, 1
     syscall
-
+    cmp rax, 1
+    sbb eax, eax
+    mov [char], al
     pop rcx
     pop rdx
     jmp here
