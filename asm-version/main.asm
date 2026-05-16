@@ -462,7 +462,7 @@ revf_default:
 ; --- methods ---
 
 push_in:
-    inc rbx
+    inc ebx
     and ebx,7
     pop rax ; get arg
     push .here
@@ -475,7 +475,7 @@ push_in:
     jmp rax
 get_val:
     pop rax ; get arg
-    add rax,rbx
+    add eax,ebx
     and eax,7
     .not_too_big:
     mov r12, [stack+eax*8]
