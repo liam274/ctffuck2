@@ -527,6 +527,8 @@ revf_table:
 
 filesize equ $ - ehdr
 
+ABSOLUTE $
+
 old_termios resb 60
 new_termios resb 60
 char resb 1
