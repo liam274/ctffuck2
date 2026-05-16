@@ -75,7 +75,7 @@ main:
     mov r14, rax ; base addr
     ; close the file since we no longer need it
     mov eax, 3
-    syscall
+    syscall ; file closed
 
     ; --- set raw mode --- ;
     ; since all the reg edited is not important, so it's fine to not to push them
@@ -173,62 +173,63 @@ norm_exit:
     syscall
 
 ins_read:
-    push .start ; set return addr
-    jmp get_abs_rcx ; get abs of rcx
+    ; push .start ; set return addr
+    call get_abs_rcx ; get abs of rcx
     .start:
     test r8b, 0b10000000 ; if counter ok
     jz .next ; only one parm
-    push .return_here
+    ; push .return_here
     push 0
-    jmp get_val ; at(0)
-    .return_here:
-    pop rax
+    call get_val ; at(0)
+    ; .return_here:
+    ; pop rax
     push [memory+rcx*8]
     pop [memory+rax*8]
     push .finish
     jmp setf
     .next:
-        push .finish
+        ; push .finish
         push rcx
-        jmp push_in
+        call push_in
     .finish:
     xor r8b, 0b10000000
     jmp next
 ins_add:
     test r8b,0b01000000
     jz .next
-    push .return_here
+    ; push .return_here
     push 1
-    jmp get_val
-    .return_here:
-    pop rax
+    call get_val
+    ; .return_here:
+    ; pop rax
     add [memory+rax*8],rcx
     push .finish
     jmp setf
     .next:
-        push .finish
+        ; push .finish
         push rcx
-        jmp push_in
+        call push_in
     .finish:
     xor r8b,0b01000000
     jmp next
 ins_set:
-    push .start
-    jmp get_abs_rcx
+    ; push .start
+    call get_abs_rcx
     .start:
     mov [memory+rcx*8],0
     or r9b,0b10000000
     and r9b,0b10111111
     jmp next
 ins_push:
-    push next
+    ; push next
     push rcx
-    jmp push_in
+    call push_in
+    jmp next
 ins_print:
     test r9b,0b00001000 ; check of
     jz next
-    push .start
-    jmp get_abs_rcx
+    ; push .start
+    call get_abs_rcx
     .start:
     cmp qword [memory+rcx*8], 0 ; check if is zero
     jz next ; skip so as not to print null
@@ -245,44 +246,44 @@ ins_print:
 ins_swap:
     test r8b,0b00100000 ; check if counter enough
     jz .next
-    push .start
-    jmp get_abs_rcx
+    ; push .start
+    call get_abs_rcx
     .start:
-    push .return_here
+    ; push .return_here
     push 2
-    jmp get_val
-    .return_here:
-    pop rax
+    call get_val
+    ; .return_here:
+    ; pop rax
     push [memory+rax*8]
     push [memory+rcx*8]
     pop [memory+rax*8]
     pop [memory+rcx*8]
     jmp .finish
     .next:
-        push .finish
+        ; push .finish
         push rcx
-        jmp push_in
+        call push_in
     .finish:
     xor r8b,0b00100000
     jmp next
 ins_grow:
     test r8b,0b00010000 ; check if counter enough
     jz .next
-    push .start
-    jmp get_abs_rcx
+    ; push .start
+    call get_abs_rcx
     .start:
-    push .return_here
+    ; push .return_here
     push 3
-    jmp get_val
-    .return_here:
-    pop rax
+    call get_val
+    ; .return_here:
+    ; pop rax
     push .finish
     push rax
     jmp [rax*8+grow_table]
     .next:
-        push .finish
+        ; push .finish
         push rcx
-        jmp push_in
+        call push_in
     .finish:
     xor r8b,0b00010000
     jmp loop_exe
@@ -346,8 +347,8 @@ default_grow:
 ins_inp:
     test r9b,0b00010000 ; test if
     jz next ; if not set, bye bye
-    push .start
-    jmp get_abs_rcx
+    ; push .start
+    call get_abs_rcx
     .start:
     jmp getch
     here:
@@ -357,19 +358,19 @@ ins_inp:
 ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
     jz .next ; counter not enough
-    push .start
-    jmp get_abs_rcx
+    ; push .start
+    call get_abs_rcx
     .start:
-    push .return_here
+    ; push .return_here
     push 4
-    jmp get_val
-    .return_here:
-    pop rax ; at(4)
+    call get_val
+    ; .return_here:
+    ; pop rax ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
-        push jmp_finish
+        ; push jmp_finish
         push rcx
-        jmp push_in
+        call push_in
     jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
     cmp rdx, r13
@@ -432,8 +433,8 @@ jmp_default:
     inc rdx
     jmp jmp_finish
 ins_revf:
-    push .start
-    jmp get_abs_rcx
+    ; push .start
+    call get_abs_rcx
     .start:
     jmp [revf_table+rcx*8] ; call revf
 revzf:
@@ -464,25 +465,27 @@ revf_default:
 push_in:
     inc ebx
     and ebx,7
-    pop rax ; get arg
-    push .here
-    push rax
-    jmp get_abs
+    test rcx,rcx ; assume that rcx is the arg, already
+    jns .here
+    neg rcx
     .here:
-    pop rax ; get abs
-    mov [stack+rbx*8],rax ; write abs
-    pop rax ; get addr
-    jmp rax
+    mov [stack+rbx*8],rcx ; write abs
+    ; pop rax ; get addr
+    ; jmp rax
+    ret
 get_val:
+    pop r12
     pop rax ; get arg
+    push r12
     add eax,ebx
     and eax,7
     .not_too_big:
-    mov r12, [stack+eax*8]
-    pop rax ; get addr
-    push r12
-    jmp rax
-setf:
+    ; pop rax ; get addr
+    mov rax, [stack+rax*8]
+    ; push r12
+    ; jmp rax
+    ret
+setf: ; don't optimize its return, since some other performance improvement depends on it
     jz .zero
     ;not zero
     js .sign_not_zero
@@ -503,22 +506,14 @@ setf:
     .exit:
     pop rax
     jmp rax
-get_abs:
-    pop rax ; get arg
-    pop r12 ; get return addr
-    test rax,rax
-    jns .return
-    neg rax
-    .return:
-    push rax
-    jmp r12
 get_abs_rcx:
-    pop r12 ; get return addr
+    ; pop r12 ; get return addr
     test rcx,rcx
     jns .return
     neg rcx
     .return:
-    jmp r12
+    ; jmp r12
+    ret
 
 ; the below method is generated by LLM(deepseek), since I'm not familiar with the mode...
 
