@@ -144,22 +144,21 @@ next:
     jnz loop
     jmp exit
 exit_no_arg:
-    mov edi,1
+    push 1
     jmp norm_exit
 exit_fail_open:
-    mov edi,2
+    push 2
     jmp norm_exit
 exit_fail_store:
-    mov edi,3
+    push 3
     jmp norm_exit
 exit_fail_lseek:
-    mov edi,4
+    push 4
     jmp norm_exit
 exit:
-    xor edi, edi
+    push 0
     jmp norm_exit
 norm_exit:
-    push rdi
     ; recover to normal mode
     mov eax, 16
     xor edi,edi
@@ -251,8 +250,7 @@ ins_grow:
     .finish:
     xor r8b,0b00010000
     jmp loop_exe
-add_grow:
-    add rax,[memory+rcx*8]
+do_mod:
     push rdx ; push temp
     xor edx,edx
     mov ecx,10
@@ -261,26 +259,15 @@ add_grow:
     pop rdx
     ; return
     jmp setf ; so now the stack has the return addr on top
+add_grow:
+    add rax,[memory+rcx*8]
+    jmp do_mod
 sub_grow:
     sub rax,[memory+rcx*8]
-    push rdx
-    xor edx,edx
-    mov ecx,10
-    div rcx
-    mov ecx,edx
-    pop rdx
-    ; return
-    jmp setf
+    jmp do_mod
 mul_grow:
     imul rax,[memory+rcx*8]
-    push rdx
-    xor edx,edx
-    mov ecx,10
-    div rcx
-    mov ecx,edx
-    pop rdx
-    ; return
-    jmp setf
+    jmp do_mod
 mod_grow:
     mov r11,[memory+rcx*8]
     mov ecx,1
@@ -296,14 +283,7 @@ mod_grow:
     jmp setf
 div_grow:
     mov rax,[memory+rcx*8]
-    push rdx
-    xor edx,edx
-    mov ecx,10
-    div rcx
-    mov ecx,edx
-    pop rdx
-    ; return
-    jmp setf
+    jmp do_mod
 xchg_grow:
     push [jump_table+rax*8]
     push [jump_table+rcx*8]
