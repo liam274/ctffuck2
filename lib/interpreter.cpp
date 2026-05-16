@@ -190,10 +190,10 @@ void revf(Ctx *ctx, int arg)
     switch (arg)
     {
     case 0:
-        ctx->zf = !ctx->zf;
+        ctx->sf = !ctx->sf;
         break;
     case 1:
-        ctx->sf = !ctx->sf;
+        ctx->zf = !ctx->zf;
         break;
     case 2:
         ctx->cf = !ctx->cf;
