@@ -51,7 +51,7 @@ main:
 
     ; get file length
     mov rax,8
-    xor rsi,rsi
+    xor esi,esi
     mov rdx,2
     syscall
     test rax,rax
@@ -61,11 +61,11 @@ main:
 
     ; store it somewhere(mmap)
     mov r8,rdi
-    xor rdi,rdi
+    xor edi,edi
     mov rsi,r13
     mov rdx,1
     mov r10,2
-    xor r9,r9
+    xor r9d,r9d
     mov rax,9
     syscall
     test rax,rax
@@ -80,7 +80,7 @@ main:
     ; --- set raw mode --- ;
 
     mov rax, 16
-    xor rdi, rdi
+    xor edi, edi
     mov rsi, TCGETS
     mov rdx, old_termios
     syscall
@@ -98,16 +98,16 @@ main:
     mov byte [new_termios + 16 + 5], 0
     
     mov rax, 16
-    xor rdi, rdi
+    xor edi, edi
     mov rsi, TCSETS
     mov rdx, new_termios
     syscall
 
     ; init
-    xor rdx,rdx ; ctx->pointer
+    xor edx,edx ; ctx->pointer
     mov r15,-1 ; last
-    xor rcx,rcx ; arg
-    xor rbx,rbx ; head_pointer
+    xor ecx,ecx ; arg
+    xor ebx,ebx ; head_pointer
     xor r8b,r8b ; counter
     ; 0 = read_counter
     ; 1 = add_counter
@@ -163,7 +163,7 @@ norm_exit:
     push rdi
     ; recover to normal mode
     mov rax, 16
-    xor rdi,rdi
+    xor edi,edi
     mov rsi, TCSETS
     mov rdx, old_termios
     syscall
@@ -459,52 +459,6 @@ revof:
 revf_default:
     jmp next
 
-; --- data --- ;
-
-align 8
-jump_table:
-    dq ins_read
-    dq ins_add
-    dq ins_set
-    dq ins_push
-    dq ins_print
-    dq ins_swap
-    dq ins_grow
-    dq ins_inp
-    dq ins_jmpm
-    dq ins_revf
-align 16
-memory: times 10 dq 0
-align 8
-stack: times 8 dq 0
-align 8
-grow_table:
-    dq add_grow
-    dq sub_grow
-    dq mul_grow
-    dq div_grow
-    dq xchg_grow
-    times 5 dq default_grow
-align 8
-jmpm_table:
-    dq jmp_z
-    dq jmp_nz
-    dq jmp_s
-    dq jmp_ns
-    dq jmp_sz
-    dq jmp_nsz
-    dq jmp_
-    dq jmp_c
-    times 2 dq jmp_default
-align 8
-revf_table:
-    dq revzf
-    dq revsf
-    dq revcf
-    dq revif
-    dq revof
-    times 5 dq revf_default
-
 ; --- methods ---
 
 push_in:
@@ -590,6 +544,48 @@ getch:
     jmp here
 
 ; --- end ---
+
+; --- data --- ;
+
+align 8
+jump_table:
+    dq ins_read
+    dq ins_add
+    dq ins_set
+    dq ins_push
+    dq ins_print
+    dq ins_swap
+    dq ins_grow
+    dq ins_inp
+    dq ins_jmpm
+    dq ins_revf
+memory: times 10 dq 0
+stack: times 8 dq 0
+grow_table:
+    dq add_grow
+    dq sub_grow
+    dq mul_grow
+    dq div_grow
+    dq xchg_grow
+    times 5 dq default_grow
+jmpm_table:
+    dq jmp_z
+    dq jmp_nz
+    dq jmp_s
+    dq jmp_ns
+    dq jmp_sz
+    dq jmp_nsz
+    dq jmp_
+    dq jmp_c
+    times 2 dq jmp_default
+revf_table:
+    dq revzf
+    dq revsf
+    dq revcf
+    dq revif
+    dq revof
+    times 5 dq revf_default
+
 ; do never write after it
 
 filesize equ $ - ehdr
