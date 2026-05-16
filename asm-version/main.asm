@@ -360,100 +360,79 @@ ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
     jz .next ; counter not enough
     push .start
-    push rcx
-    jmp get_abs
+    jmp get_abs_rcx
     .start:
-    pop rcx ; get abs
     push .return_here
     push 4
     jmp get_val
     .return_here:
     pop rax ; at(4)
-    push .finish
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
-        push .finish
+        push jmp_finish
         push rcx
         jmp push_in
-    .finish:
+    jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
     jmp next
 jmp_z:
     mov rax,[memory+rcx*8]
     test r9b,0b1000000
-    jz .return
+    jz jmp_finish
     add rdx,rax
     ;return
-    .return:
-    pop rax
-    jmp rax
+    jmp jmp_finish
 jmp_nz:
     test r9b,0b1000000
-    jnz .return
+    jnz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
-    .return:
-    pop rax
-    jmp rax
+    jmp jmp_finish
 jmp_s:
     test r9b,0b0100000
-    jz .return
+    jz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
-    .return:
-    pop rax
-    jmp rax
+    jmp jmp_finish
 jmp_ns:
     test r9b,0b0100000
-    jnz .return
+    jnz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
-    .return:
-    pop rax
-    jmp rax
+    jmp jmp_finish
 jmp_sz:
     test r9b,0b0100000
-    jz .return
+    jz jmp_finish
     test r9b,0b1100000
-    jz .return
+    jz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
-    .return:
-    pop rax
-    jmp rax
+    jmp jmp_finish
 jmp_nsz:
     test r9b,0b0100000
-    jnz .return
+    jnz jmp_finish
     test r9b,0b1100000
-    jnz .return
+    jnz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
-    .return:
-    pop rax
-    jmp rax
+    jmp jmp_finish
 jmp_:
     add rdx,[memory+rcx*8]
     ;return
-    pop rax
-    jmp rax
+    jmp jmp_finish
 jmp_c:
     test r9b,0b0010000
-    jz .return
+    jz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
-    .return:
-    pop rax
-    jmp rax
+    jmp jmp_finish
 jmp_default:
     ;return
-    pop rax
-    jmp rax
+    jmp jmp_finish
 ins_revf:
     push .start
-    push rcx
-    jmp get_abs
+    jmp get_abs_rcx
     .start:
-    pop rcx ; get abs
     jmp [revf_table+rcx*8] ; call revf
 revzf:
     xor r9b,0b10000000
