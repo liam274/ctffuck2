@@ -87,7 +87,7 @@ the right consumer.
 ## The `grow` instruction: transposon
 
 `grow` still takes three parameters (spindle, method, argument) and can produce new digits
-that are pushed into a _vector_ (`transposus`) which then get executed as if they were part of
+which then get executed as if they were part of
 the original program. Methods 0–4 compute a new digit from the current memory state; method 5
 swaps function pointers in the opcode table.
 

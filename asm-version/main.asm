@@ -257,7 +257,7 @@ add_grow:
     xor edx,edx
     mov ecx,10
     div rcx
-    mov ecx,edx
+    mov ecx,edx ; ecx = rax % 10
     pop rdx
     ; return
     jmp setf ; so now the stack has the return addr on it
@@ -281,7 +281,21 @@ mul_grow:
     pop rdx
     ; return
     jmp setf
+mod_grow:
+    mov r11,[memory+rcx*8]
+    test r11,r11
+    mov ecx,1
+    cmovz eax,ecx
+    push rdx
+    xor edx,edx
+    mov rcx,rax
+    div rcx
+    mov ecx,edx
+    pop rdx
+    ; return
+    jmp setf
 div_grow:
+    mov rax,[memory+rcx*8]
     push rdx
     xor edx,edx
     mov ecx,10
@@ -499,6 +513,7 @@ grow_table:
     dq add_grow
     dq sub_grow
     dq mul_grow
+    dq mod_grow
     dq div_grow
     dq xchg_grow
     times 5 dq default_grow
