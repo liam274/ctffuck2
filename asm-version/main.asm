@@ -178,7 +178,7 @@ ins_read:
     jz .next ; only one parm
     push 0
     call get_val ; at(0)
-    push [memory+ecx*8]
+    push [memory+rcx*8]
     pop [memory+rax*8]
     push .finish
     jmp setf
@@ -202,7 +202,7 @@ ins_add:
     jmp next
 ins_set:
     call get_abs_rcx
-    mov [memory+ecx*8],0
+    mov [memory+rcx*8],0
     or r9b,0b10000000
     and r9b,0b10111111
     jmp next
@@ -213,12 +213,12 @@ ins_print:
     test r9b,0b00001000 ; check of
     jz next
     call get_abs_rcx
-    cmp qword [memory+ecx*8], 0 ; check if is zero
+    cmp qword [memory+rcx*8], 0 ; check if is zero
     jz next ; skip so as not to print null
     mov eax, 1 ; write()
     push rdx ; save rdx
     mov edi,1
-    lea rsi, [memory+ecx*8] ; pointer to addr
+    lea rsi, [memory+rcx*8] ; pointer to addr
     mov edx, 1
     syscall
     pop rdx
@@ -230,9 +230,9 @@ ins_swap:
     push 2
     call get_val
     push [memory+rax*8]
-    push [memory+ecx*8]
+    push [memory+rcx*8]
     pop [memory+rax*8]
-    pop [memory+ecx*8]
+    pop [memory+rcx*8]
     jmp .finish
     .next:
         call push_in
@@ -253,7 +253,7 @@ ins_grow:
     xor r8b,0b00010000
     jmp loop_exe
 add_grow:
-    add rax,[memory+ecx*8]
+    add rax,[memory+rcx*8]
     push rdx ; push temp
     xor edx,edx
     mov ecx,10
@@ -263,7 +263,7 @@ add_grow:
     ; return
     jmp setf ; so now the stack has the return addr on it
 sub_grow:
-    sub rax,[memory+ecx*8]
+    sub rax,[memory+rcx*8]
     push rdx
     xor edx,edx
     mov ecx,10
@@ -273,7 +273,7 @@ sub_grow:
     ; return
     jmp setf
 mul_grow:
-    imul rax,[memory+ecx*8]
+    imul rax,[memory+rcx*8]
     push rdx
     xor edx,edx
     mov ecx,10
@@ -293,9 +293,9 @@ div_grow:
     jmp setf
 xchg_grow:
     push [jump_table+rax*8]
-    push [jump_table+ecx*8]
+    push [jump_table+rcx*8]
     pop [jump_table+rax*8]
-    pop [jump_table+ecx*8]
+    pop [jump_table+rcx*8]
     ; return
     pop rax
     jmp rax
@@ -310,7 +310,7 @@ ins_inp:
     jmp getch
     here:
     movzx rax, byte [char] ; get char
-    mov [memory+ecx*8],rax ; mov char
+    mov [memory+rcx*8],rax ; mov char
     jmp next ; return
 ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
@@ -327,7 +327,7 @@ ins_jmpm:
     jnz loop
     jmp exit
 jmp_z:
-    mov rax,[memory+ecx*8]
+    mov rax,[memory+rcx*8]
     test r9b,0b1000000
     jz jmp_finish
     add rdx,rax
@@ -336,19 +336,19 @@ jmp_z:
 jmp_nz:
     test r9b,0b1000000
     jnz jmp_finish
-    add rdx,[memory+ecx*8]
+    add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_s:
     test r9b,0b0100000
     jz jmp_finish
-    add rdx,[memory+ecx*8]
+    add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_ns:
     test r9b,0b0100000
     jnz jmp_finish
-    add rdx,[memory+ecx*8]
+    add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_sz:
@@ -359,23 +359,23 @@ jmp_sz:
     ;return
     jmp jmp_finish
     .good:
-    add rdx,[memory+ecx*8]
+    add rdx,[memory+rcx*8]
 jmp_nsz:
     test r9b,0b0100000
     jnz jmp_finish
     test r9b,0b1100000
     jnz jmp_finish
-    add rdx,[memory+ecx*8]
+    add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_:
-    add rdx,[memory+ecx*8]
+    add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_c:
     test r9b,0b0010000
     jz jmp_finish
-    add rdx,[memory+ecx*8]
+    add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_default:
@@ -384,7 +384,7 @@ jmp_default:
     jmp jmp_finish
 ins_revf:
     call get_abs_rcx
-    jmp [revf_table+ecx*8] ; call revf
+    jmp [revf_table+rcx*8] ; call revf
 revzf:
     xor r9b,0b10000000
     ;return
