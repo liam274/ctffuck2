@@ -80,7 +80,7 @@ main:
     ; --- set raw mode --- ;
 
     mov rax, 16
-    mov rdi, 0
+    xor rdi, rdi
     mov rsi, TCGETS
     mov rdx, old_termios
     syscall
@@ -98,7 +98,7 @@ main:
     mov byte [new_termios + 16 + 5], 0
     
     mov rax, 16
-    mov rdi, 0
+    xor rdi, rdi
     mov rsi, TCSETS
     mov rdx, new_termios
     syscall
@@ -121,7 +121,6 @@ main:
     ; 2 = cf
     ; 3 = if
     ; 4 = of
-    ; 5 = trans_ok
 loop:
     movzx rcx, byte [r14+rdx] ; get char
     ; digit filter
@@ -133,16 +132,12 @@ loop_exe:
     ; calc arg
     test r15,r15 ; set flag
     js .there ; reduce jmps, generally
-    .here:
-    mov rax,r15
-    sub rax,rcx
-    mov r15,rcx
-    mov rcx,rax
+    sub r15,rcx
+    xchg rcx,r15
     jmp [r15*8+jump_table]
     .there:
     mov r15,rcx
-    add r15,rcx
-    jmp .here
+    jmp [r15*8+jump_table]
     ;loop end
 next:
     inc rdx
@@ -165,13 +160,15 @@ exit:
     xor edi, edi
     jmp norm_exit
 norm_exit:
+    push rdi
     ; recover to normal mode
     mov rax, 16
-    mov rdi, 0
+    xor rdi,rdi
     mov rsi, TCSETS
     mov rdx, old_termios
     syscall
     ; exit
+    pop rdi
     mov eax, 60 ; sys_exit
     syscall
 
