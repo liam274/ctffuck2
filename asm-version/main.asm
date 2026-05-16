@@ -78,7 +78,7 @@ main:
     syscall
 
     ; --- set raw mode --- ;
-
+    ; since all the reg edited is not important, so it's fine to not to push them
     mov eax, 16
     xor edi, edi
     mov rsi, TCGETS
