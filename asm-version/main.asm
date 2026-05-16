@@ -48,7 +48,8 @@ main:
     syscall
     test rax,rax ; test if success
     js exit_fail_open
-    mov rdi,rax ; fd
+    push rax
+    pop rdi ; fd
 
     ; get file length
     push 8
@@ -59,13 +60,16 @@ main:
     syscall
     test rax,rax
     je exit_fail_lseek
-    mov r13,rax
+    push rax
+    pop r13
     ; store size in r13
 
     ; store it somewhere(mmap)
-    mov r8,rdi
+    push rdi
+    pop r8
     xor edi,edi
-    mov rsi,r13
+    push r13
+    pop rsi
     push 1
     pop rdx
     push 2
@@ -76,9 +80,10 @@ main:
     syscall
     test rax,rax
     js exit_fail_store
-
-    mov rdi, r8 ; recover registries
-    mov r14, rax ; base addr
+    push r8
+    pop rdi ; recover registries
+    push rax
+    pop r14 ; base addr
     ; close the file since we no longer need it
     push 3
     pop rax
