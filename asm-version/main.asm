@@ -43,16 +43,19 @@ main:
     pop rdi ; argv[1]
     xor esi,esi
     xor edx,edx
-    mov eax,2
+    push 2
+    pop rax
     syscall
     test rax,rax ; test if success
     js exit_fail_open
     mov rdi,rax ; fd
 
     ; get file length
-    mov eax,8
+    push 8
+    pop rax
     xor esi,esi
-    mov edx,2
+    push 2
+    pop rdx
     syscall
     test rax,rax
     je exit_fail_lseek
@@ -63,10 +66,13 @@ main:
     mov r8,rdi
     xor edi,edi
     mov rsi,r13
-    mov edx,1
-    mov r10d,2
+    push 1
+    pop rdx
+    push 2
+    pop r10
     xor r9d,r9d
-    mov eax,9
+    push 9
+    pop rax
     syscall
     test rax,rax
     js exit_fail_store
@@ -74,20 +80,24 @@ main:
     mov rdi, r8 ; recover registries
     mov r14, rax ; base addr
     ; close the file since we no longer need it
-    mov eax, 3
+    push 3
+    pop rax
     syscall ; file closed
 
     ; --- set raw mode --- ;
     ; since all the reg edited is not important, so it's fine to not to push them
-    mov eax, 16
+    push 16
+    pop rax
     xor edi, edi
-    mov rsi, 0x5401
+    push 0x5401
+    pop rsi
     lea rdx, [old_termios]
     syscall
 
     lea rsi, [old_termios]
     lea rdi, [new_termios]
-    mov ecx, 60
+    push 60
+    pop rcx
     rep movsb
 
     mov eax, dword [new_termios + 12]
@@ -97,15 +107,18 @@ main:
     mov byte [new_termios + 16 + 6], 1
     mov byte [new_termios + 16 + 5], 0
     
-    mov eax, 16
+    push 16
+    pop rax
     xor edi, edi
-    mov esi, 0x5402
+    push 0x5402
+    pop rsi
     lea rdx, [new_termios]
     syscall
 
     ; init
     xor edx,edx ; ctx->pointer
-    mov r15,-1 ; last
+    push -1
+    pop r15 ; last
     xor ecx,ecx ; arg
     xor ebx,ebx ; head_pointer
     xor r8b,r8b ; counter
@@ -160,14 +173,17 @@ exit:
     jmp norm_exit
 norm_exit:
     ; recover to normal mode
-    mov eax, 16
+    push 16
+    pop rax
     xor edi,edi
-    mov esi, 0x5402
+    push 0x5402
+    pop rsi
     lea rdx, [old_termios]
     syscall
     ; exit
     pop rdi
-    mov eax, 60 ; sys_exit
+    push 60 ; sys_exit
+    pop rax
     syscall
 
 ins_read:
