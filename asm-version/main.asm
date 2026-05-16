@@ -429,6 +429,7 @@ jmp_c:
     jmp jmp_finish
 jmp_default:
     ;return
+    inc rdx
     jmp jmp_finish
 ins_revf:
     push .start
@@ -529,7 +530,9 @@ get_val:
     jmp rax
 setf:
     jz .zero
+    ;not zero
     js .sign_not_zero
+    ;not zero && not sign
     and r9b,0b00111111 ; not sign not zero
     jmp .exit
     .sign_not_zero:
@@ -538,8 +541,8 @@ setf:
     jmp .exit
     .zero:
     js .sign_zero
-    or r9b,0b01000000 ; set SF
-    and r9b,0b01111111 ; unset ZF
+    or r9b,0b10000000 ; set ZF
+    and r9b,0b10111111 ; unset SF
     jmp .exit
     .sign_zero:
     or r9b, 0b11000000
@@ -582,9 +585,6 @@ getch:
     mov rsi, char
     mov rdx, 1
     syscall
-    cmp rax, 1
-    sbb eax, eax
-    mov [char], al
     pop rcx
     pop rdx
     jmp here
