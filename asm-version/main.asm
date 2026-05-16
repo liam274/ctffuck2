@@ -133,9 +133,9 @@ loop_exe:
     js .there ; reduce jmps, generally
     sub r15d,ecx
     xchg ecx,r15d
-    jmp [r15d*8+jump_table]
+    jmp [r15*8+jump_table]
     .there:
-    mov r15,rcx
+    mov r15d,ecx
     jmp [r15*8+jump_table]
     ;loop end
 next:
@@ -260,7 +260,7 @@ add_grow:
     mov ecx,edx ; ecx = rax % 10
     pop rdx
     ; return
-    jmp setf ; so now the stack has the return addr on it
+    jmp setf ; so now the stack has the return addr on top
 sub_grow:
     sub rax,[memory+rcx*8]
     push rdx
@@ -283,8 +283,8 @@ mul_grow:
     jmp setf
 mod_grow:
     mov r11,[memory+rcx*8]
-    test r11,r11
     mov ecx,1
+    test r11,r11
     cmovz eax,ecx
     push rdx
     xor edx,edx
@@ -320,7 +320,7 @@ ins_inp:
     test r9b,0b00010000 ; test if
     jz next ; if not set, bye bye
     call get_abs_rcx
-    jmp getch
+    jmp getch ; don't change it to call, getch is optimized
     here:
     movzx rax, byte [char] ; get char
     mov [memory+rcx*8],rax ; mov char
@@ -340,10 +340,9 @@ ins_jmpm:
     jnz loop
     jmp exit
 jmp_z:
-    mov rax,[memory+rcx*8]
     test r9b,0b10000000
     jz jmp_finish
-    add rdx,rax
+    add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_nz:
@@ -364,19 +363,18 @@ jmp_ns:
     add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
-jmp_sz:
+jmp_sz: ; ZF || SF
     test r9b,0b01000000
     jnz .good
-    test r9b,0b11000000
-    jnz .good
+    test r9b,0b10000000
+    jz jmp_finish
     ;return
-    jmp jmp_finish
     .good:
     add rdx,[memory+rcx*8]
-jmp_nsz:
+jmp_nsz: ; !ZF && !SF
     test r9b,0b01000000
     jnz jmp_finish
-    test r9b,0b11000000
+    test r9b,0b10000000
     jnz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
@@ -433,12 +431,12 @@ push_in:
     mov [stack+rbx*8],ecx ; write abs
     ret
 get_val:
-    pop r12
+    pop r12 ; pop call set addr
     pop rax ; get arg
     push r12
     add eax,ebx
     and eax,7
-    mov rax, [stack+rax*8]
+    mov eax, [stack+rax*8]
     ret
 setf: ; don't optimize its return, since some other performance improvement depends on it
     jz .zero
