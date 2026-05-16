@@ -43,16 +43,16 @@ main:
     pop rdi ; argv[1]
     xor esi,esi
     xor edx,edx
-    mov rax,2
+    mov eax,2
     syscall
     test rax,rax ; test if success
     js exit_fail_open
     mov rdi,rax ; fd
 
     ; get file length
-    mov rax,8
+    mov eax,8
     xor esi,esi
-    mov rdx,2
+    mov edx,2
     syscall
     test rax,rax
     je exit_fail_lseek
@@ -63,10 +63,10 @@ main:
     mov r8,rdi
     xor edi,edi
     mov rsi,r13
-    mov rdx,1
-    mov r10,2
+    mov edx,1
+    mov r10d,2
     xor r9d,r9d
-    mov rax,9
+    mov eax,9
     syscall
     test rax,rax
     js exit_fail_store
@@ -74,12 +74,12 @@ main:
     mov rdi, r8 ; recover registries
     mov r14, rax ; base addr
     ; close the file since we no longer need it
-    mov rax, 3
+    mov eax, 3
     syscall
 
     ; --- set raw mode --- ;
 
-    mov rax, 16
+    mov eax, 16
     xor edi, edi
     mov rsi, TCGETS
     mov rdx, old_termios
@@ -87,7 +87,7 @@ main:
 
     mov rsi, old_termios
     mov rdi, new_termios
-    mov rcx, 60
+    mov ecx, 60
     rep movsb
 
     mov eax, dword [new_termios + 12]
@@ -97,7 +97,7 @@ main:
     mov byte [new_termios + 16 + 6], 1
     mov byte [new_termios + 16 + 5], 0
     
-    mov rax, 16
+    mov eax, 16
     xor edi, edi
     mov rsi, TCSETS
     mov rdx, new_termios
@@ -122,7 +122,7 @@ main:
     ; 3 = if
     ; 4 = of
 loop:
-    movzx rcx, byte [r14+rdx] ; get char
+    movzx ecx, byte [r14+rdx] ; get char
     ; digit filter
     sub rcx,'0'
     jb next
@@ -162,7 +162,7 @@ exit:
 norm_exit:
     push rdi
     ; recover to normal mode
-    mov rax, 16
+    mov eax, 16
     xor edi,edi
     mov rsi, TCSETS
     mov rdx, old_termios
@@ -232,12 +232,12 @@ ins_print:
     .start:
     cmp qword [memory+rcx*8], 0 ; check if is zero
     jz next ; skip so as not to print null
-    mov rax, 1 ; write()
+    mov eax, 1 ; write()
     push rdi ; save rdi
     push rdx ; save rdx
-    mov rdi,1
+    mov edi,1
     lea rsi, [memory+rcx*8] ; pointer to addr
-    mov rdx, 1
+    mov edx, 1
     syscall
     pop rdx
     pop rdi
@@ -463,7 +463,7 @@ revf_default:
 
 push_in:
     inc rbx
-    and rbx,7
+    and ebx,7
     pop rax ; get arg
     push .here
     push rax
@@ -476,9 +476,9 @@ push_in:
 get_val:
     pop rax ; get arg
     add rax,rbx
-    and rax,7
+    and eax,7
     .not_too_big:
-    mov r12, [stack+rax*8]
+    mov r12, [stack+eax*8]
     pop rax ; get addr
     push r12
     jmp rax
@@ -534,10 +534,10 @@ getch:
     push rdx
     push rcx
 
-    mov rax, 0
-    mov rdi, 0
+    xor eax, eax
+    xor edi, edi
     mov rsi, char
-    mov rdx, 1
+    mov edx, 1
     syscall
     pop rcx
     pop rdx
