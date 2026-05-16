@@ -114,7 +114,6 @@ main:
     ; 2 = swap counter
     ; 3 = grow counter
     ; 4 = jmpm counter
-    ; 5 = revf coutner
     mov r9b, 0b00011000 ; flag
     ; 0 = zf
     ; 1 = sf
@@ -328,42 +327,42 @@ ins_jmpm:
     jmp exit
 jmp_z:
     mov rax,[memory+rcx*8]
-    test r9b,0b1000000
+    test r9b,0b10000000
     jz jmp_finish
     add rdx,rax
     ;return
     jmp jmp_finish
 jmp_nz:
-    test r9b,0b1000000
+    test r9b,0b10000000
     jnz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_s:
-    test r9b,0b0100000
+    test r9b,0b01000000
     jz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_ns:
-    test r9b,0b0100000
+    test r9b,0b01000000
     jnz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
     jmp jmp_finish
 jmp_sz:
-    test r9b,0b0100000
+    test r9b,0b01000000
     jnz .good
-    test r9b,0b1100000
+    test r9b,0b11000000
     jnz .good
     ;return
     jmp jmp_finish
     .good:
     add rdx,[memory+rcx*8]
 jmp_nsz:
-    test r9b,0b0100000
+    test r9b,0b01000000
     jnz jmp_finish
-    test r9b,0b1100000
+    test r9b,0b11000000
     jnz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
@@ -373,7 +372,7 @@ jmp_:
     ;return
     jmp jmp_finish
 jmp_c:
-    test r9b,0b0010000
+    test r9b,0b00100000
     jz jmp_finish
     add rdx,[memory+rcx*8]
     ;return
@@ -425,7 +424,6 @@ get_val:
     push r12
     add eax,ebx
     and eax,7
-    .not_too_big:
     mov rax, [stack+rax*8]
     ret
 setf: ; don't optimize its return, since some other performance improvement depends on it
