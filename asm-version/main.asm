@@ -527,7 +527,7 @@ revf_table:
 
 filesize equ $ - ehdr
 
-ABSOLUTE $
+ABSOLUTE $ ; Tell NASM: me want virtual address
 
 old_termios resb 60
 new_termios resb 60
