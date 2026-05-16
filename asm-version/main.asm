@@ -77,7 +77,7 @@ main:
     mov rax, 3
     syscall
 
-    ; set raw mode
+    ; --- set raw mode --- ;
 
     mov rax, 16
     mov rdi, 0
@@ -109,6 +109,12 @@ main:
     xor rcx,rcx ; arg
     xor rbx,rbx ; head_pointer
     xor r8b,r8b ; counter
+    ; 0 = read_counter
+    ; 1 = add_counter
+    ; 2 = swap counter
+    ; 3 = grow counter
+    ; 4 = jmpm counter
+    ; 5 = revf coutner
     mov r9b, 0b00011000 ; flag
     ; 0 = zf
     ; 1 = sf
@@ -117,12 +123,7 @@ main:
     ; 4 = of
     ; 5 = trans_ok
 loop:
-    test r9b,0b00000100 ; check if has transposus
-    jz .main_loop
-    and r9b,0b11111011
-    jmp loop_exe
-    .main_loop:
-    movzx rcx, byte [r14+rdx]
+    movzx rcx, byte [r14+rdx] ; get char
     ; digit filter
     sub rcx,'0'
     jb next
@@ -130,20 +131,22 @@ loop:
     ja next
 loop_exe:
     ; calc arg
-    add r15,0
-    jns .here
-    mov r15,rcx
-    add r15,rcx
+    test r15,r15 ; set flag
+    js .there ; reduce jmps, generally
     .here:
     mov rax,r15
     sub rax,rcx
     mov r15,rcx
     mov rcx,rax
     jmp [r15*8+jump_table]
+    .there:
+    mov r15,rcx
+    add r15,rcx
+    jmp .here
     ;loop end
 next:
     inc rdx
-    cmp rdx, r13
+    cmp rdx, r13 ; check if reached end
     jnz loop
     jmp exit
 exit_no_arg:
@@ -173,23 +176,21 @@ norm_exit:
     syscall
 
 ins_read:
-    push .start
+    push .start ; set return addr
     push rcx
     jmp get_abs
     .start:
-    pop rcx
-    test r8b, 0b10000000
-    jz .next
-    ; mov memory
+    pop rcx ; get the abs
+    test r8b, 0b10000000 ; if counter ok
+    jz .next ; only one parm
     push .return_here
     push 0
-    jmp get_val
+    jmp get_val ; at(0)
     .return_here:
     pop rax
     push [memory+rcx*8]
     pop [memory+rax*8]
     push .finish
-    push [memory+rax*8]
     jmp setf
     .next:
         push .finish
@@ -208,7 +209,6 @@ ins_add:
     pop rax
     add [memory+rax*8],rcx
     push .finish
-    push [memory+rax*8]
     jmp setf
     .next:
         push .finish
@@ -297,22 +297,19 @@ ins_grow:
         push rcx
         jmp push_in
     .finish:
-    or r9b, 0b00000100
     xor r8b,0b00010000
-    dec rdx
-    jmp next
+    jmp loop_exe
 add_grow:
-    pop rax
+    pop rax ; pop arg
     add rax,[memory+rcx*8]
-    push rdx
+    push rdx ; push temp
     xor rdx,rdx
     mov r11,10
     div r11
-    pop rdx
+    pop rdx ; clear temp
     mov rcx,rax
     ; return
-    push rcx
-    jmp setf
+    jmp setf ; so now the stack has the return addr on it
 sub_grow:
     pop rax
     sub rax,[memory+rcx*8]
@@ -323,7 +320,6 @@ sub_grow:
     pop rdx
     mov rcx,rax
     ; return
-    push rcx
     jmp setf
 mul_grow:
     pop rax
@@ -335,7 +331,6 @@ mul_grow:
     pop rdx
     mov rcx,rax
     ; return
-    push rcx
     jmp setf
 div_grow:
     pop rax
@@ -346,10 +341,9 @@ div_grow:
     pop rdx
     mov rcx,rax
     ; return
-    push rcx
     jmp setf
 xchg_grow:
-    pop rax
+    pop rax ; pop arg
     push [jump_table+rax*8]
     push [jump_table+rcx*8]
     pop [jump_table+rax*8]
@@ -359,46 +353,46 @@ xchg_grow:
     jmp rax
 default_grow:
     pop rax
+    ; return
     pop rax
     jmp rax
 ins_inp:
-    test r9b,0b00010000
-    jz next
+    test r9b,0b00010000 ; test if
+    jz next ; if not set, bye bye
     push .start
     push rcx
     jmp get_abs
     .start:
-    pop rcx
+    pop rcx ; get abs
     jmp getch
     here:
-    movzx rax, byte [char]
-    mov [memory+rcx*8],rax
-    jmp next
+    movzx rax, byte [char] ; get char
+    mov [memory+rcx*8],rax ; mov char
+    jmp next ; return
 ins_jmpm:
-    test r8b,0b00001000
-    jz .next
+    test r8b,0b00001000 ; test if counter enough
+    jz .next ; counter not enough
     push .start
     push rcx
     jmp get_abs
     .start:
-    pop rcx
+    pop rcx ; get abs
     push .return_here
     push 4
     jmp get_val
     .return_here:
-    pop rax
+    pop rax ; at(4)
     push .finish
-    push [memory+rcx*8]
-    jmp [rax*8+jmpm_table]
+    jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
         push .finish
         push rcx
         jmp push_in
     .finish:
-    xor r8b,0b00001000
+    xor r8b,0b00001000 ; reverse the counter
     jmp next
 jmp_z:
-    pop rax
+    mov rax,[memory+rcx*8]
     test r9b,0b1000000
     jz .return
     add rdx,rax
@@ -407,71 +401,63 @@ jmp_z:
     pop rax
     jmp rax
 jmp_nz:
-    pop rax
     test r9b,0b1000000
     jnz .return
-    add rdx,rax
+    add rdx,[memory+rcx*8]
     ;return
     .return:
     pop rax
     jmp rax
 jmp_s:
-    pop rax
     test r9b,0b0100000
     jz .return
-    add rdx,rax
+    add rdx,[memory+rcx*8]
     ;return
     .return:
     pop rax
     jmp rax
 jmp_ns:
-    pop rax
     test r9b,0b0100000
     jnz .return
-    add rdx,rax
+    add rdx,[memory+rcx*8]
     ;return
     .return:
     pop rax
     jmp rax
 jmp_sz:
-    pop rax
     test r9b,0b0100000
     jz .return
     test r9b,0b1100000
     jz .return
-    add rdx,rax
+    add rdx,[memory+rcx*8]
     ;return
     .return:
     pop rax
     jmp rax
 jmp_nsz:
-    pop rax
     test r9b,0b0100000
     jnz .return
     test r9b,0b1100000
     jnz .return
-    add rdx,rax
+    add rdx,[memory+rcx*8]
     ;return
     .return:
     pop rax
     jmp rax
 jmp_:
-    pop rax
-    add rdx,rax
+    add rdx,[memory+rcx*8]
     ;return
     pop rax
     jmp rax
 jmp_c:
-    pop rax
     test r9b,0b0010000
     jz .return
-    add rdx,rax
+    add rdx,[memory+rcx*8]
     ;return
     .return:
     pop rax
     jmp rax
 jmp_default:
-    pop rax
     ;return
     pop rax
     jmp rax
@@ -480,37 +466,32 @@ ins_revf:
     push rcx
     jmp get_abs
     .start:
-    pop rcx
-    push next
-    jmp [revf_table+rcx*8]
+    pop rcx ; get abs
+    jmp [revf_table+rcx*8] ; call revf
 revzf:
     xor r9b,0b10000000
     ;return
-    pop rax
-    jmp rax
+    jmp next
 revsf:
     xor r9b,0b01000000
     ;return
-    pop rax
-    jmp rax
+    jmp next
 revcf:
     xor r9b,0b00100000
     ;return
-    pop rax
-    jmp rax
+    jmp next
 revif:
     xor r9b,0b00010000
     ;return
-    pop rax
-    jmp rax
+    jmp next
 revof:
     xor r9b,0b00001000
     ;return
-    pop rax
-    jmp rax
+    jmp next
 revf_default:
-    pop rax
-    jmp rax
+    jmp next
+
+; --- data --- ;
 
 align 8
 jump_table:
@@ -526,14 +507,6 @@ jump_table:
     dq ins_revf
 align 16
 memory: times 10 dq 0
-
-
-; 0 = read_counter
-; 1 = add_counter
-; 2 = swap counter
-; 3 = grow counter
-; 4 = jmpm counter
-; 5 = revf coutner
 align 8
 stack: times 8 dq 0
 align 8
