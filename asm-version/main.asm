@@ -145,7 +145,6 @@ loop:
     movzx ecx, byte [r14+rdx] ; get char
     ; digit filter
     sub rcx,'0'
-    jb next
     cmp rcx,9
     ja next
 loop_exe:
@@ -201,8 +200,7 @@ ins_read:
     call get_val ; at(0)
     push [memory+rcx*8]
     pop [memory+rax*8]
-    push .finish
-    jmp setf
+    call setf
     .next:
         call push_in
     .finish:
@@ -214,8 +212,7 @@ ins_add:
     push 1
     call get_val
     add [memory+rax*8],rcx
-    push .finish
-    jmp setf
+    call setf
     .next:
         call push_in
     .finish:
@@ -266,8 +263,8 @@ ins_grow:
     call get_abs_rcx
     push 3
     call get_val
-    push .finish
-    jmp [rax*8+grow_table]
+    call [rax*8+grow_table]
+    jmp .finish
     .next:
         call push_in
     .finish:
@@ -281,7 +278,8 @@ do_mod:
     mov ecx,edx ; ecx = rax % 10
     pop rdx
     ; return
-    jmp setf ; so now the stack has the return addr on top
+    call setf ; so now the stack has the return addr on top
+    ret
 add_grow:
     add rax,[memory+rcx*8]
     jmp do_mod
@@ -303,7 +301,8 @@ mod_grow:
     mov ecx,edx
     pop rdx
     ; return
-    jmp setf
+    call setf
+    ret
 div_grow:
     mov rax,[memory+rcx*8]
     jmp do_mod
@@ -313,12 +312,10 @@ xchg_grow:
     pop [jump_table+rax*8]
     pop [jump_table+rcx*8]
     ; return
-    pop rax
-    jmp rax
+    ret
 default_grow:
     ; return
-    pop rax
-    jmp rax
+    ret
 ins_inp:
     test r9b,0b00010000 ; test IF
     jz next ; if not set, bye bye
@@ -440,21 +437,19 @@ setf: ; don't optimize its return, since some other performance improvement depe
     js .sign_not_zero
     ;not zero && not sign
     and r9b,0b00111111 ; not sign not zero
-    jmp .exit
+    ret
     .sign_not_zero:
     and r9b, 0b01111111 ; unset ZF
     or r9b,0b01000000 ; set SF
-    jmp .exit
+    ret
     .zero:
     js .sign_zero
     or r9b,0b10000000 ; set ZF
     and r9b,0b10111111 ; unset SF
-    jmp .exit
+    ret
     .sign_zero:
     or r9b, 0b11000000
-    .exit:
-    pop rax
-    jmp rax
+    ret
 get_abs_rcx:
     test rcx, rcx
     jns .return
