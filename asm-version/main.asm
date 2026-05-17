@@ -164,16 +164,16 @@ next:
     jmp exit
 exit_no_arg:
     push 1
-    jmp norm_exit
+    jmp no_recovery
 exit_fail_open:
     push 2
-    jmp norm_exit
+    jmp no_recovery
 exit_fail_store:
     push 3
-    jmp norm_exit
+    jmp no_recovery
 exit_fail_lseek:
     push 4
-    jmp norm_exit
+    jmp no_recovery
 exit:
     push 0
     jmp norm_exit
@@ -187,6 +187,7 @@ norm_exit:
     lea rdx, [old_termios]
     syscall
     ; exit
+    no_recovery:
     pop rdi
     push 60 ; sys_exit
     pop rax
