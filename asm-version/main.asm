@@ -73,9 +73,9 @@ main:
     pop rdi ; argv[0]
     pop rdi ; argv[1]
     xor esi,esi
-    xor edx,edx
     push 2
     pop rax
+    cdq
     syscall
     test rax,rax ; test if success
     js exit_fail_open
@@ -196,6 +196,7 @@ loop_exe:
     mov r15d,ecx
     jmp [r15*8+jump_table]
     ;loop end
+align 8
 jump_table:
     dq ins_read
     dq ins_add
