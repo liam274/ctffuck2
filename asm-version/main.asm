@@ -141,6 +141,11 @@ main:
     ; 2 = cf
     ; 3 = if
     ; 4 = of
+    jmp loop
+    align 16
+next:
+    inc rdx
+    jz exit
 loop:
     movzx ecx, byte [r14+rdx] ; get char
     ; digit filter
@@ -152,16 +157,14 @@ loop_exe:
     test r15,r15 ; set flag
     js .there ; reduce jmps, generally
     sub r15d,ecx
-    xchg ecx,r15d
+    mov eax,ecx
+    mov ecx,r15d
+    mov r15d,eax
     jmp [r15*8+jump_table]
     .there:
     mov r15d,ecx
     jmp [r15*8+jump_table]
     ;loop end
-next:
-    inc rdx
-    jnz loop ; check if reached end
-    jmp exit
 exit_no_arg:
     push 1
     jmp no_recovery
@@ -186,8 +189,8 @@ norm_exit:
     pop rsi
     lea rdx, [old_termios]
     syscall
+no_recovery:
     ; exit
-    no_recovery:
     pop rdi
     push 60 ; sys_exit
     pop rax
@@ -322,7 +325,7 @@ ins_inp:
     jz next ; if not set, bye bye
     call get_abs_rcx
     jmp getch ; don't change it to call, getch is optimized
-    here:
+here:
     movzx rax, byte [char] ; get char
     mov [memory+rcx*8],rax ; mov char
     jmp next ; return
@@ -335,7 +338,7 @@ ins_jmpm:
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
         call push_in
-    jmp_finish:
+jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
     test rdx,rdx
     jnz loop
