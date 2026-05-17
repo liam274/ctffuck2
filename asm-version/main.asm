@@ -35,6 +35,37 @@ phdr:
     dq 0x1000
 phdrsize equ $ - phdr
 
+exit_no_arg:
+    push 1
+    jmp no_recovery
+exit_fail_open:
+    push 2
+    jmp no_recovery
+exit_fail_store:
+    push 3
+    jmp no_recovery
+exit_fail_lseek:
+    push 4
+    jmp no_recovery
+exit:
+    push 0
+    jmp norm_exit
+norm_exit:
+    ; recover to normal mode
+    push 16
+    pop rax
+    xor edi,edi
+    push 0x5402
+    pop rsi
+    lea rdx, [old_termios]
+    syscall
+no_recovery:
+    ; exit
+    pop rdi
+    push 60 ; sys_exit
+    pop rax
+    syscall
+
 main:
     pop rcx ; argc
     cmp rcx,2
@@ -48,8 +79,7 @@ main:
     syscall
     test rax,rax ; test if success
     js exit_fail_open
-    push rax
-    pop rdi ; fd
+    xchg eax, edi ; fd
 
     ; get file length
     push 8
@@ -157,7 +187,7 @@ loop_exe:
     test r15,r15 ; set flag
     js .there ; reduce jmps, generally
     sub r15d,ecx
-    mov eax,ecx
+    mov eax,ecx ; xchg ecx,r15d ; mov is faster
     mov ecx,r15d
     mov r15d,eax
     jmp [r15*8+jump_table]
@@ -165,36 +195,6 @@ loop_exe:
     mov r15d,ecx
     jmp [r15*8+jump_table]
     ;loop end
-exit_no_arg:
-    push 1
-    jmp no_recovery
-exit_fail_open:
-    push 2
-    jmp no_recovery
-exit_fail_store:
-    push 3
-    jmp no_recovery
-exit_fail_lseek:
-    push 4
-    jmp no_recovery
-exit:
-    push 0
-    jmp norm_exit
-norm_exit:
-    ; recover to normal mode
-    push 16
-    pop rax
-    xor edi,edi
-    push 0x5402
-    pop rsi
-    lea rdx, [old_termios]
-    syscall
-no_recovery:
-    ; exit
-    pop rdi
-    push 60 ; sys_exit
-    pop rax
-    syscall
 
 ins_read:
     call get_abs_rcx ; get abs of rcx
