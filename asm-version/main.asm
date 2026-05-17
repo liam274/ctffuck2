@@ -209,10 +209,7 @@ jump_table:
     dq ins_jmpm
     dq ins_revf
 get_val:
-    pop r12 ; pop call set addr
-    pop rax ; get arg
-    push r12
-    add eax,ebx
+    add eax,ebx ; assume rax as parm
     and eax,7
     mov eax, [stack+rax*8]
     ret
@@ -226,7 +223,7 @@ ins_read:
     call get_abs_rcx ; get abs of rcx
     test r8b, 0b10000000 ; if counter ok
     jz .next ; only one parm
-    push 0
+    xor eax,eax
     call get_val ; at(0)
     push [rbp+rcx*8]
     pop [rbp+rax*8]
@@ -239,7 +236,7 @@ ins_read:
 ins_add:
     test r8b,0b01000000
     jz .next
-    push 1
+    mov eax,1
     call get_val
     add [rbp+rax*8],rcx
     call setf
@@ -281,7 +278,7 @@ ins_swap:
     test r8b,0b00100000 ; check if counter enough
     jz .next
     call get_abs_rcx
-    push 2
+    mov eax,2
     call get_val
     push [rbp+rax*8]
     push [rbp+rcx*8]
@@ -297,7 +294,7 @@ ins_grow:
     test r8b,0b00010000 ; check if counter enough
     jz .next
     call get_abs_rcx
-    push 3
+    mov eax,3
     call get_val
     call [rax*8+grow_table]
     jmp .finish
@@ -338,7 +335,7 @@ ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
     jz .next ; counter not enough
     call get_abs_rcx
-    push 4
+    mov eax,4
     call get_val ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
@@ -346,7 +343,7 @@ ins_jmpm:
 jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
     test rdx,rdx
-    jnz loop
+    jae loop
     jmp exit
 jmpm_table:
     dq jmp_z
