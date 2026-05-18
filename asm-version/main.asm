@@ -99,8 +99,7 @@ main:
     xor edi,edi
     push r13
     pop rsi
-    push 1
-    pop rdx
+    mov dl,1
     push 2
     pop r10
     xor r9d,r9d
@@ -135,12 +134,8 @@ main:
     pop rcx
     rep movsb
 
-    mov eax, dword [r12 + 12]
-    and eax, ~(2 | 8)
-    mov dword [r12 + 12], eax
-
-    mov byte [r12 + 16 + 6], 1
-    mov byte [r12 + 16 + 5], 0
+    and dword [r12 + 12], ~(2 | 8)
+    mov word [r12 + 21], 0x0100
     
     push 16
     pop rax
@@ -360,24 +355,15 @@ ins_revf:
     call get_abs_rcx
     jmp [revf_table+rcx*8] ; call revf
 setf:
+    and r9b,0b00111111
+    js .sign
     jz .zero
-    ;not zero
-    js .sign_not_zero
-    ;not zero && not sign
-    and r9b,0b00111111 ; not sign not zero
     ret
-    .sign_not_zero:
-    and r9b, 0b01111111 ; unset ZF
-    or r9b,0b01000000 ; set SF
+    .sign:
+    or r9b,0b10000000
     ret
     .zero:
-    js .sign_zero
-    or r9b,0b10000000 ; set ZF
-    and r9b,0b10111111 ; unset SF
-    ret
-    .sign_zero:
-    or r9b, 0b11000000
-    ret
+    or r9b,0b01000000
 revf_table:
     dq revsf
     dq revzf
