@@ -55,8 +55,8 @@ norm_exit:
     push 16
     pop rax
     xor edi,edi
-    mov rsi, 0x5402
-    lea rdx, [old_termios]
+    mov esi, 0x5402
+    mov edx, old_termios
     syscall
 no_recovery:
     ; exit
@@ -120,17 +120,17 @@ main:
 
     ; --- set raw mode --- ;
     ; since all the reg edited is not important, so it's fine to not to push them
-    lea r12,old_termios
+    mov r12d,old_termios
     push 16
     pop rax
     xor edi, edi
     mov esi, 0x5401
-    mov rdx, r12
+    mov edx, r12d
     syscall
 
-    mov rsi, r12
-    lea r12,new_termios
-    mov rdi, r12
+    mov esi, r12d
+    mov r12d,new_termios
+    mov edi, r12d
     push 60
     pop rcx
     rep movsb
@@ -146,7 +146,7 @@ main:
     pop rax
     xor edi, edi
     mov esi, 0x5402
-    mov rdx,r12
+    mov edx,r12d
     syscall
 
     ; init
@@ -170,8 +170,8 @@ main:
     ; 2 = cf
     ; 3 = if
     ; 4 = of
-    lea rbp,memory
-    lea r12,stack
+    mov ebp,memory
+    mov r12d,stack
     jmp loop
     align 16
 next:
@@ -223,7 +223,7 @@ ins_read:
     call get_abs_rcx ; get abs of rcx
     test r8b, 0b10000000 ; if counter ok
     jz .next ; only one parm
-    xor eax,eax
+    xor al,al
     call get_val ; at(0)
     push [rbp+rcx*8]
     pop [rbp+rax*8]
@@ -236,7 +236,7 @@ ins_read:
 ins_add:
     test r8b,0b01000000
     jz .next
-    mov eax,1
+    mov al,1
     call get_val
     add [rbp+rax*8],rcx
     call setf
@@ -269,7 +269,7 @@ ins_print:
     mov eax, 1 ; write()
     push rdx ; save rdx
     mov edi,1
-    lea rsi, [rbp+rcx*8] ; pointer to addr
+    lea esi, [rbp+rcx*8] ; pointer to addr
     mov edx, 1
     syscall
     pop rdx
@@ -278,7 +278,7 @@ ins_swap:
     test r8b,0b00100000 ; check if counter enough
     jz .next
     call get_abs_rcx
-    mov eax,2
+    mov al,2
     call get_val
     push [rbp+rax*8]
     push [rbp+rcx*8]
@@ -294,7 +294,7 @@ ins_grow:
     test r8b,0b00010000 ; check if counter enough
     jz .next
     call get_abs_rcx
-    mov eax,3
+    mov al,3
     call get_val
     call [rax*8+grow_table]
     jmp .finish
@@ -335,7 +335,7 @@ ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
     jz .next ; counter not enough
     call get_abs_rcx
-    mov eax,4
+    mov al,4
     call get_val ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
