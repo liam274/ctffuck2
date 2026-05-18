@@ -368,12 +368,6 @@ setf:
     and al, 0b11000000
     or r9b, al
     ret
-    ; pushfq
-    ; pop r10
-    ; and r9b, 0b00111111
-    ; and r10b, 0b11000000
-    ; or r9b, r10b
-    ; ret
 add_grow:
     add rax,[rbp+rcx*8]
     jmp do_mod
