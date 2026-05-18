@@ -30,8 +30,8 @@
     30 00000048 0000000000000000            dq 0
     31 00000050 [0000000000000000]          dq ehdr
     32 00000058 [0000000000000000]          dq ehdr
-    33 00000060 6605000000000000            dq filesize
-    34 00000068 6F06000000000000            dq memsize
+    33 00000060 6305000000000000            dq filesize
+    34 00000068 6C06000000000000            dq memsize
     35 00000070 0010000000000000            dq 0x1000
     36                                  phdrsize equ $ - phdr
     37                                  
@@ -56,7 +56,7 @@
     56 0000008E 58                          pop rax
     57 0000008F 31FF                        xor edi,edi
     58 00000091 BE02540000                  mov esi, 0x5402
-    59 00000096 BA[66050000]                mov edx, old_termios
+    59 00000096 BA[63050000]                mov edx, old_termios
     60 0000009B 0F05                        syscall
     61                                  no_recovery:
     62                                      ; exit
@@ -118,7 +118,7 @@
    118                                  
    119                                      ; --- set raw mode --- ;
    120                                      ; since all the reg edited is not important, so it's fine to not to push them
-   121 000000F1 41BC[66050000]              mov r12d,old_termios
+   121 000000F1 41BC[63050000]              mov r12d,old_termios
    122 000000F7 6A10                        push 16
    123 000000F9 58                          pop rax
    124 000000FA 31FF                        xor edi, edi
@@ -127,7 +127,7 @@
    127 00000104 0F05                        syscall
    128                                  
    129 00000106 4489E6                      mov esi, r12d
-   130 00000109 41BC[A2050000]              mov r12d,new_termios
+   130 00000109 41BC[9F050000]              mov r12d,new_termios
    131 0000010F 4489E7                      mov edi, r12d
    132 00000112 6A3C                        push 60
    133 00000114 59                          pop rcx
@@ -164,8 +164,8 @@
    164                                      ; 2 = cf
    165                                      ; 3 = if
    166                                      ; 4 = of
-   167 0000014B BD[DF050000]                mov ebp,memory
-   168 00000150 41BC[2F060000]              mov r12d,stack
+   167 0000014B BD[DC050000]                mov ebp,memory
+   168 00000150 41BC[2C060000]              mov r12d,stack
    169 00000156 EB11                        jmp loop
    170 00000158 90<rep 8h>                  align 16
    171                                  next:
@@ -222,7 +222,7 @@
    222 00000218 E8D3FFFFFF                  call get_val ; at(0)
    223 0000021D 4C8B5CCD00                  mov r11, [rbp+rcx*8]
    224 00000222 4C895CC500                  mov [rbp+rax*8], r11
-   225 00000227 E81B020000                  call setf
+   225 00000227 E818020000                  call setf
    226                                      .next:
    227 0000022C E8CBFFFFFF                      call push_in
    228                                      .finish:
@@ -234,7 +234,7 @@
    234 00000240 B001                        mov al,1
    235 00000242 E8A9FFFFFF                  call get_val
    236 00000247 48014CC500                  add [rbp+rax*8],rcx
-   237 0000024C E8F6010000                  call setf
+   237 0000024C E8F3010000                  call setf
    238                                      .next:
    239 00000251 E8A6FFFFFF                      call push_in
    240                                      .finish:
@@ -299,13 +299,13 @@
    299 00000316 4180F010                    xor r8b,0b00010000
    300 0000031A E959FEFFFF                  jmp loop_exe
    301                                  grow_table:
-   302 0000031F [5504000000000000]          dq add_grow
-   303 00000327 [5C04000000000000]          dq sub_grow
-   304 0000032F [6304000000000000]          dq mul_grow
-   305 00000337 [6B04000000000000]          dq mod_grow
-   306 0000033F [A104000000000000]          dq div_grow
-   307 00000347 [A804000000000000]          dq xchg_grow
-   308 0000034F [C704000000000000]-         times 5 dq default_grow
+   302 0000031F [5204000000000000]          dq add_grow
+   303 00000327 [5904000000000000]          dq sub_grow
+   304 0000032F [6004000000000000]          dq mul_grow
+   305 00000337 [6804000000000000]          dq mod_grow
+   306 0000033F [9E04000000000000]          dq div_grow
+   307 00000347 [A504000000000000]          dq xchg_grow
+   308 0000034F [C404000000000000]-         times 5 dq default_grow
    308 0000034F <rep 5h>           
    309                                  ins_inp:
    310 00000377 41F6C110                    test r9b,0b00010000 ; test IF
@@ -313,7 +313,7 @@
    312 00000381 E8FAFEFFFF                  call get_abs_rcx
    313 00000386 EB12                        jmp getch ; don't change it to call, getch is optimized
    314                                  here:
-   315 00000388 480FB6054E020000            movzx rax, byte [char] ; get char
+   315 00000388 480FB6054B020000            movzx rax, byte [char] ; get char
    316 00000390 488944CD00                  mov [rbp+rcx*8],rax ; mov char
    317 00000395 E9C6FDFFFF                  jmp next ; return
    318                                  getch:
@@ -321,7 +321,7 @@
    320 0000039B 51                          push rcx
    321 0000039C 31C0                        xor eax, eax
    322 0000039E 31FF                        xor edi, edi
-   323 000003A0 BE[DE050000]                mov esi, char
+   323 000003A0 BE[DB050000]                mov esi, char
    324 000003A5 BA01000000                  mov edx, 1
    325 000003AA 0F05                        syscall
    326 000003AC 59                          pop rcx
@@ -342,140 +342,138 @@
    341 000003D5 0F838EFDFFFF                jae loop
    342 000003DB E9A8FCFFFF                  jmp exit
    343                                  jmpm_table:
-   344 000003E0 [C804000000000000]          dq jmp_z
-   345 000003E8 [DC04000000000000]          dq jmp_nz
-   346 000003F0 [F004000000000000]          dq jmp_s
-   347 000003F8 [0405000000000000]          dq jmp_ns
-   348 00000400 [1805000000000000]          dq jmp_sz
-   349 00000408 [2C05000000000000]          dq jmp_nsz
-   350 00000410 [4005000000000000]          dq jmp_
-   351 00000418 [4A05000000000000]          dq jmp_c
-   352 00000420 [5E05000000000000]-         times 2 dq jmp_default
+   344 000003E0 [C504000000000000]          dq jmp_z
+   345 000003E8 [D904000000000000]          dq jmp_nz
+   346 000003F0 [ED04000000000000]          dq jmp_s
+   347 000003F8 [0105000000000000]          dq jmp_ns
+   348 00000400 [1505000000000000]          dq jmp_sz
+   349 00000408 [2905000000000000]          dq jmp_nsz
+   350 00000410 [3D05000000000000]          dq jmp_
+   351 00000418 [4705000000000000]          dq jmp_c
+   352 00000420 [5B05000000000000]-         times 2 dq jmp_default
    352 00000420 <rep 2h>           
    353                                  
    354                                  ins_revf:
    355 00000430 E84BFEFFFF                  call get_abs_rcx
-   356 00000435 B007                        mov al, 7
-   357 00000437 28C8                        sub al, cl
-   358 00000439 88C1                        mov cl, al
-   359 0000043B B001                        mov al, 1
-   360 0000043D D2E0                        shl al, cl
-   361 0000043F 4130C1                      xor r9b, al
-   362 00000442 E919FDFFFF                  jmp next
-   363                                  setf:
-   364 00000447 9F                          lahf
-   365 00000448 0FB6C4                      movzx eax,ah
-   366 0000044B 4180E13F                    and r9b,0b00111111
-   367 0000044F 24C0                        and al, 0b11000000
-   368 00000451 4108C1                      or r9b, al
-   369 00000454 C3                          ret
-   370                                  add_grow:
-   371 00000455 480344CD00                  add rax,[rbp+rcx*8]
-   372 0000045A EB31                        jmp do_mod
-   373                                  sub_grow:
-   374 0000045C 482B44CD00                  sub rax,[rbp+rcx*8]
-   375 00000461 EB2A                        jmp do_mod
-   376                                  mul_grow:
-   377 00000463 480FAF44CD00                imul rax,[rbp+rcx*8]
-   378 00000469 EB22                        jmp do_mod
-   379                                  mod_grow:
-   380 0000046B 4C8B5CCD00                  mov r11,[rbp+rcx*8]
-   381 00000470 B901000000                  mov ecx,1
-   382 00000475 4D85DB                      test r11,r11
-   383 00000478 0F44C1                      cmovz eax,ecx
-   384 0000047B 52                          push rdx
-   385 0000047C 31D2                        xor edx,edx
-   386 0000047E 4889C1                      mov rcx,rax
-   387 00000481 48F7F1                      div rcx
-   388 00000484 89D1                        mov ecx,edx
-   389 00000486 5A                          pop rdx
-   390                                      ; return
-   391 00000487 E8BBFFFFFF                  call setf
-   392 0000048C C3                          ret
-   393                                  do_mod:
-   394 0000048D 52                          push rdx ; push temp
-   395 0000048E 31D2                        xor edx,edx
-   396 00000490 B90A000000                  mov ecx,10
-   397 00000495 48F7F1                      div rcx
-   398 00000498 89D1                        mov ecx,edx ; ecx = rax % 10
-   399 0000049A 5A                          pop rdx
-   400                                      ; return
-   401 0000049B E8A7FFFFFF                  call setf ; so now the stack has the return addr on top
-   402 000004A0 C3                          ret
-   403                                  div_grow:
-   404 000004A1 488B44CD00                  mov rax,[rbp+rcx*8]
-   405 000004A6 EBE5                        jmp do_mod
-   406                                  xchg_grow:
-   407 000004A8 FF34C5[A0010000]            push [jump_table+rax*8]
-   408 000004AF FF34CD[A0010000]            push [jump_table+rcx*8]
-   409 000004B6 668F04C5[A0010000]          pop [jump_table+rax*8]
-   410 000004BE 668F04CD[A0010000]          pop [jump_table+rcx*8]
-   411                                      ; return
-   412 000004C6 C3                          ret
-   413                                  default_grow:
-   414                                      ; return
-   415 000004C7 C3                          ret
-   416                                  
-   417                                  jmp_z:
-   418 000004C8 41F6C140                    test r9b,0b01000000
-   419 000004CC 0F84FCFEFFFF                jz jmp_finish
-   420 000004D2 480354CD00                  add rdx,[rbp+rcx*8]
-   421                                      ;return
-   422 000004D7 E9F2FEFFFF                  jmp jmp_finish
-   423                                  jmp_nz:
-   424 000004DC 41F6C140                    test r9b,0b01000000
-   425 000004E0 0F85E8FEFFFF                jnz jmp_finish
-   426 000004E6 480354CD00                  add rdx,[rbp+rcx*8]
-   427                                      ;return
-   428 000004EB E9DEFEFFFF                  jmp jmp_finish
-   429                                  jmp_s:
-   430 000004F0 41F6C180                    test r9b,0b10000000
-   431 000004F4 0F84D4FEFFFF                jz jmp_finish
-   432 000004FA 480354CD00                  add rdx,[rbp+rcx*8]
-   433                                      ;return
-   434 000004FF E9CAFEFFFF                  jmp jmp_finish
-   435                                  jmp_ns:
-   436 00000504 41F6C180                    test r9b,0b10000000
-   437 00000508 0F85C0FEFFFF                jnz jmp_finish
-   438 0000050E 480354CD00                  add rdx,[rbp+rcx*8]
-   439                                      ;return
-   440 00000513 E9B6FEFFFF                  jmp jmp_finish
-   441                                  jmp_sz: ; ZF || SF
-   442 00000518 41F6C1C0                    test r9b,0b11000000
-   443 0000051C 0F84ACFEFFFF                jz jmp_finish
-   444                                      ;return
-   445 00000522 480354CD00                  add rdx,[rbp+rcx*8]
-   446 00000527 E9A2FEFFFF                  jmp jmp_finish
-   447                                  jmp_nsz: ; !ZF && !SF
-   448 0000052C 41F6C1C0                    test r9b,0b11000000
-   449 00000530 0F8598FEFFFF                jnz jmp_finish
-   450 00000536 480354CD00                  add rdx,[rbp+rcx*8]
-   451                                      ;return
-   452 0000053B E98EFEFFFF                  jmp jmp_finish
-   453                                  jmp_:
-   454 00000540 480354CD00                  add rdx,[rbp+rcx*8]
-   455                                      ;return
-   456 00000545 E984FEFFFF                  jmp jmp_finish
-   457                                  jmp_c:
-   458 0000054A 41F6C120                    test r9b,0b00100000
-   459 0000054E 0F847AFEFFFF                jz jmp_finish
-   460 00000554 480354CD00                  add rdx,[rbp+rcx*8]
-   461                                      ;return
-   462 00000559 E970FEFFFF                  jmp jmp_finish
-   463                                  jmp_default:
-   464                                      ;return
-   465 0000055E 48FFC2                      inc rdx
-   466 00000561 E968FEFFFF                  jmp jmp_finish
-   467                                  ; --- end --- ;
+   356 00000435 80F107                      xor cl, 7
+   357 00000438 B001                        mov al, 1
+   358 0000043A D2E0                        shl al, cl
+   359 0000043C 4130C1                      xor r9b, al
+   360 0000043F E91CFDFFFF                  jmp next
+   361                                  setf:
+   362 00000444 9F                          lahf
+   363 00000445 0FB6C4                      movzx eax,ah
+   364 00000448 4180E13F                    and r9b,0b00111111
+   365 0000044C 24C0                        and al, 0b11000000
+   366 0000044E 4108C1                      or r9b, al
+   367 00000451 C3                          ret
+   368                                  add_grow:
+   369 00000452 480344CD00                  add rax,[rbp+rcx*8]
+   370 00000457 EB31                        jmp do_mod
+   371                                  sub_grow:
+   372 00000459 482B44CD00                  sub rax,[rbp+rcx*8]
+   373 0000045E EB2A                        jmp do_mod
+   374                                  mul_grow:
+   375 00000460 480FAF44CD00                imul rax,[rbp+rcx*8]
+   376 00000466 EB22                        jmp do_mod
+   377                                  mod_grow:
+   378 00000468 4C8B5CCD00                  mov r11,[rbp+rcx*8]
+   379 0000046D B901000000                  mov ecx,1
+   380 00000472 4D85DB                      test r11,r11
+   381 00000475 0F44C1                      cmovz eax,ecx
+   382 00000478 52                          push rdx
+   383 00000479 31D2                        xor edx,edx
+   384 0000047B 4889C1                      mov rcx,rax
+   385 0000047E 48F7F1                      div rcx
+   386 00000481 89D1                        mov ecx,edx
+   387 00000483 5A                          pop rdx
+   388                                      ; return
+   389 00000484 E8BBFFFFFF                  call setf
+   390 00000489 C3                          ret
+   391                                  do_mod:
+   392 0000048A 52                          push rdx ; push temp
+   393 0000048B 31D2                        xor edx,edx
+   394 0000048D B90A000000                  mov ecx,10
+   395 00000492 48F7F1                      div rcx
+   396 00000495 89D1                        mov ecx,edx ; ecx = rax % 10
+   397 00000497 5A                          pop rdx
+   398                                      ; return
+   399 00000498 E8A7FFFFFF                  call setf ; so now the stack has the return addr on top
+   400 0000049D C3                          ret
+   401                                  div_grow:
+   402 0000049E 488B44CD00                  mov rax,[rbp+rcx*8]
+   403 000004A3 EBE5                        jmp do_mod
+   404                                  xchg_grow:
+   405 000004A5 FF34C5[A0010000]            push [jump_table+rax*8]
+   406 000004AC FF34CD[A0010000]            push [jump_table+rcx*8]
+   407 000004B3 668F04C5[A0010000]          pop [jump_table+rax*8]
+   408 000004BB 668F04CD[A0010000]          pop [jump_table+rcx*8]
+   409                                      ; return
+   410 000004C3 C3                          ret
+   411                                  default_grow:
+   412                                      ; return
+   413 000004C4 C3                          ret
+   414                                  
+   415                                  jmp_z:
+   416 000004C5 41F6C140                    test r9b,0b01000000
+   417 000004C9 0F84FFFEFFFF                jz jmp_finish
+   418 000004CF 480354CD00                  add rdx,[rbp+rcx*8]
+   419                                      ;return
+   420 000004D4 E9F5FEFFFF                  jmp jmp_finish
+   421                                  jmp_nz:
+   422 000004D9 41F6C140                    test r9b,0b01000000
+   423 000004DD 0F85EBFEFFFF                jnz jmp_finish
+   424 000004E3 480354CD00                  add rdx,[rbp+rcx*8]
+   425                                      ;return
+   426 000004E8 E9E1FEFFFF                  jmp jmp_finish
+   427                                  jmp_s:
+   428 000004ED 41F6C180                    test r9b,0b10000000
+   429 000004F1 0F84D7FEFFFF                jz jmp_finish
+   430 000004F7 480354CD00                  add rdx,[rbp+rcx*8]
+   431                                      ;return
+   432 000004FC E9CDFEFFFF                  jmp jmp_finish
+   433                                  jmp_ns:
+   434 00000501 41F6C180                    test r9b,0b10000000
+   435 00000505 0F85C3FEFFFF                jnz jmp_finish
+   436 0000050B 480354CD00                  add rdx,[rbp+rcx*8]
+   437                                      ;return
+   438 00000510 E9B9FEFFFF                  jmp jmp_finish
+   439                                  jmp_sz: ; ZF || SF
+   440 00000515 41F6C1C0                    test r9b,0b11000000
+   441 00000519 0F84AFFEFFFF                jz jmp_finish
+   442                                      ;return
+   443 0000051F 480354CD00                  add rdx,[rbp+rcx*8]
+   444 00000524 E9A5FEFFFF                  jmp jmp_finish
+   445                                  jmp_nsz: ; !ZF && !SF
+   446 00000529 41F6C1C0                    test r9b,0b11000000
+   447 0000052D 0F859BFEFFFF                jnz jmp_finish
+   448 00000533 480354CD00                  add rdx,[rbp+rcx*8]
+   449                                      ;return
+   450 00000538 E991FEFFFF                  jmp jmp_finish
+   451                                  jmp_:
+   452 0000053D 480354CD00                  add rdx,[rbp+rcx*8]
+   453                                      ;return
+   454 00000542 E987FEFFFF                  jmp jmp_finish
+   455                                  jmp_c:
+   456 00000547 41F6C120                    test r9b,0b00100000
+   457 0000054B 0F847DFEFFFF                jz jmp_finish
+   458 00000551 480354CD00                  add rdx,[rbp+rcx*8]
+   459                                      ;return
+   460 00000556 E973FEFFFF                  jmp jmp_finish
+   461                                  jmp_default:
+   462                                      ;return
+   463 0000055B 48FFC2                      inc rdx
+   464 0000055E E96BFEFFFF                  jmp jmp_finish
+   465                                  ; --- end --- ;
+   466                                  
+   467                                  filesize equ $ - ehdr
    468                                  
-   469                                  filesize equ $ - ehdr
+   469                                  ABSOLUTE $ ; Tell NASM: me want virtual address
    470                                  
-   471                                  ABSOLUTE $ ; Tell NASM: me want virtual address
-   472                                  
-   473 00000566 <res 3Ch>               old_termios resb 60
-   474 000005A2 <res 3Ch>               new_termios resb 60
-   475 000005DE ??                      char resb 1
-   476 000005DF <res 50h>               memory resq 10
-   477 0000062F <res 40h>               stack resq 8
-   478                                  
-   479                                  memsize equ $-ehdr
+   471 00000563 <res 3Ch>               old_termios resb 60
+   472 0000059F <res 3Ch>               new_termios resb 60
+   473 000005DB ??                      char resb 1
+   474 000005DC <res 50h>               memory resq 10
+   475 0000062C <res 40h>               stack resq 8
+   476                                  
+   477                                  memsize equ $-ehdr

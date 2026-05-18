@@ -353,9 +353,7 @@ jmpm_table:
 
 ins_revf:
     call get_abs_rcx
-    mov al, 7
-    sub al, cl
-    mov cl, al
+    xor cl, 7
     mov al, 1
     shl al, cl
     xor r9b, al
