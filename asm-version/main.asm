@@ -206,6 +206,7 @@ jump_table:
 get_val:
     add al,bl ; assume rax as parm
     and al,7
+    movzx eax, al
     mov eax, [r12+rax*8]
     ret
 push_in:
@@ -220,8 +221,8 @@ ins_read:
     jz .next ; only one parm
     xor al,al
     call get_val ; at(0)
-    push [rbp+rcx*8]
-    pop [rbp+rax*8]
+    mov r11, [rbp+rcx*8]
+    mov [rbp+rax*8], r11
     call setf
     .next:
         call push_in
@@ -275,10 +276,10 @@ ins_swap:
     call get_abs_rcx
     mov al,2
     call get_val
-    push [rbp+rax*8]
-    push [rbp+rcx*8]
-    pop [rbp+rax*8]
-    pop [rbp+rcx*8]
+    mov r10, [rbp+rax*8]
+    mov r11, [rbp+rcx*8]
+    mov [rbp+rax*8], r11
+    mov [rbp+rcx*8], r10
     jmp .finish
     .next:
         call push_in
@@ -353,44 +354,26 @@ jmpm_table:
 
 ins_revf:
     call get_abs_rcx
-    jmp [revf_table+rcx*8] ; call revf
+    mov al, 7
+    sub al, cl
+    mov cl, al
+    mov al, 1
+    shl al, cl
+    xor r9b, al
+    jmp next
 setf:
-    pushfq
-    pop r10
-    and r9b, 0b00111111
-    and r10b, 0b11000000
-    or r9b, r10b
+    lahf
+    movzx eax,ah
+    and r9b,0b00111111
+    and al, 0b11000000
+    or r9b, al
     ret
-revf_table:
-    dq revsf
-    dq revzf
-    dq revcf
-    dq revif
-    dq revof
-    times 5 dq revf_default
-revsf:
-    xor r9b,0b10000000
-    ;return
-    jmp next
-revzf:
-    xor r9b,0b01000000
-    ;return
-    jmp next
-revcf:
-    xor r9b,0b00100000
-    ;return
-    jmp next
-revif:
-    xor r9b,0b00010000
-    ;return
-    jmp next
-revof:
-    xor r9b,0b00001000
-    ;return
-    jmp next
-revf_default:
-    jmp next
-
+    ; pushfq
+    ; pop r10
+    ; and r9b, 0b00111111
+    ; and r10b, 0b11000000
+    ; or r9b, r10b
+    ; ret
 add_grow:
     add rax,[rbp+rcx*8]
     jmp do_mod
