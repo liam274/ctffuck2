@@ -90,15 +90,14 @@ main:
     test rax,rax
     je exit_fail_lseek
     push rax
-    pop r13
     ; store size in r13
 
     ; store it somewhere(mmap)
     push rdi
     pop r8
     xor edi,edi
-    push r13
     pop rsi
+    mov r13,rsi
     mov dl,1
     push 2
     pop r10
