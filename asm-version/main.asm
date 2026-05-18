@@ -325,7 +325,7 @@ getch:
     push rcx
     xor eax, eax
     xor edi, edi
-    mov rsi, char
+    mov esi, char
     mov edx, 1
     syscall
     pop rcx
@@ -343,7 +343,7 @@ ins_jmpm:
 jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
     test rdx,rdx
-    jbe loop
+    jae loop
     jmp exit
 jmpm_table:
     dq jmp_z
