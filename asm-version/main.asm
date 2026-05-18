@@ -55,8 +55,7 @@ norm_exit:
     push 16
     pop rax
     xor edi,edi
-    push 0x5402
-    pop rsi
+    mov rsi, 0x5402
     lea rdx, [old_termios]
     syscall
 no_recovery:
@@ -121,33 +120,33 @@ main:
 
     ; --- set raw mode --- ;
     ; since all the reg edited is not important, so it's fine to not to push them
+    lea r12,old_termios
     push 16
     pop rax
     xor edi, edi
-    push 0x5401
-    pop rsi
-    lea rdx, [old_termios]
+    mov esi, 0x5401
+    mov rdx, r12
     syscall
 
-    lea rsi, [old_termios]
-    lea rdi, [new_termios]
+    mov rsi, r12
+    lea r12,new_termios
+    mov rdi, r12
     push 60
     pop rcx
     rep movsb
 
-    mov eax, dword [new_termios + 12]
+    mov eax, dword [r12 + 12]
     and eax, ~(2 | 8)
-    mov dword [new_termios + 12], eax
+    mov dword [r12 + 12], eax
 
-    mov byte [new_termios + 16 + 6], 1
-    mov byte [new_termios + 16 + 5], 0
+    mov byte [r12 + 16 + 6], 1
+    mov byte [r12 + 16 + 5], 0
     
     push 16
     pop rax
     xor edi, edi
-    push 0x5402
-    pop rsi
-    lea rdx, [new_termios]
+    mov esi, 0x5402
+    mov rdx,r12
     syscall
 
     ; init
@@ -172,6 +171,7 @@ main:
     ; 3 = if
     ; 4 = of
     lea rbp,memory
+    lea r12,stack
     jmp loop
     align 16
 next:
@@ -211,13 +211,13 @@ jump_table:
 get_val:
     add eax,ebx ; assume rax as parm
     and eax,7
-    mov eax, [stack+rax*8]
+    mov eax, [r12+rax*8]
     ret
 push_in:
     inc ebx
     and ebx,7 ; assume that rcx is the arg, already
     call get_abs_rcx
-    mov [stack+rbx*8],ecx ; write abs
+    mov [r12+rbx*8],ecx ; write abs
     ret
 ins_read:
     call get_abs_rcx ; get abs of rcx
@@ -343,7 +343,7 @@ ins_jmpm:
 jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
     test rdx,rdx
-    jae loop
+    jbe loop
     jmp exit
 jmpm_table:
     dq jmp_z
