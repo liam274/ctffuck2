@@ -345,7 +345,7 @@
    343                                  jmp_finish:
    344 000003EB 4180F008                    xor r8b,0b00001000 ; reverse the counter
    345 000003EF 4885D2                      test rdx,rdx
-   346 000003F2 0F8381FDFFFF                jae loop
+   346 000003F2 0F8681FDFFFF                jbe loop
    347 000003F8 E98BFCFFFF                  jmp exit
    348                                  jmpm_table:
    349 000003FD [7005000000000000]          dq jmp_z
