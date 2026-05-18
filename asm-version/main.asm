@@ -85,7 +85,7 @@ main:
     pop rax
     xor esi,esi
     push 2
-    pop rdx
+    pop rdx ; emptied rdx high bit 32
     syscall
     test rax,rax
     je exit_fail_lseek
@@ -204,8 +204,8 @@ jump_table:
     dq ins_jmpm
     dq ins_revf
 get_val:
-    add eax,ebx ; assume rax as parm
-    and eax,7
+    add al,bl ; assume rax as parm
+    and al,7
     mov eax, [r12+rax*8]
     ret
 push_in:
@@ -355,15 +355,12 @@ ins_revf:
     call get_abs_rcx
     jmp [revf_table+rcx*8] ; call revf
 setf:
-    and r9b,0b00111111
-    js .sign
-    jz .zero
+    pushfq
+    pop r10
+    and r9b, 0b00111111
+    and r10b, 0b11000000
+    or r9b, r10b
     ret
-    .sign:
-    or r9b,0b10000000
-    ret
-    .zero:
-    or r9b,0b01000000
 revf_table:
     dq revsf
     dq revzf
