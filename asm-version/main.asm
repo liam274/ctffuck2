@@ -227,7 +227,9 @@ ins_read:
 ins_add:
     test r8b,0b01000000
     jz strict short .next
-    mov eax, [r12+rbx*8+8] ; at(1)
+    lea eax, rbx[1]
+    and eax, 7
+    mov eax, [r12+rax*8] ; at(1)
     add [rbp+rax*8],rcx
     call setf
     jmp short .finish
@@ -267,7 +269,9 @@ ins_swap:
     test r8b,0b00100000 ; check if counter enough
     jz .next
     call get_abs_rcx
-    mov eax,[r12+rbx*8+16]
+    lea eax, rbx[2]
+    and eax,7
+    mov eax,[r12+rax*8] ; at(2)
     mov r10, [rbp+rax*8]
     mov r11, [rbp+rcx*8]
     mov [rbp+rax*8], r11
@@ -282,7 +286,9 @@ ins_grow:
     test r8b,0b00010000 ; check if counter enough
     jz .next
     call get_abs_rcx
-    mov eax, [r12+rbx*8+24]
+    lea eax, rbx[3]
+    and eax, 7
+    mov eax, [r12+rbx*8+24] ; at(3)
     call [rax*8+grow_table]
     jmp .finish
     .next:
@@ -401,6 +407,8 @@ ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
     jz .next ; counter not enough
     call get_abs_rcx
+    lea eax, rbx[4]
+    and eax, 7
     mov eax, [r12+rbx*8+32] ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
