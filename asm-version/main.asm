@@ -109,8 +109,7 @@ main:
     js exit_fail_store
     push r8
     pop rdi ; recover registries
-    push rax
-    pop r14 ; base addr
+    xchg rax,r14 ; base addr
     ; close the file since we no longer need it
     push 3
     pop rax
@@ -266,11 +265,11 @@ ins_print:
     call get_abs_rcx
     cmp qword [rbp+rcx*8], 0 ; check if is zero
     jz next ; skip so as not to print null
-    mov eax, 1 ; write()
     push rdx ; save rdx
-    mov edi,1
+    mov eax, 1 ; write()
+    mov edi,eax
+    mov edx,eax
     lea esi, [rbp+rcx*8] ; pointer to addr
-    mov edx, 1
     syscall
     pop rdx
     jmp next
