@@ -141,10 +141,8 @@ main:
     syscall
 
     ; init
-    push r13
-    pop rdx
-    neg rdx
     add r14,r13
+    neg r13
     push -1
     pop r15 ; last
     xor ecx,ecx ; arg
@@ -166,10 +164,10 @@ main:
     jmp loop
     align 16
 next:
-    inc rdx
+    inc r13
     jz exit
 loop:
-    movzx ecx, byte [r14+rdx] ; get char
+    movzx ecx, byte [r14+r13] ; get char
     ; digit filter
     sub rcx,'0'
     cmp rcx,9
@@ -267,13 +265,11 @@ ins_print:
     call get_abs_rcx
     cmp qword [rbp+rcx*8], 0 ; check if is zero
     jz next ; skip so as not to print null
-    push rdx ; save rdx
     mov eax, 1 ; write()
     mov edi,eax
     mov edx,eax
     lea esi, [rbp+rcx*8] ; pointer to addr
     syscall
-    pop rdx
     jmp next
 ins_swap:
     test r8b,0b00100000 ; check if counter enough
@@ -316,15 +312,13 @@ ins_inp:
     test r9b,0b00010000 ; test IF
     jz next ; if not set, bye bye
     call get_abs_rcx
-    push rdx ; getch start
-    push rcx
+    push rcx ; getch start
     xor eax, eax
     xor edi, edi
     mov esi, char
     mov edx, 1
     syscall
-    pop rcx
-    pop rdx ; getch end
+    pop rcx ; getch end
     movzx eax, byte [char] ; get char
     mov [rbp+rcx*8],rax ; mov char
     jmp next ; return
@@ -360,22 +354,18 @@ mod_grow:
     mov cl,1
     test r11,r11
     cmovz eax,ecx
-    push rdx
     xor edx,edx
     mov rcx,rax
     div rcx
     mov ecx,edx
-    pop rdx
     ; return
     call setf
     ret
 do_mod:
-    push rdx ; push temp
     xor edx,edx
     mov ecx,10
     div rcx
     mov ecx,edx ; ecx = rax % 10
-    pop rdx
     ; return
     call setf ; so now the stack has the return addr on top
     ret
@@ -396,25 +386,25 @@ default_grow:
 jmp_z:
     test r9b,0b01000000
     jz jmp_finish
-    add rdx,[rbp+rcx*8]
+    add r13,[rbp+rcx*8]
     ;return
     jmp jmp_finish
 jmp_nz:
     test r9b,0b01000000
     jnz jmp_finish
-    add rdx,[rbp+rcx*8]
+    add r13,[rbp+rcx*8]
     ;return
     jmp jmp_finish
 jmp_s:
     test r9b,0b10000000
     jz jmp_finish
-    add rdx,[rbp+rcx*8]
+    add r13,[rbp+rcx*8]
     ;return
     jmp jmp_finish
 jmp_ns:
     test r9b,0b10000000
     jnz jmp_finish
-    add rdx,[rbp+rcx*8]
+    add r13,[rbp+rcx*8]
     ;return
     jmp jmp_finish
 ins_jmpm:
@@ -428,34 +418,34 @@ ins_jmpm:
         call push_in
 jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
-    test rdx,rdx
+    test r13,r13
     jae loop
     jmp exit
 jmp_sz: ; ZF || SF
     test r9b,0b11000000
     jz jmp_finish
     ;return
-    add rdx,[rbp+rcx*8]
+    add r13,[rbp+rcx*8]
     jmp jmp_finish
 jmp_nsz: ; !ZF && !SF
     test r9b,0b11000000
     jnz jmp_finish
-    add rdx,[rbp+rcx*8]
+    add r13,[rbp+rcx*8]
     ;return
     jmp jmp_finish
 jmp_:
-    add rdx,[rbp+rcx*8]
+    add r13,[rbp+rcx*8]
     ;return
     jmp jmp_finish
 jmp_c:
     test r9b,0b00100000
     jz jmp_finish
-    add rdx,[rbp+rcx*8]
+    add r13,[rbp+rcx*8]
     ;return
     jmp jmp_finish
 jmp_default:
     ;return
-    inc rdx
+    inc r13
     jmp jmp_finish
 ; --- end --- ;
 
