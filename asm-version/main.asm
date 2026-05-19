@@ -49,8 +49,6 @@ exit_fail_lseek:
     jmp no_recovery
 exit:
     push 0
-    jmp norm_exit
-norm_exit:
     ; recover to normal mode
     push 16
     pop rax
@@ -223,25 +221,29 @@ setf:
 ins_read:
     call get_abs_rcx ; get abs of rcx
     test r8b, 0b10000000 ; if counter ok
-    jz .next ; only one parm
+    jz strict short .next ; only one parm
     xor al,al
     call get_val ; at(0)
     mov r11, [rbp+rcx*8]
     mov [rbp+rax*8], r11
     call setf
+    jmp .finish
     .next:
         call push_in
+    .finish:
     xor r8b, 0b10000000
     jmp next
 ins_add:
     test r8b,0b01000000
-    jz .next
+    jz strict short .next
     mov al,1
     call get_val
     add [rbp+rax*8],rcx
     call setf
+    jmp short .finish
     .next:
         call push_in
+    .finish:
     xor r8b,0b01000000
     jmp next
 ins_set:
