@@ -327,20 +327,6 @@ ins_inp:
     movzx eax, byte [char] ; get char
     mov [rbp+rcx*8],rax ; mov char
     jmp next ; return
-ins_jmpm:
-    test r8b,0b00001000 ; test if counter enough
-    jz .next ; counter not enough
-    call get_abs_rcx
-    mov al,4
-    call get_val ; at(4)
-    jmp [rax*8+jmpm_table] ; goto get conditions
-    .next:
-        call push_in
-jmp_finish:
-    xor r8b,0b00001000 ; reverse the counter
-    test rdx,rdx
-    jae loop
-    jmp exit
 jmpm_table:
     dq jmp_z
     dq jmp_nz
@@ -370,7 +356,7 @@ mul_grow:
     jmp do_mod
 mod_grow:
     mov r11,[rbp+rcx*8]
-    mov ecx,1
+    mov cl,1
     test r11,r11
     cmovz eax,ecx
     push rdx
@@ -430,6 +416,20 @@ jmp_ns:
     add rdx,[rbp+rcx*8]
     ;return
     jmp jmp_finish
+ins_jmpm:
+    test r8b,0b00001000 ; test if counter enough
+    jz .next ; counter not enough
+    call get_abs_rcx
+    mov al,4
+    call get_val ; at(4)
+    jmp [rax*8+jmpm_table] ; goto get conditions
+    .next:
+        call push_in
+jmp_finish:
+    xor r8b,0b00001000 ; reverse the counter
+    test rdx,rdx
+    jae loop
+    jmp exit
 jmp_sz: ; ZF || SF
     test r9b,0b11000000
     jz jmp_finish
