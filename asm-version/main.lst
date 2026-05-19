@@ -187,8 +187,8 @@
    187                                      ;loop end
    188 0000019B 90<rep 5h>              align 8
    189                                  jump_table:
-   190 000001A0 [1902000000000000]          dq ins_read
-   191 000001A8 [4A02000000000000]          dq ins_add
+   190 000001A0 [1402000000000000]          dq ins_read
+   191 000001A8 [4502000000000000]          dq ins_add
    192 000001B0 [7102000000000000]          dq ins_set
    193 000001B8 [8802000000000000]          dq ins_push
    194 000001C0 [9B02000000000000]          dq ins_print
@@ -206,40 +206,40 @@
    206                                  push_in:
    207 000001FC FFC3                        inc ebx
    208 000001FE 83E307                      and ebx,7 ; assume that rcx is the arg, already
-   209 00000201 E88C000000                  call get_abs_rcx
-   210 00000206 41890CDC                    mov [r12+rbx*8],ecx ; write abs
-   211 0000020A C3                          ret
-   212                                  setf:
-   213 0000020B 9F                          lahf
-   214 0000020C 0FB6C4                      movzx eax,ah
-   215 0000020F 4180E13F                    and r9b,0b00111111
-   216 00000213 24C0                        and al, 0b11000000
-   217 00000215 4108C1                      or r9b, al
-   218 00000218 C3                          ret
-   219                                  ins_read:
-   220 00000219 E874000000                  call get_abs_rcx ; get abs of rcx
-   221 0000021E 41F6C080                    test r8b, 0b10000000 ; if counter ok
-   222 00000222 7418                        jz strict short .next ; only one parm
-   223 00000224 30C0                        xor al,al
-   224 00000226 E8C5FFFFFF                  call get_val ; at(0)
-   225 0000022B 4C8B5CCD00                  mov r11, [rbp+rcx*8]
-   226 00000230 4C895CC500                  mov [rbp+rax*8], r11
-   227 00000235 E8D1FFFFFF                  call setf
-   228 0000023A EB05                        jmp .finish
-   229                                      .next:
-   230 0000023C E8BBFFFFFF                      call push_in
-   231                                      .finish:
-   232 00000241 4180F080                    xor r8b, 0b10000000
-   233 00000245 E916FFFFFF                  jmp next
-   234                                  ins_add:
-   235 0000024A 41F6C040                    test r8b,0b01000000
-   236 0000024E 7413                        jz strict short .next
-   237 00000250 B001                        mov al,1
-   238 00000252 E899FFFFFF                  call get_val
-   239 00000257 48014CC500                  add [rbp+rax*8],rcx
-   240 0000025C E8AAFFFFFF                  call setf
-   241 00000261 EB05                        jmp short .finish
-   242                                      .next:
+   209 00000201 41890CDC                    mov [r12+rbx*8],ecx ; write abs
+   210 00000205 C3                          ret
+   211                                  setf:
+   212 00000206 9F                          lahf
+   213 00000207 0FB6C4                      movzx eax,ah
+   214 0000020A 4180E13F                    and r9b,0b00111111
+   215 0000020E 24C0                        and al, 0b11000000
+   216 00000210 4108C1                      or r9b, al
+   217 00000213 C3                          ret
+   218                                  ins_read:
+   219 00000214 E879000000                  call get_abs_rcx ; get abs of rcx
+   220 00000219 41F6C080                    test r8b, 0b10000000 ; if counter ok
+   221 0000021D 7418                        jz strict short .next ; only one parm
+   222 0000021F 30C0                        xor al,al
+   223 00000221 E8CAFFFFFF                  call get_val ; at(0)
+   224 00000226 4C8B5CCD00                  mov r11, [rbp+rcx*8]
+   225 0000022B 4C895CC500                  mov [rbp+rax*8], r11
+   226 00000230 E8D1FFFFFF                  call setf
+   227 00000235 EB05                        jmp .finish
+   228                                      .next:
+   229 00000237 E8C0FFFFFF                      call push_in
+   230                                      .finish:
+   231 0000023C 4180F080                    xor r8b, 0b10000000
+   232 00000240 E91BFFFFFF                  jmp next
+   233                                  ins_add:
+   234 00000245 41F6C040                    test r8b,0b01000000
+   235 00000249 7413                        jz strict short .next
+   236 0000024B B001                        mov al,1
+   237 0000024D E89EFFFFFF                  call get_val
+   238 00000252 48014CC500                  add [rbp+rax*8],rcx
+   239 00000257 E8AAFFFFFF                  call setf
+   240 0000025C EB0A                        jmp short .finish
+   241                                      .next:
+   242 0000025E E82F000000                      call get_abs_rcx
    243 00000263 E894FFFFFF                      call push_in
    244                                      .finish:
    245 00000268 4180F040                    xor r8b,0b01000000
@@ -361,7 +361,7 @@
    359 0000043F 48F7F1                      div rcx
    360 00000442 89D1                        mov ecx,edx
    361                                      ; return
-   362 00000444 E8C2FDFFFF                  call setf
+   362 00000444 E8BDFDFFFF                  call setf
    363 00000449 C3                          ret
    364                                  do_mod:
    365 0000044A 31D2                        xor edx,edx
@@ -369,7 +369,7 @@
    367 00000451 48F7F1                      div rcx
    368 00000454 89D1                        mov ecx,edx ; ecx = rax % 10
    369                                      ; return
-   370 00000456 E8B0FDFFFF                  call setf ; so now the stack has the return addr on top
+   370 00000456 E8ABFDFFFF                  call setf ; so now the stack has the return addr on top
    371 0000045B C3                          ret
    372                                  div_grow:
    373 0000045C 488B44CD00                  mov rax,[rbp+rcx*8]

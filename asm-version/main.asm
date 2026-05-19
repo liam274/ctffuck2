@@ -206,7 +206,6 @@ get_val:
 push_in:
     inc ebx
     and ebx,7 ; assume that rcx is the arg, already
-    call get_abs_rcx
     mov [r12+rbx*8],ecx ; write abs
     ret
 setf:
@@ -240,6 +239,7 @@ ins_add:
     call setf
     jmp short .finish
     .next:
+        call get_abs_rcx
         call push_in
     .finish:
     xor r8b,0b01000000
