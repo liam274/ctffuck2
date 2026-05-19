@@ -288,7 +288,7 @@ ins_grow:
     call get_abs_rcx
     lea eax, rbx[3]
     and eax, 7
-    mov eax, [r12+rbx*8+24] ; at(3)
+    mov eax, [r12+rax*8] ; at(3)
     call [rax*8+grow_table]
     jmp .finish
     .next:
@@ -409,7 +409,7 @@ ins_jmpm:
     call get_abs_rcx
     lea eax, rbx[4]
     and eax, 7
-    mov eax, [r12+rbx*8+32] ; at(4)
+    mov eax, [r12+rax*8] ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
         call push_in
