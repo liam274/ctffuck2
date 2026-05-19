@@ -197,12 +197,6 @@ jump_table:
     dq ins_inp
     dq ins_jmpm
     dq ins_revf
-get_val:
-    add al,bl ; assume rax as parm
-    and al,7
-    movzx eax, al
-    mov eax, [r12+rax*8]
-    ret
 push_in:
     inc ebx
     and ebx,7 ; assume that rcx is the arg, already
@@ -219,8 +213,7 @@ ins_read:
     call get_abs_rcx ; get abs of rcx
     test r8b, 0b10000000 ; if counter ok
     jz strict short .next ; only one parm
-    xor al,al
-    call get_val ; at(0)
+    mov eax,[r12+rbx*8] ; at(0)
     mov r11, [rbp+rcx*8]
     mov [rbp+rax*8], r11
     test r11,r11
@@ -234,8 +227,7 @@ ins_read:
 ins_add:
     test r8b,0b01000000
     jz strict short .next
-    mov al,1
-    call get_val
+    mov eax, [r12+rbx*8+8] ; at(1)
     add [rbp+rax*8],rcx
     call setf
     jmp short .finish
@@ -255,10 +247,9 @@ ins_push:
     call push_in
     jmp next
 get_abs_rcx:
-    mov rax,rcx
-    cqo
-    xor rcx,rdx
-    sub rcx,rdx
+    mov eax,ecx
+    neg eax
+    cmovns ecx,eax
     ret
 ins_print:
     test r9b,0b00001000 ; check OF
@@ -276,8 +267,7 @@ ins_swap:
     test r8b,0b00100000 ; check if counter enough
     jz .next
     call get_abs_rcx
-    mov al,2
-    call get_val
+    mov eax,[r12+rbx*8+16]
     mov r10, [rbp+rax*8]
     mov r11, [rbp+rcx*8]
     mov [rbp+rax*8], r11
@@ -292,8 +282,7 @@ ins_grow:
     test r8b,0b00010000 ; check if counter enough
     jz .next
     call get_abs_rcx
-    mov al,3
-    call get_val
+    mov eax, [r12+rbx*8+24]
     call [rax*8+grow_table]
     jmp .finish
     .next:
@@ -412,8 +401,7 @@ ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
     jz .next ; counter not enough
     call get_abs_rcx
-    mov al,4
-    call get_val ; at(4)
+    mov eax, [r12+rbx*8+32] ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
         call push_in
