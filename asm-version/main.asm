@@ -214,6 +214,13 @@ push_in:
     call get_abs_rcx
     mov [r12+rbx*8],ecx ; write abs
     ret
+setf:
+    lahf
+    movzx eax,ah
+    and r9b,0b00111111
+    and al, 0b11000000
+    or r9b, al
+    ret
 ins_read:
     call get_abs_rcx ; get abs of rcx
     test r8b, 0b10000000 ; if counter ok
@@ -225,7 +232,6 @@ ins_read:
     call setf
     .next:
         call push_in
-    .finish:
     xor r8b, 0b10000000
     jmp next
 ins_add:
@@ -237,7 +243,6 @@ ins_add:
     call setf
     .next:
         call push_in
-    .finish:
     xor r8b,0b01000000
     jmp next
 ins_set:
@@ -310,13 +315,7 @@ ins_inp:
     test r9b,0b00010000 ; test IF
     jz next ; if not set, bye bye
     call get_abs_rcx
-    jmp getch ; don't change it to call, getch is optimized
-here:
-    movzx rax, byte [char] ; get char
-    mov [rbp+rcx*8],rax ; mov char
-    jmp next ; return
-getch:
-    push rdx
+    push rdx ; getch start
     push rcx
     xor eax, eax
     xor edi, edi
@@ -324,8 +323,10 @@ getch:
     mov edx, 1
     syscall
     pop rcx
-    pop rdx
-    jmp here
+    pop rdx ; getch end
+    movzx eax, byte [char] ; get char
+    mov [rbp+rcx*8],rax ; mov char
+    jmp next ; return
 ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
     jz .next ; counter not enough
@@ -358,13 +359,6 @@ ins_revf:
     shl al, cl
     xor r9b, al
     jmp next
-setf:
-    lahf
-    movzx eax,ah
-    and r9b,0b00111111
-    and al, 0b11000000
-    or r9b, al
-    ret
 add_grow:
     add rax,[rbp+rcx*8]
     jmp do_mod
