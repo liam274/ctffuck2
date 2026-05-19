@@ -223,6 +223,7 @@ ins_read:
     call get_val ; at(0)
     mov r11, [rbp+rcx*8]
     mov [rbp+rax*8], r11
+    test r11,r11
     call setf
     jmp .finish
     .next:
@@ -254,10 +255,10 @@ ins_push:
     call push_in
     jmp next
 get_abs_rcx:
-    test rcx, rcx
-    jns .return
-    neg rcx
-    .return:
+    mov rax,rcx
+    cqo
+    xor rcx,rdx
+    sub rcx,rdx
     ret
 ins_print:
     test r9b,0b00001000 ; check OF
@@ -322,16 +323,6 @@ ins_inp:
     movzx eax, byte [char] ; get char
     mov [rbp+rcx*8],rax ; mov char
     jmp next ; return
-jmpm_table:
-    dq jmp_z
-    dq jmp_nz
-    dq jmp_s
-    dq jmp_ns
-    dq jmp_sz
-    dq jmp_nsz
-    dq jmp_
-    dq jmp_c
-    times 2 dq jmp_default
 
 ins_revf:
     call get_abs_rcx
@@ -355,7 +346,6 @@ mod_grow:
     test r11,r11
     cmovz eax,ecx
     xor edx,edx
-    mov rcx,rax
     div rcx
     mov ecx,edx
     ; return
@@ -367,6 +357,7 @@ do_mod:
     div rcx
     mov ecx,edx ; ecx = rax % 10
     ; return
+    test ecx,ecx
     call setf ; so now the stack has the return addr on top
     ret
 div_grow:
@@ -383,6 +374,16 @@ default_grow:
     ; return
     ret
 
+jmpm_table:
+    dq jmp_z
+    dq jmp_nz
+    dq jmp_s
+    dq jmp_ns
+    dq jmp_sz
+    dq jmp_nsz
+    dq jmp_
+    dq jmp_c
+    times 2 dq jmp_default
 jmp_z:
     test r9b,0b01000000
     jz jmp_finish
@@ -419,7 +420,7 @@ ins_jmpm:
 jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
     test r13,r13
-    jae loop
+    js loop
     jmp exit
 jmp_sz: ; ZF || SF
     test r9b,0b11000000
