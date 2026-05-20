@@ -65,8 +65,8 @@ no_recovery:
 
 main:
     pop rcx ; argc
-    cmp rcx,2
-    jb exit_no_arg
+    dec rcx
+    jz exit_no_arg
     pop rdi ; argv[0]
     pop rdi ; argv[1]
     xor esi,esi
@@ -321,9 +321,8 @@ ins_inp:
 
 ins_revf:
     call get_abs_rcx
-    xor cl, 7
-    mov al, 1
-    shl al, cl
+    mov al, 0x80
+    shr al, cl
     xor r9b, al
     jmp next
 add_grow:
@@ -381,28 +380,24 @@ jmpm_table:
     times 2 dq jmp_default
 jmp_z:
     test r9b,0b01000000
-    jz jmp_finish
-    add r13,[rbp+rcx*8]
+    jz jmp_default
     ;return
-    jmp jmp_finish
+    jmp jmp_
 jmp_nz:
     test r9b,0b01000000
-    jnz jmp_finish
-    add r13,[rbp+rcx*8]
+    jnz jmp_default
     ;return
-    jmp jmp_finish
+    jmp jmp_
 jmp_s:
     test r9b,0b10000000
-    jz jmp_finish
-    add r13,[rbp+rcx*8]
+    jz jmp_default
     ;return
-    jmp jmp_finish
+    jmp jmp_
 jmp_ns:
     test r9b,0b10000000
-    jnz jmp_finish
-    add r13,[rbp+rcx*8]
+    jnz jmp_default
     ;return
-    jmp jmp_finish
+    jmp jmp_
 ins_jmpm:
     test r8b,0b00001000 ; test if counter enough
     jz .next ; counter not enough
@@ -413,6 +408,8 @@ ins_jmpm:
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
         call push_in
+jmp_default:
+    inc r13
 jmp_finish:
     xor r8b,0b00001000 ; reverse the counter
     test r13,r13
@@ -420,30 +417,23 @@ jmp_finish:
     jmp exit
 jmp_sz: ; ZF || SF
     test r9b,0b11000000
-    jz jmp_finish
+    jz jmp_default
     ;return
-    add r13,[rbp+rcx*8]
-    jmp jmp_finish
+    jmp jmp_
 jmp_nsz: ; !ZF && !SF
     test r9b,0b11000000
-    jnz jmp_finish
-    add r13,[rbp+rcx*8]
+    jnz jmp_default
     ;return
-    jmp jmp_finish
+    jmp jmp_
 jmp_:
     add r13,[rbp+rcx*8]
     ;return
     jmp jmp_finish
 jmp_c:
     test r9b,0b00100000
-    jz jmp_finish
-    add r13,[rbp+rcx*8]
+    jz jmp_default
     ;return
-    jmp jmp_finish
-jmp_default:
-    ;return
-    inc r13
-    jmp jmp_finish
+    jmp jmp_
 ; --- end --- ;
 
 filesize equ $ - ehdr
