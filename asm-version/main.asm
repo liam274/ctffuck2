@@ -211,33 +211,29 @@ setf:
     ret
 ins_read:
     call get_abs_rcx ; get abs of rcx
-    test r8b, 0b10000000 ; if counter ok
-    jz .next ; only one parm
+    btc r8d, 8 ; if counter ok
+    jnc .next ; only one parm
     mov eax,[r12+rbx*8] ; at(0)
     mov r11, [rbp+rcx*8]
     mov [rbp+rax*8], r11
     test r11,r11
     call setf
-    jmp .finish
+    jmp next
     .next:
         call push_in
-    .finish:
-    xor r8b, 0b10000000
     jmp next
 ins_add:
-    test r8b,0b01000000
-    jz .next
+    btc r8d,7
+    jnc .next
     lea eax, rbx[1]
     and eax, 7
     mov eax, [r12+rax*8] ; at(1)
     add [rbp+rax*8],rcx
     call setf
-    jmp .finish
+    jmp next
     .next:
         call get_abs_rcx
         call push_in
-    .finish:
-    xor r8b,0b01000000
     jmp next
 ins_set:
     call get_abs_rcx
@@ -250,9 +246,10 @@ ins_push:
     call push_in
     jmp next
 get_abs_rcx:
-    mov eax,ecx
-    neg eax
-    cmovns ecx,eax
+    mov eax, ecx
+    sar eax, 31
+    xor ecx, eax
+    sub ecx, eax
     ret
 ins_print:
     test r9b,0b00001000 ; check OF
@@ -267,8 +264,8 @@ ins_print:
     syscall
     jmp next
 ins_swap:
-    test r8b,0b00100000 ; check if counter enough
-    jz .next
+    btc r8d,6 ; check if counter enough
+    jnc .next
     call get_abs_rcx
     lea eax, rbx[2]
     and eax,7
@@ -277,25 +274,21 @@ ins_swap:
     mov r11, [rbp+rcx*8]
     mov [rbp+rax*8], r11
     mov [rbp+rcx*8], r10
-    jmp .finish
+    jmp next
     .next:
         call push_in
-    .finish:
-    xor r8b,0b00100000
     jmp next
 ins_grow:
-    test r8b,0b00010000 ; check if counter enough
-    jz .next
+    btc r8d,5 ; check if counter enough
+    jnc .next
     call get_abs_rcx
     lea eax, rbx[3]
     and eax, 7
     mov eax, [r12+rax*8] ; at(3)
     call [rax*8+grow_table]
-    jmp .finish
+    jmp next
     .next:
         call push_in
-    .finish:
-    xor r8b,0b00010000
     jmp loop_exe
 grow_table:
     dq add_grow
@@ -398,8 +391,8 @@ jmp_ns:
     ;return
     jmp jmp_
 ins_jmpm:
-    test r8b,0b00001000 ; test if counter enough
-    jz .next ; counter not enough
+    btc r8d,4 ; test if counter enough
+    jnc .next ; counter not enough
     call get_abs_rcx
     lea eax, rbx[4]
     and eax, 7
