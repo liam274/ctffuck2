@@ -169,8 +169,8 @@ next:
 loop:
     movzx ecx, byte [r14+r13] ; get char
     ; digit filter
-    sub rcx,'0'
-    cmp rcx,9
+    lea eax, [rcx-'0']
+    cmp eax,9
     ja next
 loop_exe:
     ; calc arg
@@ -180,10 +180,10 @@ loop_exe:
     mov eax,ecx ; xchg ecx,r15d ; mov is faster
     mov ecx,r15d
     mov r15d,eax
-    jmp [r15*8+jump_table]
+    jmp [r15*8+jump_table - 384]
     .there:
     mov r15d,ecx
-    jmp [r15*8+jump_table]
+    jmp [r15*8+jump_table - 384]
     ;loop end
 align 8
 jump_table:
@@ -344,8 +344,7 @@ mod_grow:
     div rcx
     mov ecx,edx
     ; return
-    call setf
-    ret
+    jmp setf
 do_mod:
     xor edx,edx
     mov ecx,10
@@ -353,8 +352,7 @@ do_mod:
     mov ecx,edx ; ecx = rax % 10
     ; return
     test ecx,ecx
-    call setf ; so now the stack has the return addr on top
-    ret
+    jmp setf ; so now the stack has the return addr on top
 div_grow:
     mov rax,[rbp+rcx*8]
     jmp do_mod
