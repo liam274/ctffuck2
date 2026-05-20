@@ -48,7 +48,6 @@ exit_fail_lseek:
     push 4
     jmp no_recovery
 exit:
-    push 0
     ; recover to normal mode
     push 16
     pop rax
@@ -56,6 +55,7 @@ exit:
     mov esi, 0x5402
     mov edx, old_termios
     syscall
+    push 0
 no_recovery:
     ; exit
     pop rdi
@@ -65,18 +65,19 @@ no_recovery:
 
 main:
     pop rcx ; argc
-    dec rcx
+    dec ecx
     jz exit_no_arg
     pop rdi ; argv[0]
     pop rdi ; argv[1]
+    ; read file
     xor esi,esi
     push 2
     pop rax
-    cdq
+    cdq ; empty edx
     syscall
     test rax,rax ; test if success
     js exit_fail_open
-    xchg eax, edi ; fd
+    xchg eax, edi ; edi=fd
 
     ; get file length
     push 8
@@ -116,8 +117,7 @@ main:
     ; --- set raw mode --- ;
     ; since all the reg edited is not important, so it's fine to not to push them
     mov r12d,old_termios
-    push 16
-    pop rax
+    mov al, 16
     xor edi, edi
     mov esi, 0x5401
     mov edx, r12d
@@ -147,7 +147,7 @@ main:
     pop r15 ; last
     xor ecx,ecx ; arg
     xor ebx,ebx ; ebx head_pointer
-    xor r8b,r8b ; counter
+    xor r8d,r8d ; counter
     ; 0 = read_counter
     ; 1 = add_counter
     ; 2 = swap counter
