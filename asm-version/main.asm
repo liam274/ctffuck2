@@ -334,14 +334,14 @@ mod_grow:
     test r11,r11
     cmovz eax,ecx
     xor edx,edx
-    div rcx
+    div ecx
     mov ecx,edx
     ; return
     jmp setf
 do_mod:
     xor edx,edx
     mov ecx,10
-    div rcx
+    div ecx
     mov ecx,edx ; ecx = rax % 10
     ; return
     test ecx,ecx
