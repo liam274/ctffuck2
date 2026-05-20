@@ -212,7 +212,7 @@ setf:
 ins_read:
     call get_abs_rcx ; get abs of rcx
     test r8b, 0b10000000 ; if counter ok
-    jz strict short .next ; only one parm
+    jz .next ; only one parm
     mov eax,[r12+rbx*8] ; at(0)
     mov r11, [rbp+rcx*8]
     mov [rbp+rax*8], r11
@@ -220,20 +220,19 @@ ins_read:
     call setf
     jmp .finish
     .next:
-        call get_abs_rcx
         call push_in
     .finish:
     xor r8b, 0b10000000
     jmp next
 ins_add:
     test r8b,0b01000000
-    jz strict short .next
+    jz .next
     lea eax, rbx[1]
     and eax, 7
     mov eax, [r12+rax*8] ; at(1)
     add [rbp+rax*8],rcx
     call setf
-    jmp short .finish
+    jmp .finish
     .next:
         call get_abs_rcx
         call push_in
