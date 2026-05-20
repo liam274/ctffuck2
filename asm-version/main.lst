@@ -175,18 +175,18 @@
    175                                  loop_exe:
    176                                      ; calc arg
    177 00000166 4585FF                      test r15d,r15d ; set flag
-   178 00000169 7813                        js .there ; reduce jmps, generally
+   178 00000169 7813                        js .first_time_only ; reduce jmps, generally
    179 0000016B 4129CF                      sub r15d,ecx
-   180 0000016E 89C8                        mov eax,ecx ; xchg ecx,r15d ; mov is faster
+   180 0000016E 89C8                        mov eax,ecx ; xchg ecx,r15d ; tested, mov is faster
    181 00000170 4489F9                      mov ecx,r15d
    182 00000173 4189C7                      mov r15d,eax
-   183 00000176 42FF24FD[10000000]          jmp [r15*8+jump_table - 384]
-   184                                      .there:
+   183 00000176 42FF24FD[10000000]          jmp [r15*8+jump_table]
+   184                                      .first_time_only:
    185 0000017E 4189CF                      mov r15d,ecx
-   186 00000181 42FF24FD[10000000]          jmp [r15*8+jump_table - 384]
+   186 00000181 42FF24FD[10000000]          jmp [r15*8+jump_table]
    187                                      ;loop end
    188 00000189 90<rep 7h>              align 8
-   189                                  jump_table:
+   189                                  jump_table equ $ - 384
    190 00000190 [F701000000000000]          dq ins_read
    191 00000198 [2802000000000000]          dq ins_add
    192 000001A0 [5702000000000000]          dq ins_set
@@ -358,10 +358,10 @@
    357 000003F6 488B44CD00                  mov rax,[rbp+rcx*8]
    358 000003FB EBE6                        jmp do_mod
    359                                  xchg_grow:
-   360 000003FD FF34C5[90010000]            push [jump_table+rax*8]
-   361 00000404 FF34CD[90010000]            push [jump_table+rcx*8]
-   362 0000040B 668F04C5[90010000]          pop [jump_table+rax*8]
-   363 00000413 668F04CD[90010000]          pop [jump_table+rcx*8]
+   360 000003FD FF34C5[10000000]            push [jump_table+rax*8]
+   361 00000404 FF34CD[10000000]            push [jump_table+rcx*8]
+   362 0000040B 668F04C5[10000000]          pop [jump_table+rax*8]
+   363 00000413 668F04CD[10000000]          pop [jump_table+rcx*8]
    364                                      ; return
    365 0000041B C3                          ret
    366                                  default_grow:

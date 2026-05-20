@@ -175,18 +175,18 @@ loop:
 loop_exe:
     ; calc arg
     test r15d,r15d ; set flag
-    js .there ; reduce jmps, generally
+    js .first_time_only ; reduce jmps, generally
     sub r15d,ecx
-    mov eax,ecx ; xchg ecx,r15d ; mov is faster
+    mov eax,ecx ; xchg ecx,r15d ; tested, mov is faster
     mov ecx,r15d
     mov r15d,eax
-    jmp [r15*8+jump_table - 384]
-    .there:
+    jmp [r15*8+jump_table]
+    .first_time_only:
     mov r15d,ecx
-    jmp [r15*8+jump_table - 384]
+    jmp [r15*8+jump_table]
     ;loop end
 align 8
-jump_table:
+jump_table equ $ - 384
     dq ins_read
     dq ins_add
     dq ins_set
