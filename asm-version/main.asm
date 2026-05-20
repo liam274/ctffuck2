@@ -204,7 +204,7 @@ push_in:
     ret
 setf:
     lahf
-    movzx eax,ah
+    mov al, ah
     and r9b,0b00111111
     and al, 0b11000000
     or r9b, al
@@ -220,6 +220,7 @@ ins_read:
     call setf
     jmp .finish
     .next:
+        call get_abs_rcx
         call push_in
     .finish:
     xor r8b, 0b10000000
@@ -246,6 +247,7 @@ ins_set:
     and r9b,0b01111111
     jmp next
 ins_push:
+    call get_abs_rcx
     call push_in
     jmp next
 get_abs_rcx:
