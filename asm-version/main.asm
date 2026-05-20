@@ -174,7 +174,7 @@ loop:
     ja next
 loop_exe:
     ; calc arg
-    test r15,r15 ; set flag
+    test r15d,r15d ; set flag
     js .there ; reduce jmps, generally
     sub r15d,ecx
     mov eax,ecx ; xchg ecx,r15d ; mov is faster

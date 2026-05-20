@@ -174,7 +174,7 @@
    174 00000164 77EA                        ja next
    175                                  loop_exe:
    176                                      ; calc arg
-   177 00000166 4D85FF                      test r15,r15 ; set flag
+   177 00000166 4585FF                      test r15d,r15d ; set flag
    178 00000169 7813                        js .there ; reduce jmps, generally
    179 0000016B 4129CF                      sub r15d,ecx
    180 0000016E 89C8                        mov eax,ecx ; xchg ecx,r15d ; mov is faster
