@@ -185,18 +185,7 @@ loop_exe:
     mov r15d,ecx
     jmp [r15*8+jump_table]
     ;loop end
-align 8
-jump_table equ $ - 384
-    dq ins_read
-    dq ins_add
-    dq ins_set
-    dq ins_push
-    dq ins_print
-    dq ins_swap
-    dq ins_grow
-    dq ins_inp
-    dq ins_jmpm
-    dq ins_revf
+
 push_in:
     inc ebx
     and ebx,7 ; assume that rcx is the arg, already
@@ -214,9 +203,9 @@ ins_read:
     btc r8d, 8 ; if counter ok
     jnc .next ; only one parm
     mov eax,[r12+rbx*8] ; at(0)
-    mov r11, [rbp+rcx*8]
-    mov [rbp+rax*8], r11
-    test r11,r11
+    mov r11d, [rbp+rcx*8]
+    mov [rbp+rax*8], r11d
+    test r11d,r11d
     call setf
     jmp next
     .next:
@@ -270,10 +259,10 @@ ins_swap:
     lea eax, rbx[2]
     and eax,7
     mov eax,[r12+rax*8] ; at(2)
-    mov r10, [rbp+rax*8]
-    mov r11, [rbp+rcx*8]
-    mov [rbp+rax*8], r11
-    mov [rbp+rcx*8], r10
+    mov r10d, [rbp+rax*8]
+    mov r11d, [rbp+rcx*8]
+    mov [rbp+rax*8], r11d
+    mov [rbp+rcx*8], r10d
     jmp next
     .next:
         call push_in
@@ -290,14 +279,6 @@ ins_grow:
     .next:
         call push_in
     jmp loop_exe
-grow_table:
-    dq add_grow
-    dq sub_grow
-    dq mul_grow
-    dq mod_grow
-    dq div_grow
-    dq xchg_grow
-    times 5 dq default_grow
 ins_inp:
     test r9b,0b00010000 ; test IF
     jz next ; if not set, bye bye
@@ -310,7 +291,7 @@ ins_inp:
     syscall
     pop rcx ; getch end
     movzx eax, byte [char] ; get char
-    mov [rbp+rcx*8],rax ; mov char
+    mov [rbp+rcx*8], eax ; mov char
     jmp next ; return
 
 ins_revf:
@@ -347,29 +328,19 @@ do_mod:
     test ecx,ecx
     jmp setf ; so now the stack has the return addr on top
 div_grow:
-    mov rax,[rbp+rcx*8]
+    mov eax,[rbp+rcx*8]
     jmp do_mod
 xchg_grow:
-    push [jump_table+rax*8]
-    push [jump_table+rcx*8]
-    pop [jump_table+rax*8]
-    pop [jump_table+rcx*8]
+    mov eax, [jump_table+rax*8]
+    mov ecx, [jump_table+rcx*8]
+    mov [jump_table+rax*8], ecx
+    mov [jump_table+rcx*8], eax
     ; return
     ret
 default_grow:
     ; return
     ret
 
-jmpm_table:
-    dq jmp_z
-    dq jmp_nz
-    dq jmp_s
-    dq jmp_ns
-    dq jmp_sz
-    dq jmp_nsz
-    dq jmp_
-    dq jmp_c
-    times 2 dq jmp_default
 jmp_z:
     test r9b,0b01000000
     jz jmp_default
@@ -426,6 +397,36 @@ jmp_c:
     jz jmp_default
     ;return
     jmp jmp_
+align 8
+jump_table equ $ - 384
+    dq ins_read
+    dq ins_add
+    dq ins_set
+    dq ins_push
+    dq ins_print
+    dq ins_swap
+    dq ins_grow
+    dq ins_inp
+    dq ins_jmpm
+    dq ins_revf
+grow_table:
+    dq add_grow
+    dq sub_grow
+    dq mul_grow
+    dq mod_grow
+    dq div_grow
+    dq xchg_grow
+    times 4 dq default_grow
+jmpm_table:
+    dq jmp_z
+    dq jmp_nz
+    dq jmp_s
+    dq jmp_ns
+    dq jmp_sz
+    dq jmp_nsz
+    dq jmp_
+    dq jmp_c
+    times 2 dq jmp_default
 ; --- end --- ;
 
 filesize equ $ - ehdr
