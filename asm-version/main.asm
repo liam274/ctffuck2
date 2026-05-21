@@ -180,6 +180,9 @@ loop_exe:
     mov eax,ecx ; xchg ecx,r15d ; tested, mov is faster
     mov ecx,r15d
     mov r15d,eax
+    sar eax, 31
+    xor ecx, eax
+    sub ecx, eax
     jmp [r15*8+jump_table]
     .first_time_only:
     mov r15d,ecx
@@ -199,7 +202,6 @@ setf:
     or r9b, al
     ret
 ins_read:
-    call get_abs_rcx ; get abs of rcx
     btc r8d, 8 ; if counter ok
     jnc .next ; only one parm
     mov eax,[r12+rbx*8] ; at(0)
@@ -214,6 +216,10 @@ ins_read:
 ins_add:
     btc r8d,7
     jnc .next
+    test eax,eax
+    jns .go
+    neg rcx
+    .go:
     lea eax, rbx[1]
     and eax, 7
     mov eax, [r12+rax*8] ; at(1)
@@ -221,29 +227,19 @@ ins_add:
     call setf
     jmp next
     .next:
-        call get_abs_rcx
         call push_in
     jmp next
 ins_set:
-    call get_abs_rcx
     mov [rbp+rcx*8],0
     or r9b,0b01000000
     and r9b,0b01111111
     jmp next
 ins_push:
-    call get_abs_rcx
     call push_in
     jmp next
-get_abs_rcx:
-    mov eax, ecx
-    sar eax, 31
-    xor ecx, eax
-    sub ecx, eax
-    ret
 ins_print:
     test r9b,0b00001000 ; check OF
     jz next
-    call get_abs_rcx
     cmp qword [rbp+rcx*8], 0 ; check if is zero
     jz next ; skip so as not to print null
     mov eax, 1 ; write()
@@ -255,7 +251,6 @@ ins_print:
 ins_swap:
     btc r8d,6 ; check if counter enough
     jnc .next
-    call get_abs_rcx
     lea eax, rbx[2]
     and eax,7
     mov eax,[r12+rax*8] ; at(2)
@@ -270,7 +265,6 @@ ins_swap:
 ins_grow:
     btc r8d,5 ; check if counter enough
     jnc .next
-    call get_abs_rcx
     lea eax, rbx[3]
     and eax, 7
     mov eax, [r12+rax*8] ; at(3)
@@ -282,7 +276,6 @@ ins_grow:
 ins_inp:
     test r9b,0b00010000 ; test IF
     jz next ; if not set, bye bye
-    call get_abs_rcx
     push rcx ; getch start
     xor eax, eax
     xor edi, edi
@@ -295,7 +288,6 @@ ins_inp:
     jmp next ; return
 
 ins_revf:
-    call get_abs_rcx
     mov al, 0x80
     shr al, cl
     xor r9b, al
@@ -310,10 +302,12 @@ mul_grow:
     imul rax,[rbp+rcx*8]
     jmp do_mod
 mod_grow:
-    mov r11,[rbp+rcx*8]
-    mov cl,1
-    test r11,r11
-    cmovz eax,ecx
+    mov r11d,[rbp+rcx*8]
+    test r11d,r11d
+    jnz .ok
+    inc r11d
+    .ok:
+    mov eax, r11d
     xor edx,edx
     div ecx
     mov ecx,edx
@@ -321,7 +315,7 @@ mod_grow:
     jmp setf
 do_mod:
     xor edx,edx
-    mov ecx,10
+    mov cl,10
     div ecx
     mov ecx,edx ; ecx = rax % 10
     ; return
@@ -364,7 +358,6 @@ jmp_ns:
 ins_jmpm:
     btc r8d,4 ; test if counter enough
     jnc .next ; counter not enough
-    call get_abs_rcx
     lea eax, rbx[4]
     and eax, 7
     mov eax, [r12+rax*8] ; at(4)
