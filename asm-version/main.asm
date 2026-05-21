@@ -169,11 +169,10 @@ loop:
     movzx ecx, byte [r14+r13] ; get char
     ; digit filter
     lea eax, [rcx-'0']
-    cmp eax,9
+    cmp al,9
     ja next
 loop_exe:
     ; calc arg
-    test r15d,r15d ; set flag
     sub ecx,r15d
     add r15d, ecx
     mov eax,ecx
