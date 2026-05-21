@@ -143,8 +143,7 @@ main:
     ; init
     add r14,r13
     neg r13
-    push -1
-    pop r15 ; last
+    xor r15d,r15d ; last
     xor ecx,ecx ; arg
     xor ebx,ebx ; ebx head_pointer
     xor r8d,r8d ; counter
@@ -175,17 +174,11 @@ loop:
 loop_exe:
     ; calc arg
     test r15d,r15d ; set flag
-    js .first_time_only ; reduce jmps, generally
-    sub r15d,ecx
-    mov eax,ecx ; xchg ecx,r15d ; tested, mov is faster
-    mov ecx,r15d
-    mov r15d,eax
-    sar eax, 31
-    xor ecx, eax
-    sub ecx, eax
-    jmp [r15*8+jump_table]
-    .first_time_only:
-    mov r15d,ecx
+    sub ecx,r15d
+    add r15d, ecx
+    mov eax,ecx
+    neg ecx
+    cmovs ecx,eax
     jmp [r15*8+jump_table]
     ;loop end
 
