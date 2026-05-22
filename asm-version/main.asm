@@ -255,15 +255,15 @@ ins_grow:
 ins_inp:
     test r9b,0b00010000 ; test IF
     jz next ; if not set, bye bye
-    push rcx ; getch start
+    ; getch start
     xor eax, eax
     xor edi, edi
-    mov esi, char
+    lea esi, [rbp+rcx*4]
     mov edx, 1
+    push rcx
     syscall
     pop rcx ; getch end
-    movzx eax, byte [char] ; get char
-    mov [rbp+rcx*4], eax ; mov char
+    and dword [rbp+rcx*4], 0xFF
     jmp next ; return
 
 ins_revf:
@@ -301,10 +301,11 @@ div_grow:
     mov eax,[rbp+rcx*4]
     jmp do_mod
 xchg_grow:
-    mov r10, [jump_table+rax*8+384]
-    mov r11, [jump_table+rcx*8+384]
-    mov [jump_table+rax*8+384], r11
-    mov [jump_table+rcx*8+384], r10
+    lea r8d, [jump_table+384]
+    mov r10, [r8+rax*8]
+    mov r11, [r8+rcx*8]
+    mov [r8+rax*8], r11
+    mov [r8+rcx*8], r10
     ; return
     ret
 default_grow:
@@ -404,7 +405,6 @@ ABSOLUTE $ ; Tell NASM: me want virtual address
 
 old_termios resb 60
 new_termios resb 60
-char resb 1
 memory resd 10
 stack resd 8
 
