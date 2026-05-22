@@ -282,10 +282,8 @@ mul_grow:
     jmp do_mod
 mod_grow:
     mov r11d,[rbp+rcx*4]
-    test r11d,r11d
-    jnz .ok
-    inc r11d
-    .ok:
+    cmp r11d,1
+    adc r11d,0
     xor edx,edx
     div r11d
     mov ecx,edx
