@@ -4,7 +4,7 @@ org 0x400000
 default rel
 ; --- defines start --- ;
 
-%define BOX_SIZE qword
+%define BOX_SIZE dword
 
 ; --- defines end --- ;
 ehdr:
@@ -138,7 +138,7 @@ main:
     
     push 16
     pop rax
-    mov edx, edi
+    lea edx, [edi-60]
     mov esi, 0x5402
     xor edi, edi
     syscall
@@ -148,7 +148,7 @@ main:
     neg r13
     xor r15d,r15d ; last
     xor ecx,ecx ; arg
-    xor ebx,ebx ; ebx head_pointer
+    xor ebx,ebx ; head_pointer
     xor r8d,r8d ; counter
     ; 0 = read_counter
     ; 1 = add_counter
@@ -188,7 +188,7 @@ loop_exe:
 push_in:
     inc ebx
     and ebx,7 ; assume that rcx is the arg, already
-    mov [r12+rbx*8],ecx ; write abs
+    mov [r12+rbx*4],ecx ; write abs
     ret
 setf:
     lahf
@@ -200,9 +200,9 @@ setf:
 ins_read:
     btc r8d, 8 ; if counter ok
     jnc .next ; only one parm
-    mov eax,[r12+rbx*8] ; at(0)
-    mov r11d, [rbp+rcx*8]
-    mov [rbp+rax*8], r11d
+    mov eax, [r12+rbx*4] ; at(0)
+    mov r11d, [rbp+rcx*4]
+    mov [rbp+rax*4], r11d
     test r11d,r11d
     call setf
     jmp next
@@ -218,8 +218,8 @@ ins_add:
     .go:
     lea eax, rbx[1]
     and eax, 7
-    mov eax, [r12+rax*8] ; at(1)
-    add [rbp+rax*8],ecx
+    mov eax, [r12+rax*4] ; at(1)
+    add [rbp+rax*4], ecx
     call setf
     jmp next
     .next:
@@ -227,7 +227,7 @@ ins_add:
     jmp next
 ins_set:
     xor eax,eax
-    mov [rbp+rcx*8],eax
+    mov [rbp+rcx*4],eax
     or r9b,0b01000000 ; these two command cannot be run at the same time QmQ
     and r9b,0b01111111
     jmp next
@@ -237,12 +237,12 @@ ins_push:
 ins_print:
     test r9b,0b00001000 ; check OF
     jz next
-    cmp BOX_SIZE [rbp+rcx*8], 0 ; check if is zero
+    cmp BOX_SIZE [rbp+rcx*4], 0 ; check if is zero
     jz next ; skip so as not to print null
     mov eax, 1 ; write()
     mov edi,eax
     mov edx,eax
-    lea esi, [rbp+rcx*8] ; pointer to addr
+    lea esi, [rbp+rcx*4] ; pointer to addr
     syscall
     jmp next
 ins_swap:
@@ -250,11 +250,11 @@ ins_swap:
     jnc .next
     lea eax, rbx[2]
     and eax,7
-    mov eax,[r12+rax*8] ; at(2)
-    mov r10d, [rbp+rax*8]
-    mov r11d, [rbp+rcx*8]
-    mov [rbp+rax*8], r11d
-    mov [rbp+rcx*8], r10d
+    mov eax,[r12+rax*4] ; at(2)
+    mov r10d, [rbp+rax*4]
+    mov r11d, [rbp+rcx*4]
+    mov [rbp+rax*4], r11d
+    mov [rbp+rcx*4], r10d
     jmp next
     .next:
         call push_in
@@ -264,12 +264,12 @@ ins_grow:
     jnc .next
     lea eax, rbx[3]
     and eax, 7
-    mov eax, [r12+rax*8] ; at(3)
+    mov eax, [r12+rax*4] ; at(3)
     call [rax*8+grow_table]
-    jmp next
+    jmp loop_exe
     .next:
         call push_in
-    jmp loop_exe
+    jmp next
 ins_inp:
     test r9b,0b00010000 ; test IF
     jz next ; if not set, bye bye
@@ -281,7 +281,7 @@ ins_inp:
     syscall
     pop rcx ; getch end
     movzx eax, byte [char] ; get char
-    mov [rbp+rcx*8], eax ; mov char
+    mov [rbp+rcx*4], eax ; mov char
     jmp next ; return
 
 ins_revf:
@@ -290,16 +290,16 @@ ins_revf:
     xor r9b, al
     jmp next
 add_grow:
-    add eax,[rbp+rcx*8]
+    add eax,[rbp+rcx*4]
     jmp do_mod
 sub_grow:
-    sub eax,[rbp+rcx*8]
+    sub eax,[rbp+rcx*4]
     jmp do_mod
 mul_grow:
-    imul eax,[rbp+rcx*8]
+    imul eax,[rbp+rcx*4]
     jmp do_mod
 mod_grow:
-    mov r11d,[rbp+rcx*8]
+    mov r11d,[rbp+rcx*4]
     test r11d,r11d
     jnz .ok
     inc r11d
@@ -318,13 +318,13 @@ do_mod:
     test ecx,ecx
     jmp setf ; so now the stack has the return addr on top
 div_grow:
-    mov eax,[rbp+rcx*8]
+    mov eax,[rbp+rcx*4]
     jmp do_mod
 xchg_grow:
-    mov eax, [jump_table+rax*8]
-    mov ecx, [jump_table+rcx*8]
-    mov [jump_table+rax*8], ecx
-    mov [jump_table+rcx*8], eax
+    mov r10, [jump_table+rax*8+384]
+    mov r11, [jump_table+rcx*8+394]
+    mov [jump_table+rax*8+384], r11
+    mov [jump_table+rcx*8+384], r10
     ; return
     ret
 default_grow:
@@ -356,7 +356,7 @@ ins_jmpm:
     jnc .next ; counter not enough
     lea eax, rbx[4]
     and eax, 7
-    mov eax, [r12+rax*8] ; at(4)
+    mov eax, [r12+rax*4] ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
         call push_in
@@ -377,7 +377,7 @@ jmp_nsz: ; !ZF && !SF
     ;return
     jmp jmp_
 jmp_:
-    add r13,[rbp+rcx*8]
+    add r13,[rbp+rcx*4]
     ;return
     jmp jmp_finish
 jmp_c:
