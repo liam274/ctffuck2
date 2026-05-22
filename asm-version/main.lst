@@ -367,47 +367,46 @@
    367 00000344 74D5                        jz jmp_default
    368                                      ;return
    369 00000346 EBF1                        jmp jmp_
-   370                                  ; align 8
-   371                                  jump_table equ $ - 384
-   372 00000348 [8401000000000000]          dq ins_read
-   373 00000350 [A301000000000000]          dq ins_add
-   374 00000358 [BF01000000000000]          dq ins_set
-   375 00000360 [D201000000000000]          dq ins_push
-   376 00000368 [D401000000000000]          dq ins_print
-   377 00000370 [FD01000000000000]          dq ins_swap
-   378 00000378 [2B02000000000000]          dq ins_grow
-   379 00000380 [4C02000000000000]          dq ins_inp
-   380 00000388 [FA02000000000000]          dq ins_jmpm
-   381 00000390 [7402000000000000]          dq ins_revf
-   382                                  grow_table:
-   383 00000398 [8002000000000000]          dq add_grow
-   384 000003A0 [8602000000000000]          dq sub_grow
-   385 000003A8 [8C02000000000000]          dq mul_grow
-   386 000003B0 [9302000000000000]          dq mod_grow
-   387 000003B8 [BB02000000000000]          dq div_grow
-   388 000003C0 [C102000000000000]          dq xchg_grow
-   389 000003C8 [D902000000000000]-         times 4 dq default_grow
-   389 000003C8 <rep 4h>           
-   390                                  jmpm_table:
-   391 000003E8 [DA02000000000000]          dq jmp_z
-   392 000003F0 [E202000000000000]          dq jmp_nz
-   393 000003F8 [EA02000000000000]          dq jmp_s
-   394 00000400 [F202000000000000]          dq jmp_ns
-   395 00000408 [2903000000000000]          dq jmp_sz
-   396 00000410 [3103000000000000]          dq jmp_nsz
-   397 00000418 [3903000000000000]          dq jmp_
-   398 00000420 [4003000000000000]          dq jmp_c
-   399 00000428 [1B03000000000000]-         times 2 dq jmp_default
-   399 00000428 <rep 2h>           
-   400                                  ; --- end --- ;
-   401                                  
-   402                                  filesize equ $ - ehdr
-   403                                  
-   404                                  ABSOLUTE $ ; Tell NASM: me want virtual address
-   405                                  
-   406 00000438 <res 3Ch>               old_termios resb 60
-   407 00000474 <res 3Ch>               new_termios resb 60
-   408 000004B0 <res 28h>               memory resd 10
-   409 000004D8 <res 20h>               stack resd 8
-   410                                  
-   411                                  memsize equ $-ehdr
+   370                                  jump_table equ $ - 384
+   371 00000348 [8401000000000000]          dq ins_read
+   372 00000350 [A301000000000000]          dq ins_add
+   373 00000358 [BF01000000000000]          dq ins_set
+   374 00000360 [D201000000000000]          dq ins_push
+   375 00000368 [D401000000000000]          dq ins_print
+   376 00000370 [FD01000000000000]          dq ins_swap
+   377 00000378 [2B02000000000000]          dq ins_grow
+   378 00000380 [4C02000000000000]          dq ins_inp
+   379 00000388 [FA02000000000000]          dq ins_jmpm
+   380 00000390 [7402000000000000]          dq ins_revf
+   381                                  grow_table:
+   382 00000398 [8002000000000000]          dq add_grow
+   383 000003A0 [8602000000000000]          dq sub_grow
+   384 000003A8 [8C02000000000000]          dq mul_grow
+   385 000003B0 [9302000000000000]          dq mod_grow
+   386 000003B8 [BB02000000000000]          dq div_grow
+   387 000003C0 [C102000000000000]          dq xchg_grow
+   388 000003C8 [D902000000000000]-         times 4 dq default_grow
+   388 000003C8 <rep 4h>           
+   389                                  jmpm_table:
+   390 000003E8 [DA02000000000000]          dq jmp_z
+   391 000003F0 [E202000000000000]          dq jmp_nz
+   392 000003F8 [EA02000000000000]          dq jmp_s
+   393 00000400 [F202000000000000]          dq jmp_ns
+   394 00000408 [2903000000000000]          dq jmp_sz
+   395 00000410 [3103000000000000]          dq jmp_nsz
+   396 00000418 [3903000000000000]          dq jmp_
+   397 00000420 [4003000000000000]          dq jmp_c
+   398 00000428 [1B03000000000000]-         times 2 dq jmp_default
+   398 00000428 <rep 2h>           
+   399                                  ; --- end --- ;
+   400                                  
+   401                                  filesize equ $ - ehdr
+   402                                  
+   403                                  ABSOLUTE $ ; Tell NASM: me want virtual address
+   404                                  
+   405 00000438 <res 3Ch>               old_termios resb 60
+   406 00000474 <res 3Ch>               new_termios resb 60
+   407 000004B0 <res 28h>               memory resd 10
+   408 000004D8 <res 20h>               stack resd 8
+   409                                  
+   410                                  memsize equ $-ehdr
