@@ -163,10 +163,11 @@ main:
 next:
     inc r13
     jz exit
-loop:
+loop: ; simply fall through, so as to improve performance
     movzx ecx, byte [r14+r13] ; get char
     ; digit filter
-    lea eax, [rcx-'0']
+    lea eax, [rcx-'0'] ; Instead of keep relying on ALU, here we used AGU instead
+    ; So It can be synced
     cmp al,9
     ja next
 loop_exe:
@@ -208,12 +209,12 @@ ins_add:
     jnc .next
     test eax,eax
     jns .go
-    neg rcx
+    neg ecx
     .go:
     lea eax, rbx[1]
     and eax, 7
     mov eax, [r12+rax*8] ; at(1)
-    add [rbp+rax*8],rcx
+    add [rbp+rax*8],ecx
     call setf
     jmp next
     .next:
@@ -222,7 +223,7 @@ ins_add:
 ins_set:
     xor eax,eax
     mov [rbp+rcx*8],eax
-    or r9b,0b01000000
+    or r9b,0b01000000 ; these two command cannot be run at the same time QmQ
     and r9b,0b01111111
     jmp next
 ins_push:
@@ -284,13 +285,13 @@ ins_revf:
     xor r9b, al
     jmp next
 add_grow:
-    add rax,[rbp+rcx*8]
+    add eax,[rbp+rcx*8]
     jmp do_mod
 sub_grow:
-    sub rax,[rbp+rcx*8]
+    sub eax,[rbp+rcx*8]
     jmp do_mod
 mul_grow:
-    imul rax,[rbp+rcx*8]
+    imul eax,[rbp+rcx*8]
     jmp do_mod
 mod_grow:
     mov r11d,[rbp+rcx*8]
