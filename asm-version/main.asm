@@ -347,7 +347,6 @@ ins_jmpm:
 jmp_default:
     inc r13
 jmp_finish:
-    test r13,r13
     js loop
     jmp exit
 jmp_sz: ; ZF || SF
