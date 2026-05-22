@@ -164,7 +164,6 @@ main:
     mov ebp,memory
     mov r12d,stack
     jmp loop
-    align 16
 next:
     inc r13
     jz exit
@@ -216,7 +215,7 @@ ins_add:
     jns .go
     neg ecx
     .go:
-    lea eax, rbx[1]
+    lea eax, [rbx+1]
     and eax, 7
     mov eax, [r12+rax*4] ; at(1)
     add [rbp+rax*4], ecx
@@ -248,7 +247,7 @@ ins_print:
 ins_swap:
     btc r8d,6 ; check if counter enough
     jnc .next
-    lea eax, rbx[2]
+    lea eax, [rbx+2]
     and eax,7
     mov eax,[r12+rax*4] ; at(2)
     mov r10d, [rbp+rax*4]
@@ -262,7 +261,7 @@ ins_swap:
 ins_grow:
     btc r8d,5 ; check if counter enough
     jnc .next
-    lea eax, rbx[3]
+    lea eax, [rbx+3]
     and eax, 7
     mov eax, [r12+rax*4] ; at(3)
     call [rax*8+grow_table]
@@ -322,7 +321,7 @@ div_grow:
     jmp do_mod
 xchg_grow:
     mov r10, [jump_table+rax*8+384]
-    mov r11, [jump_table+rcx*8+394]
+    mov r11, [jump_table+rcx*8+384]
     mov [jump_table+rax*8+384], r11
     mov [jump_table+rcx*8+384], r10
     ; return
@@ -354,7 +353,7 @@ jmp_ns:
 ins_jmpm:
     btc r8d,4 ; test if counter enough
     jnc .next ; counter not enough
-    lea eax, rbx[4]
+    lea eax, [rbx+4]
     and eax, 7
     mov eax, [r12+rax*4] ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
