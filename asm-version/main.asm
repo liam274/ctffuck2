@@ -211,14 +211,10 @@ ins_read:
 ins_add:
     btc r8d,7
     jnc .next
-    test eax,eax
-    jns .go
-    neg ecx
-    .go:
-    lea eax, [rbx+1]
-    and eax, 7
-    mov eax, [r12+rax*4] ; at(1)
-    add [rbp+rax*4], ecx
+    lea ecx, [rbx+1]
+    and ecx, 7
+    mov ecx, [r12+rcx*4] ; at(1)
+    add [rbp+rcx*4], eax
     call setf
     jmp next
     .next:
