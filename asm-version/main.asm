@@ -2,6 +2,11 @@
 BITS 64
 org 0x400000
 default rel
+; --- defines start --- ;
+
+%define BOX_SIZE qword
+
+; --- defines end --- ;
 ehdr:
     db 0x7F, "ELF"
     db 2
@@ -232,7 +237,7 @@ ins_push:
 ins_print:
     test r9b,0b00001000 ; check OF
     jz next
-    cmp qword [rbp+rcx*8], 0 ; check if is zero
+    cmp BOX_SIZE [rbp+rcx*8], 0 ; check if is zero
     jz next ; skip so as not to print null
     mov eax, 1 ; write()
     mov edi,eax
@@ -419,7 +424,7 @@ ABSOLUTE $ ; Tell NASM: me want virtual address
 old_termios resb 60
 new_termios resb 60
 char resb 1
-memory resq 10
-stack resq 8
+memory resd 10
+stack resd 8
 
 memsize equ $-ehdr
