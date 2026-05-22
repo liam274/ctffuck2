@@ -367,7 +367,6 @@ jmp_c:
     jz jmp_default
     ;return
     jmp jmp_
-align 8
 jump_table equ $ - 384
     dq ins_read
     dq ins_add

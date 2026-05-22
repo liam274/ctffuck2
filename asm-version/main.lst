@@ -367,7 +367,7 @@
    367 00000344 74D5                        jz jmp_default
    368                                      ;return
    369 00000346 EBF1                        jmp jmp_
-   370                                  align 8
+   370                                  ; align 8
    371                                  jump_table equ $ - 384
    372 00000348 [8401000000000000]          dq ins_read
    373 00000350 [A301000000000000]          dq ins_add
