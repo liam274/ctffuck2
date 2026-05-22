@@ -147,7 +147,7 @@ main:
     add r14,r13
     neg r13
     xor r15d,r15d ; last
-    xor ecx,ecx ; arg
+    ; ecx arg
     xor ebx,ebx ; head_pointer
     xor r8d,r8d ; counter
     ; 0 = read_counter
