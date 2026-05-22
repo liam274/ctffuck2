@@ -116,28 +116,26 @@ main:
 
     ; --- set raw mode --- ;
     ; since all the reg edited is not important, so it's fine to not to push them
-    mov r12d,old_termios
     mov al, 16
     xor edi, edi
     mov esi, 0x5401
-    mov edx, r12d
+    mov edx, old_termios
     syscall
 
-    mov esi, r12d
-    mov r12d,new_termios
-    mov edi, r12d
+    mov esi, edx
+    mov edi, new_termios
     push 60
     pop rcx
     rep movsb
 
-    and dword [r12 + 12], ~(2 | 8)
-    mov word [r12 + 21], 0x0100
+    and dword [rdi + 12-60], ~(2 | 8)
+    mov word [rdi + 21-60], 0x0100
     
     push 16
     pop rax
-    xor edi, edi
+    mov edx, edi
     mov esi, 0x5402
-    mov edx,r12d
+    xor edi, edi
     syscall
 
     ; init
@@ -222,7 +220,8 @@ ins_add:
         call push_in
     jmp next
 ins_set:
-    mov [rbp+rcx*8],0
+    xor eax,eax
+    mov [rbp+rcx*8],eax
     or r9b,0b01000000
     and r9b,0b01111111
     jmp next
@@ -299,9 +298,8 @@ mod_grow:
     jnz .ok
     inc r11d
     .ok:
-    mov eax, r11d
     xor edx,edx
-    div ecx
+    div r11d
     mov ecx,edx
     ; return
     jmp setf
@@ -359,7 +357,6 @@ ins_jmpm:
 jmp_default:
     inc r13
 jmp_finish:
-    xor r8b,0b00001000 ; reverse the counter
     test r13,r13
     js loop
     jmp exit
