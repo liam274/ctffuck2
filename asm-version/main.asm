@@ -188,7 +188,7 @@ push_in:
     inc ebx
     and ebx,7 ; assume that rcx is the arg, already
     mov [r12+rbx*4],ecx ; write abs
-    ret
+    jmp next
 setf:
     lahf
     mov al, ah
@@ -198,27 +198,21 @@ setf:
     ret
 ins_read:
     btc r8d, 8 ; if counter ok
-    jnc .next ; only one parm
+    jnc push_in ; only one parm
     mov eax, [r12+rbx*4] ; at(0)
     mov r11d, [rbp+rcx*4]
     mov [rbp+rax*4], r11d
     test r11d,r11d
     call setf
     jmp next
-    .next:
-        call push_in
-    jmp next
 ins_add:
     btc r8d,7
-    jnc .next
+    jnc push_in
     lea ecx, [rbx+1]
     and ecx, 7
     mov ecx, [r12+rcx*4] ; at(1)
     add [rbp+rcx*4], eax
     call setf
-    jmp next
-    .next:
-        call push_in
     jmp next
 ins_set:
     xor eax,eax
@@ -227,8 +221,7 @@ ins_set:
     and r9b,0b01111111
     jmp next
 ins_push:
-    call push_in
-    jmp next
+    jmp push_in
 ins_print:
     test r9b,0b00001000 ; check OF
     jz next
@@ -242,7 +235,7 @@ ins_print:
     jmp next
 ins_swap:
     btc r8d,6 ; check if counter enough
-    jnc .next
+    jnc push_in
     lea eax, [rbx+2]
     and eax,7
     mov eax,[r12+rax*4] ; at(2)
@@ -251,20 +244,14 @@ ins_swap:
     mov [rbp+rax*4], r11d
     mov [rbp+rcx*4], r10d
     jmp next
-    .next:
-        call push_in
-    jmp next
 ins_grow:
     btc r8d,5 ; check if counter enough
-    jnc .next
+    jnc push_in
     lea eax, [rbx+3]
     and eax, 7
     mov eax, [r12+rax*4] ; at(3)
     call [rax*8+grow_table]
     jmp loop_exe
-    .next:
-        call push_in
-    jmp next
 ins_inp:
     test r9b,0b00010000 ; test IF
     jz next ; if not set, bye bye
@@ -354,7 +341,9 @@ ins_jmpm:
     mov eax, [r12+rax*4] ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
     .next:
-        call push_in
+    inc ebx
+    and ebx,7 ; assume that rcx is the arg, already
+    mov [r12+rbx*4],ecx ; write abs
 jmp_default:
     inc r13
 jmp_finish:
