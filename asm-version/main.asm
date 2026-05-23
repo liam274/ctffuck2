@@ -181,8 +181,8 @@ loop_exe:
     mov eax,ecx
     neg ecx
     cmovs ecx,eax
-    mov r10d, [r15*4+jump_table]
-    jmp r10
+    mov edx, [r15*4+jump_table]
+    jmp rdx
     ;loop end
 push_in:
     inc ebx
