@@ -181,7 +181,8 @@ loop_exe:
     mov eax,ecx
     neg ecx
     cmovs ecx,eax
-    jmp [r15*8+jump_table]
+    mov r10d, [r15*4+jump_table]
+    jmp r10
     ;loop end
 push_in:
     inc ebx
@@ -224,7 +225,8 @@ ins_grow:
     lea eax, [rbx+3]
     and eax, 7
     mov eax, [r12+rax*4] ; at(3)
-    call [rax*8+grow_table]
+    mov eax, [rax*4+grow_table]
+    call rax
     jmp loop_exe
 ins_inp:
     test r9b,0b00010000 ; test IF
@@ -275,10 +277,10 @@ div_grow:
     jmp do_mod
 xchg_grow:
     lea r8d, [jump_table+384]
-    mov r10, [r8+rax*8]
-    mov r11, [r8+rcx*8]
-    mov [r8+rax*8], r11
-    mov [r8+rcx*8], r10
+    mov r10d, [r8+rax*4]
+    mov r11d, [r8+rcx*4]
+    mov [r8+rax*4], r11d
+    mov [r8+rcx*4], r10d
     ; return
     ret
 default_grow:
@@ -335,7 +337,8 @@ ins_jmpm:
     lea eax, [rbx+4]
     and eax, 7
     mov eax, [r12+rax*4] ; at(4)
-    jmp [rax*8+jmpm_table] ; goto get conditions
+    mov eax, [rax*4+jmpm_table]
+    jmp rax ; goto get conditions
 jmp_default:
     jmp next
 jmp_finish:
@@ -359,35 +362,35 @@ jmp_c:
     jz jmp_default
     ;return
     jmp jmp_
-jump_table equ $ - 384
-    dq ins_read
-    dq ins_add
-    dq ins_set
-    dq ins_push
-    dq ins_print
-    dq ins_swap
-    dq ins_grow
-    dq ins_inp
-    dq ins_jmpm
-    dq ins_revf
+jump_table equ $ - 192
+    dd ins_read
+    dd ins_add
+    dd ins_set
+    dd ins_push
+    dd ins_print
+    dd ins_swap
+    dd ins_grow
+    dd ins_inp
+    dd ins_jmpm
+    dd ins_revf
 grow_table:
-    dq add_grow
-    dq sub_grow
-    dq mul_grow
-    dq mod_grow
-    dq div_grow
-    dq xchg_grow
-    times 4 dq default_grow
+    dd add_grow
+    dd sub_grow
+    dd mul_grow
+    dd mod_grow
+    dd div_grow
+    dd xchg_grow
+    times 4 dd default_grow
 jmpm_table:
-    dq jmp_z
-    dq jmp_nz
-    dq jmp_s
-    dq jmp_ns
-    dq jmp_sz
-    dq jmp_nsz
-    dq jmp_
-    dq jmp_c
-    times 2 dq jmp_default
+    dd jmp_z
+    dd jmp_nz
+    dd jmp_s
+    dd jmp_ns
+    dd jmp_sz
+    dd jmp_nsz
+    dd jmp_
+    dd jmp_c
+    times 2 dd jmp_default
 ; --- end --- ;
 
 filesize equ $ - ehdr
