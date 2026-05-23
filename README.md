@@ -11,7 +11,6 @@ To its [esolang wiki](https://esolangs.org/wiki/CTFFuck2).
 - [The `push` instruction: instant injection](#the-push-instruction-instant-injection)
 - [The `grow` instruction: transposon](#the-grow-instruction-transposon)
 - [Building and Running](#building-and-running)
-- [The Philosophy of Hardcore](#the-philosophy-of-hardcore)
 - [Credits](#credits)
 
 ## Table of Technical Contents
