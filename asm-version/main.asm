@@ -183,13 +183,11 @@ loop_exe:
     cmovs ecx,eax
     jmp [r15*8+jump_table]
     ;loop end
-
 push_in:
     inc ebx
     and ebx,7 ; assume that rcx is the arg, already
     mov [r12+rbx*4],ecx ; write abs
     jmp next
-
 ins_set:
     xor eax,eax
     mov [rbp+rcx*4],eax
@@ -241,7 +239,6 @@ ins_inp:
     pop rcx ; getch end
     and dword [rbp+rcx*4], 0xFF
     jmp next ; return
-
 ins_revf:
     mov al, 0x80
     shr al, cl
@@ -255,7 +252,7 @@ mod_grow:
     div r11d
     mov ecx,edx
     ; return
-    call setf
+    jmp setf
 add_grow:
     add eax,[rbp+rcx*4]
     jmp do_mod
