@@ -101,15 +101,24 @@ without executing it.
 
 ### Build from source code
 
+#### CPP Version
+
 If you want to build from source code, you need a C++17 compiler (for `std::filesystem` and lambdas) and a Unix-like environment
 (the terminal raw mode uses `termios.h`).
 
+#### ASM Version
+
+Run the `build.sh` given in the directory `asm-version/`
+or its command
+
 ### Run the binary
+
+#### CPP Version
 
 If you just want to execute from the binary
 
 ```bash
-./ctffuck2 -f program.ctf # execute from file
+./ctffuck2 -f /path/to/your/file # execute from file
 ```
 
 or
@@ -118,7 +127,15 @@ or
 ./ctffuck2 -r "8754" # execute immediately
 ```
 
-### Flags:
+#### ASM Version
+
+To be small, the asm version does **NOT** support flagged parameters, it will only execute on one positional parameter:
+
+```bash
+./ctffuck2 /path/to/your/file
+```
+
+### Flags (For CPP Version):
 
 - `-f`, `--file` : Path to the program file (a string of digits, other characters ignored).
 - `-d`， `--debug` : (Currently a no-op; debugging is done by staring into the void.)
