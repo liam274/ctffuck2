@@ -331,17 +331,13 @@ jmp_ns:
     jmp jmp_
 ins_jmpm:
     btc r8d,4 ; test if counter enough
-    jnc .next ; counter not enough
+    jnc push_in ; counter not enough
     lea eax, [rbx+4]
     and eax, 7
     mov eax, [r12+rax*4] ; at(4)
     jmp [rax*8+jmpm_table] ; goto get conditions
-    .next:
-    inc ebx
-    and ebx,7 ; assume that rcx is the arg, already
-    mov [r12+rbx*4],ecx ; write abs
 jmp_default:
-    inc r13
+    jmp next
 jmp_finish:
     js loop
     jmp exit
@@ -353,8 +349,7 @@ jmp_sz: ; ZF || SF
 jmp_nsz: ; !ZF && !SF
     test r9b,0b11000000
     jnz jmp_default
-    ;return
-    jmp jmp_
+    ; fall through, just
 jmp_:
     add r13,[rbp+rcx*4]
     ;return
