@@ -189,31 +189,7 @@ push_in:
     and ebx,7 ; assume that rcx is the arg, already
     mov [r12+rbx*4],ecx ; write abs
     jmp next
-setf:
-    lahf
-    mov al, ah
-    and r9b,0b00111111
-    and al, 0b11000000
-    or r9b, al
-    ret
-ins_read:
-    btc r8d, 8 ; if counter ok
-    jnc push_in ; only one parm
-    mov eax, [r12+rbx*4] ; at(0)
-    mov r11d, [rbp+rcx*4]
-    mov [rbp+rax*4], r11d
-    test r11d,r11d
-    call setf
-    jmp next
-ins_add:
-    btc r8d,7
-    jnc push_in
-    lea ecx, [rbx+1]
-    and ecx, 7
-    mov ecx, [r12+rcx*4] ; at(1)
-    add [rbp+rcx*4], eax
-    call setf
-    jmp next
+
 ins_set:
     xor eax,eax
     mov [rbp+rcx*4],eax
@@ -271,6 +247,15 @@ ins_revf:
     shr al, cl
     xor r9b, al
     jmp next
+mod_grow:
+    mov r11d,[rbp+rcx*4]
+    cmp r11d,1
+    adc r11d,0
+    xor edx,edx
+    div r11d
+    mov ecx,edx
+    ; return
+    call setf
 add_grow:
     add eax,[rbp+rcx*4]
     jmp do_mod
@@ -280,15 +265,6 @@ sub_grow:
 mul_grow:
     imul eax,[rbp+rcx*4]
     jmp do_mod
-mod_grow:
-    mov r11d,[rbp+rcx*4]
-    cmp r11d,1
-    adc r11d,0
-    xor edx,edx
-    div r11d
-    mov ecx,edx
-    ; return
-    jmp setf
 do_mod:
     xor edx,edx
     mov cl,10
@@ -311,7 +287,31 @@ xchg_grow:
 default_grow:
     ; return
     ret
-
+setf:
+    lahf
+    mov al, ah
+    and r9b,0b00111111
+    and al, 0b11000000
+    or r9b, al
+    ret
+ins_read:
+    btc r8d, 8 ; if counter ok
+    jnc push_in ; only one parm
+    mov eax, [r12+rbx*4] ; at(0)
+    mov r11d, [rbp+rcx*4]
+    mov [rbp+rax*4], r11d
+    test r11d,r11d
+    call setf
+    jmp next
+ins_add:
+    btc r8d,7
+    jnc push_in
+    lea ecx, [rbx+1]
+    and ecx, 7
+    mov ecx, [r12+rcx*4] ; at(1)
+    add [rbp+rcx*4], eax
+    call setf
+    jmp next
 jmp_z:
     test r9b,0b01000000
     jz jmp_default
