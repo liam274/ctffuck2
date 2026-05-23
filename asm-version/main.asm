@@ -276,7 +276,7 @@ div_grow:
     mov eax,[rbp+rcx*4]
     jmp do_mod
 xchg_grow:
-    lea r8d, [jump_table+384]
+    lea r8d, [jump_table+192]
     mov r10d, [r8+rax*4]
     mov r11d, [r8+rcx*4]
     mov [r8+rax*4], r11d

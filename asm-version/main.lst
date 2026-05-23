@@ -276,7 +276,7 @@
    276 0000025A 8B448D00                    mov eax,[rbp+rcx*4]
    277 0000025E EBEE                        jmp do_mod
    278                                  xchg_grow:
-   279 00000260 448D0593010000              lea r8d, [jump_table+384]
+   279 00000260 448D05D3000000              lea r8d, [jump_table+192]
    280 00000267 458B1480                    mov r10d, [r8+rax*4]
    281 0000026B 458B1C88                    mov r11d, [r8+rcx*4]
    282 0000026F 45891C80                    mov [r8+rax*4], r11d
